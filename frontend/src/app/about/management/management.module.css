@@ -1,0 +1,183 @@
+.group {
+  margin-top: 28px;
+}
+
+.group > h2 {
+  margin-bottom: 14px;
+  letter-spacing: -0.03em;
+}
+
+.people {
+  display: grid;
+  gap: 10px;
+}
+
+.person {
+  border-radius: 16px;
+  border: 1px solid var(--card-border);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.person[open] {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--card-border));
+  box-shadow: var(--shadow);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.head::-webkit-details-marker {
+  display: none;
+}
+
+.head:hover {
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface));
+}
+
+.headText {
+  display: grid;
+  gap: 2px;
+}
+
+.headText b {
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.headText small {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--ink-muted);
+  transition: transform 0.2s ease;
+}
+
+.person[open] .chevron {
+  transform: rotate(180deg);
+  color: var(--brand-strong);
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  padding: 20px 18px;
+  border-top: 1px solid var(--line);
+}
+
+.portrait {
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  aspect-ratio: 2 / 3;
+  border-radius: 14px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--brand) 10%, var(--surface));
+  border: 1px solid var(--card-border);
+}
+
+.portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.noPhoto {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-weight: 700;
+  font-size: 34px;
+  letter-spacing: 0.04em;
+  color: var(--brand-strong);
+}
+
+.about {
+  min-width: 0;
+}
+
+.personName {
+  margin: 0 0 12px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  color: var(--brand-strong);
+}
+
+.panel {
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand) 8%, var(--surface));
+  border: 1px solid var(--card-border);
+  padding: 4px 14px 14px;
+}
+
+.body p {
+  margin-top: 12px;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .body {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .portrait {
+    position: static;
+    width: 190px;
+    justify-self: center;
+  }
+}
+
+.empty {
+  margin-top: 24px;
+  color: var(--ink-muted);
+}
+
+.subhead {
+  margin-top: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--brand-strong);
+}
+
+.career {
+  margin-top: 12px;
+}
+
+.career :global(th),
+.career :global(td) {
+  white-space: normal;
+  vertical-align: top;
+}
+
+.career :global(td:first-child) {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.career :global(td:last-child) {
+  width: 220px;
+  color: var(--ink-muted);
+}
+
+@media (max-width: 640px) {
+  .career :global(td:last-child) {
+    width: auto;
+  }
+}

@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Сайт Кыргызской фондовой биржи: Next.js (frontend) и Express (backend).
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+kse-kg/
+  frontend/    Next.js 16, UI и страницы
+  backend/     Express API, PostgreSQL CMS, загрузки
+  shared/      общие типы CMS
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Учебная платформа вынесена в соседнюю папку: [`../kse-edu`](../kse-edu). На сайте — только ссылка (`NEXT_PUBLIC_EDU_URL`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Запуск (dev)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+cp .env.example .env
+npm run db:up
+npm run db:migrate
+npm run db:seed
+npm run dev
+```
 
-## Learn More
+Нужен Docker для PostgreSQL.
 
-To learn more about Next.js, take a look at the following resources:
+| Сервис | URL |
+|--------|-----|
+| Сайт КФБ | http://localhost:3000 |
+| API КФБ | http://localhost:4000 |
+| Раздел «Учебный центр» | http://localhost:3000/education |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Ссылка «Онлайн-платформа» → `NEXT_PUBLIC_EDU_URL` (по умолчанию `http://127.0.0.1:5173/education/app`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+PostgreSQL: `localhost:5433` — БД `kse`. При первом запуске контейнера также создаётся `education_crm` для `kse-edu`.
 
-## Deploy on Vercel
+## Учебная платформа
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Отдельный проект: **`Desktop/kse-edu`**.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+cd ../kse-edu
+npm install
+npm run db:setup
+npm run dev
+```
+
+## Production (Docker)
+
+```bash
+docker compose up -d --build
+```
+
+Учебная платформа: `cd ../kse-edu && docker compose up -d --build`.
+
+## CMS
+
+Данные в PostgreSQL через **Prisma ORM**. Миграции: `npm run db:migrate` / `npm run db:deploy`.
+
+## Авторизация (сайт КФБ)
+
+- кабинет `/login`: `investor@kse.kg` / `kse`
+- админка `/admin`: `admin@kse.kg` / `admin`

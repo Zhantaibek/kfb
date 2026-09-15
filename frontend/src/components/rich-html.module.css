@@ -1,0 +1,104 @@
+.prose {
+  color: inherit;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.prose :global(h2) {
+  margin: 1.25rem 0 0.6rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.prose :global(h3) {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.prose :global(h4) {
+  margin: 0.85rem 0 0.45rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.prose :global(p) {
+  margin: 0 0 0.85rem;
+}
+
+.prose :global(figure.rte-figure) {
+  margin: 1rem 0;
+  max-width: 100%;
+}
+
+.prose :global(figure.rte-figure[data-align="inline"]) {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.prose :global(figure.rte-figure[data-align="left"]) {
+  float: left;
+  margin: 0.25rem 1rem 0.75rem 0;
+}
+
+.prose :global(figure.rte-figure[data-align="right"]) {
+  float: right;
+  margin: 0.25rem 0 0.75rem 1rem;
+}
+
+.prose :global(figure.rte-figure[data-align="center"]) {
+  display: block;
+  float: none;
+  clear: both;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.prose :global(figure.rte-figure[data-align="below"]) {
+  display: block;
+  float: none;
+  clear: both;
+  margin: 1rem 0;
+}
+
+.prose :global(figure.rte-figure[data-align="full"]) {
+  display: block;
+  float: none;
+  clear: both;
+  width: 100%;
+}
+
+.prose :global(figure.rte-figure[data-align="block-right"]) {
+  display: block;
+  float: none;
+  clear: both;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.prose :global(figure.rte-figure img) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.prose :global(figure.rte-figure figcaption) {
+  margin-top: 8px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.prose :global(figure.rte-figure figcaption:empty) {
+  display: none;
+}
+
+.prose::after {
+  content: "";
+  display: table;
+  clear: both;
+}

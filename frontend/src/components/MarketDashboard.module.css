@@ -1,0 +1,179 @@
+.board {
+  width: min(1480px, calc(100% - 20px));
+  margin: 28px auto 8px;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.92fr) minmax(320px, 1.18fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow);
+  padding: 20px 20px 10px;
+}
+
+.card h2 {
+  color: var(--brand-strong);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+
+.card h2 small {
+  display: inline;
+  margin-left: 8px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.card ul {
+  list-style: none;
+}
+
+.card li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  min-height: 46px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 15px;
+}
+
+.card li:last-child {
+  border-bottom: 0;
+}
+
+.card b {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.card em {
+  min-width: 7.5rem;
+  text-align: right;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.card em[data-dir="up"] {
+  color: var(--up);
+}
+
+.card em[data-dir="down"] {
+  color: var(--down);
+}
+
+.chartHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chartHead h2 {
+  margin: 0;
+}
+
+.modeIndex,
+.modeCap {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pills {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--pill-track);
+}
+
+.pills label {
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-muted);
+}
+
+.board:has(.modeIndex:checked) .pills label:first-child,
+.board:has(.modeCap:checked) .capLabel {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.chartIndex,
+.chartCap {
+  display: none;
+  margin-top: 8px;
+}
+
+.board:has(.modeIndex:checked) .chartIndex,
+.board:has(.modeCap:checked) .chartCap {
+  display: block;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.line {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dot {
+  fill: var(--surface);
+  stroke: var(--brand);
+  stroke-width: 2;
+}
+
+.axis {
+  fill: var(--ink-muted);
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .board {
+    grid-template-columns: 1fr;
+    width: min(1240px, calc(100% - 20px));
+  }
+
+  .compact {
+    width: 100%;
+  }
+}
+
+.compact {
+  width: 100%;
+  margin: 22px 0 0;
+}

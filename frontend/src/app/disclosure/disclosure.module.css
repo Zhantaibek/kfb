@@ -1,0 +1,113 @@
+.note {
+  max-width: 920px;
+  margin: 8px 0 22px;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.note a {
+  font-weight: 700;
+  color: var(--brand-strong);
+  text-decoration: underline;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+  font-size: 16px;
+}
+
+.pager a {
+  min-width: 28px;
+  padding: 4px 8px;
+  text-align: center;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.pager a[data-on="true"] {
+  color: var(--brand-strong);
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.meta {
+  margin-top: 12px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 14px;
+}
+
+.tabs button {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs button[data-on="true"] {
+  border-color: color-mix(in srgb, var(--brand) 50%, transparent);
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+  color: var(--brand-strong);
+}
+
+.kv :global(th),
+.kv :global(td) {
+  white-space: normal;
+}
+
+.kv :global(td:first-child) {
+  width: 280px;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.empty {
+  margin: 12px 0;
+  color: var(--ink-muted);
+}
+
+.events :global(td) {
+  white-space: normal;
+}
+
+.events :global(td:first-child) {
+  width: 120px;
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.more {
+  margin-top: 14px;
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--brand-strong);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.more:hover {
+  border-color: color-mix(in srgb, var(--brand) 50%, transparent);
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+}

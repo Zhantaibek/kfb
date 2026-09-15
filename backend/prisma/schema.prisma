@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model News {
+  id         String   @id
+  slug       String   @unique
+  date       String
+  tag        String
+  kind       String
+  status     String
+  title      String
+  excerpt    String
+  body       String
+  photo      String
+  issuerSlug String   @default("")
+  i18n       Json     @default("{}")
+  createdAt  DateTime @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status, updatedAt(sort: Desc)])
+  @@index([issuerSlug])
+  @@map("news")
+}
+
+model ManagementPerson {
+  id        String   @id
+  slug      String   @unique
+  name      String
+  role      String
+  groupId   String   @map("group_id")
+  photo     String
+  bio       String
+  education String
+  career    Json     @default("[]")
+  sortOrder Int      @map("order")
+  status    String
+  i18n      Json     @default("{}")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([groupId, sortOrder])
+  @@map("management")
+}
+
+model Slide {
+  id        String @id
+  title     String
+  text      String
+  href      String
+  value     String
+  photo     String
+  sortOrder Int    @map("order")
+  i18n      Json   @default("{}")
+
+  @@map("slides")
+}
+
+model Media {
+  id        String   @id
+  name      String
+  url       String
+  createdAt DateTime @map("created_at") @db.Timestamptz(6)
+
+  @@map("media")
+}
+
+model Page {
+  id        String   @id
+  path      String   @unique
+  title     String
+  lead      String
+  body      String
+  status    String
+  i18n      Json     @default("{}")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status])
+  @@map("pages")
+}
+
+model MenuItem {
+  id        String  @id
+  label     String
+  href      String
+  menuGroup String  @map("group")
+  sortOrder Int     @map("order")
+  parentId  String? @map("parent_id")
+  i18n      Json    @default("{}")
+
+  @@index([parentId, sortOrder])
+  @@map("menu")
+}
+
+model Request {
+  id        String   @id
+  source    String
+  payload   Json     @default("{}")
+  status    String
+  createdAt DateTime @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt(sort: Desc)])
+  @@map("requests")
+}
+
+model User {
+  id       String @id
+  name     String
+  email    String @unique
+  role     String
+  password String
+
+  @@map("users")
+}
+
+model Visit {
+  id   String   @id
+  path String
+  at   DateTime @db.Timestamptz(6)
+
+  @@index([at(sort: Desc)])
+  @@map("visits")
+}
+
+model Audit {
+  id     String   @id
+  action String
+  entity String
+  detail String
+  actor  String
+  at     DateTime @db.Timestamptz(6)
+
+  @@index([at(sort: Desc)])
+  @@map("audit")
+}
+
+model SiteSettings {
+  id              String   @id
+  tagline         String    @default("")
+  address         String    @default("")
+  phones          String    @default("")
+  emails          String    @default("")
+  fax             String    @default("")
+  license         String    @default("")
+  copyright       String    @default("")
+  eduUrl          String    @default("")
+  disclosurePhone String    @default("") @map("disclosure_phone")
+  eduPhone        String    @default("") @map("edu_phone")
+  i18n            Json      @default("{}")
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("settings")
+}
+
+model HomeHub {
+  id        String @id
+  href      String
+  title     String
+  text      String
+  photo     String
+  sortOrder Int    @map("order")
+  i18n      Json   @default("{}")
+
+  @@map("hubs")
+}
