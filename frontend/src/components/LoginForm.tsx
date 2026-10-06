@@ -5,12 +5,30 @@ import { useRouter } from "next/navigation";
 import { useApp } from "@/components/AppProviders";
 import { useTr } from "@/lib/use-tr";
 import ui from "@/app/ui.module.css";
+import styles from "@/app/login/login.module.css";
+
+function MailIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 7l9 7 9-7" />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 018 0v3" />
+    </svg>
+  );
+}
 
 export function LoginForm() {
-  const { login, register } = useApp();
+  const { login } = useApp();
   const tr = useTr();
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -19,57 +37,41 @@ export function LoginForm() {
     setBusy(true);
     setError(null);
     const data = new FormData(event.currentTarget);
-    const message =
-      mode === "login"
-        ? await login(String(data.get("email")), String(data.get("password")))
-        : await register({
-            name: String(data.get("name")),
-            email: String(data.get("email")),
-            password: String(data.get("password")),
-          });
+    const result = await login(String(data.get("email")), String(data.get("password")));
     setBusy(false);
-    if (message) {
-      setError(message);
+    if ("error" in result) {
+      setError(result.error);
       return;
     }
-    router.push("/cabinet");
+    router.push(result.staff ? "/admin" : "/cabinet");
   }
 
   return (
-    <form className={ui.form} key={mode} onSubmit={(event) => void submit(event)}>
-      <div className={ui.pills} style={{ marginBottom: 8 }}>
-        <button type="button" data-on={mode === "login"} onClick={() => setMode("login")}>
-          {tr("Вход")}
-        </button>
-        <button type="button" data-on={mode === "register"} onClick={() => setMode("register")}>
-          {tr("Регистрация")}
-        </button>
-      </div>
-      {mode === "register" ? (
-        <label className={ui.field}>
-          <span>{tr("Имя")}</span>
-          <input name="name" type="text" required />
-        </label>
-      ) : null}
-      <label className={ui.field}>
+    <form className={`${ui.form} ${styles.form}`} onSubmit={(event) => void submit(event)}>
+      <label className={styles.field}>
         <span>{tr("E-mail")}</span>
-        <input name="email" type="email" defaultValue={mode === "login" ? "investor@kse.kg" : ""} required />
+        <input name="email" type="email" placeholder={tr("E-mail")} defaultValue="investor@kse.kg" required />
+        <MailIcon />
       </label>
-      <label className={ui.field}>
+      <label className={styles.field}>
         <span>{tr("Пароль")}</span>
-        <input name="password" type="password" defaultValue={mode === "login" ? "kse" : ""} required minLength={4} />
+        <input
+          name="password"
+          type="password"
+          placeholder={tr("Пароль")}
+          defaultValue="kse"
+          required
+          minLength={4}
+        />
+        <LockIcon />
       </label>
       {error ? (
         <p className={ui.down}>{tr(error)}</p>
       ) : (
-        <p className={ui.muted}>
-          {mode === "login"
-            ? tr("Демо: investor@kse.kg / kse. Сессия хранится в cookie.")
-            : tr("Аккаунт сохранится в PostgreSQL. Пароль не короче 4 символов.")}
-        </p>
+        <p className={ui.muted}>{tr("Учётную запись выдаёт биржа. Демо: investor@kse.kg / kse.")}</p>
       )}
       <button className={ui.primary} type="submit" disabled={busy}>
-        {busy ? "…" : mode === "login" ? tr("Войти") : tr("Создать аккаунт")}
+        {busy ? "…" : tr("Войти")}
       </button>
     </form>
   );

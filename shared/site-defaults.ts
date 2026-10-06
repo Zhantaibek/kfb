@@ -2,7 +2,7 @@ import type { CmsHomeHub, CmsSiteSettings } from "./cms";
 
 export const defaultSiteSettings: CmsSiteSettings = {
   id: "site",
-  tagline: "Организатор торгов с 1994 года. Лицензия №37 НКРЦБ.",
+  tagline: "Рынок ценных бумаг Кыргызстана. Котировки, итоги торгов и отчёты эмитентов — в одном месте.",
   address: "720010, Кыргызская Республика, г. Бишкек, ул. Московская, 172",
   phones: "+996 312 31 14 84\n+996 551 31 14 84",
   emails: "office@kse.kg",

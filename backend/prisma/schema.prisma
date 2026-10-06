@@ -18,7 +18,8 @@ model News {
   excerpt    String
   body       String
   photo      String
-  issuerSlug String   @default("")
+  issuerSlug String?
+  issuer     Issuer?  @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
   i18n       Json     @default("{}")
   createdAt  DateTime @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @map("updated_at") @db.Timestamptz(6)
@@ -84,13 +85,15 @@ model Page {
 }
 
 model MenuItem {
-  id        String  @id
+  id        String     @id
   label     String
   href      String
-  menuGroup String  @map("group")
-  sortOrder Int     @map("order")
-  parentId  String? @map("parent_id")
-  i18n      Json    @default("{}")
+  menuGroup String     @map("group")
+  sortOrder Int        @map("order")
+  parentId  String?    @map("parent_id")
+  parent    MenuItem?  @relation("MenuTree", fields: [parentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  children  MenuItem[] @relation("MenuTree")
+  i18n      Json       @default("{}")
 
   @@index([parentId, sortOrder])
   @@map("menu")
@@ -140,18 +143,18 @@ model Audit {
 
 model SiteSettings {
   id              String   @id
-  tagline         String    @default("")
-  address         String    @default("")
-  phones          String    @default("")
-  emails          String    @default("")
-  fax             String    @default("")
-  license         String    @default("")
-  copyright       String    @default("")
-  eduUrl          String    @default("")
-  disclosurePhone String    @default("") @map("disclosure_phone")
-  eduPhone        String    @default("") @map("edu_phone")
-  i18n            Json      @default("{}")
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  tagline         String   @default("")
+  address         String   @default("")
+  phones          String   @default("")
+  emails          String   @default("")
+  fax             String   @default("")
+  license         String   @default("")
+  copyright       String   @default("")
+  eduUrl          String   @default("")
+  disclosurePhone String   @default("") @map("disclosure_phone")
+  eduPhone        String   @default("") @map("edu_phone")
+  i18n            Json     @default("{}")
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("settings")
 }
@@ -166,4 +169,55 @@ model HomeHub {
   i18n      Json   @default("{}")
 
   @@map("hubs")
+}
+
+model Issuer {
+  id        String         @id
+  slug      String         @unique
+  name      String
+  activity  String         @default("")
+  director  String         @default("")
+  position  String         @default("")
+  address   String         @default("")
+  phone     String         @default("")
+  registrar String         @default("")
+  security  String         @default("")
+  count     String         @default("")
+  price     String         @default("")
+  status    String         @default("")
+  sortOrder Int            @map("order")
+  updatedAt DateTime       @map("updated_at") @db.Timestamptz(6)
+  listing   ListingEntry[]
+  news      News[]
+
+  @@index([sortOrder])
+  @@map("issuers")
+}
+
+model ListingEntry {
+  id          String   @id
+  code        String   @unique
+  category    String
+  sortOrder   Int      @map("order")
+  name        String
+  issuerSlug  String?  @map("issuer_slug")
+  issuer      Issuer?  @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
+  security    String   @default("")
+  price       String   @default("")
+  cap         String   @default("")
+  count       String   @default("")
+  doc         String   @default("")
+  symbols     String   @default("")
+  industry    String   @default("")
+  activity    String   @default("")
+  listedAt    String   @default("") @map("listed_at")
+  auditor     String   @default("")
+  registrar   String   @default("")
+  marketMaker String   @default("") @map("market_maker")
+  documents   Json     @default("[]")
+  updatedAt   DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([category, sortOrder])
+  @@index([issuerSlug])
+  @@map("listing")
 }

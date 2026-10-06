@@ -6,6 +6,7 @@ import {
   postRequest,
   postVisit,
   readAdminData,
+  readIssuerData,
   readPublicContent,
   writeAdminData,
   createCollectionItem,
@@ -17,7 +18,20 @@ export const adminCmsRoutes = Router();
 adminCmsRoutes.get("/data", asyncHandler(readAdminData));
 adminCmsRoutes.post("/data", asyncHandler(writeAdminData));
 
-const collections = ["news", "slides", "pages", "menu", "hubs", "management", "settings", "media", "requests", "users"] as const;
+const collections = [
+  "news",
+  "slides",
+  "pages",
+  "menu",
+  "hubs",
+  "management",
+  "issuers",
+  "listing",
+  "settings",
+  "media",
+  "requests",
+  "users",
+] as const;
 for (const collection of collections) {
   adminCmsRoutes.post(`/${collection}`, asyncHandler(createCollectionItem(collection)));
   adminCmsRoutes.patch(`/${collection}/:id`, asyncHandler(updateCollectionItem(collection)));
@@ -26,6 +40,7 @@ for (const collection of collections) {
 
 export const publicCmsRoutes = Router();
 publicCmsRoutes.get("/content", asyncHandler(readPublicContent));
+publicCmsRoutes.get("/issuers", asyncHandler(readIssuerData));
 publicCmsRoutes.post("/request", validateBody(publicRequestSchema), asyncHandler(postRequest));
 publicCmsRoutes.post("/visit", validateBody(visitSchema), asyncHandler(postVisit));
 

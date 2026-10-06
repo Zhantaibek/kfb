@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { requireSession } from "../auth/auth.service";
-import { createRequest, getAdminData, getPublicContent, mutateCollection, trackVisit } from "./cms.service";
+import { createRequest, getAdminData, getIssuerData, getPublicContent, mutateCollection, trackVisit } from "./cms.service";
 import type { MutableCollection } from "../../validation/cms";
 
 export async function readAdminData(req: Request, res: Response) {
@@ -55,6 +55,10 @@ export function deleteCollectionItem(collection: MutableCollection) {
 
 export async function readPublicContent(_req: Request, res: Response) {
   res.json(await getPublicContent());
+}
+
+export async function readIssuerData(_req: Request, res: Response) {
+  res.json(await getIssuerData());
 }
 
 export async function postRequest(req: Request, res: Response) {

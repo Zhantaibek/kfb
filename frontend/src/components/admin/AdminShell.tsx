@@ -9,7 +9,15 @@ import { AdminIcon } from "@/components/admin/AdminIcons";
 import { AdminLangSwitch } from "@/components/admin/AdminLangSwitch";
 import css from "@/app/admin/admin.module.css";
 
-const groups = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: Parameters<typeof AdminIcon>[0]["name"];
+  /** Открыть в новой вкладке (Swagger). */
+  blank?: boolean;
+};
+
+const groups: { title: string; items: NavItem[] }[] = [
   {
     title: "Обзор",
     items: [{ href: "/admin/dashboard", label: "Панель", icon: "dashboard" as const }],
@@ -18,13 +26,14 @@ const groups = [
     title: "Контент",
     items: [
       { href: "/admin/news", label: "Новости", icon: "news" as const },
-      { href: "/admin/pages", label: "Страницы", icon: "pages" as const },
-      { href: "/admin/menu", label: "Меню", icon: "menu" as const },
+      { href: "/admin/menu", label: "Меню и страницы", icon: "menu" as const },
       { href: "/admin/slider", label: "Слайдер", icon: "slider" as const },
       { href: "/admin/hubs", label: "Главная", icon: "site" as const },
       { href: "/admin/management", label: "Руководство", icon: "users" as const },
+      { href: "/admin/issuers", label: "Эмитенты и листинг", icon: "pages" as const },
       { href: "/admin/media", label: "Медиа / фото", icon: "media" as const },
       { href: "/admin/settings", label: "Контакты и подвал", icon: "requests" as const },
+      { href: "/admin/footer", label: "Ссылки подвала", icon: "menu" as const },
       { href: "/admin/requests", label: "Заявки", icon: "requests" as const },
     ],
   },
@@ -42,13 +51,14 @@ const groups = [
 const titles: Record<string, { title: string; lead: string }> = {
   "/admin/dashboard": { title: "Панель управления", lead: "Обзор CMS, API и быстрые переходы" },
   "/admin/news": { title: "Новости", lead: "Публикации сайта" },
-  "/admin/pages": { title: "Страницы", lead: "Тексты разделов" },
-  "/admin/menu": { title: "Меню", lead: "Навигация сайта" },
+  "/admin/menu": { title: "Меню и страницы", lead: "Шапка сайта и тексты разделов" },
   "/admin/slider": { title: "Слайдер", lead: "Баннеры на главной" },
   "/admin/hubs": { title: "Главная", lead: "Карточки на главной странице" },
   "/admin/management": { title: "Руководство", lead: "Совет директоров и исполнительный орган" },
+  "/admin/issuers": { title: "Эмитенты и листинг", lead: "Центр раскрытия информации и официальный список" },
   "/admin/media": { title: "Медиа / фото", lead: "Загрузки CMS" },
   "/admin/settings": { title: "Контакты и подвал", lead: "Телефоны, адрес и копирайт" },
+  "/admin/footer": { title: "Ссылки подвала", lead: "Колонки, кнопки и ссылки внизу сайта" },
   "/admin/requests": { title: "Заявки", lead: "Обращения с сайта" },
   "/admin/users": { title: "Пользователи", lead: "Доступ в портал" },
   "/admin/visits": { title: "Посещения", lead: "Открытия публичных страниц" },
@@ -57,13 +67,22 @@ const titles: Record<string, { title: string; lead: string }> = {
   "/admin/profile": { title: "Профиль", lead: "Текущая учётная запись" },
 };
 
+function readNavCollapsed() {
+  try {
+    return typeof window !== "undefined" && localStorage.getItem("kse-admin-nav") === "collapsed";
+  } catch {
+    return false;
+  }
+}
+
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { lang, tr } = useApp();
   const [ready, setReady] = useState(pathname === "/admin/login");
   const [open, setOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  // Шапка админки рисуется только в браузере (до проверки сессии — заглушка), поэтому localStorage читаем сразу.
+  const [collapsed, setCollapsed] = useState(() => readNavCollapsed());
   const [name, setName] = useState("Админ");
   const [apiOk, setApiOk] = useState<boolean | null>(null);
   const [clock, setClock] = useState("");
@@ -72,11 +91,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
     const raw = titles[pathname] ?? { title: "Портал администратора", lead: "CMS Кыргызской фондовой биржи" };
     return { title: tr(raw.title), lead: tr(raw.lead) };
   }, [pathname, tr]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("kse-admin-nav");
-    if (saved === "collapsed") setCollapsed(true);
-  }, []);
 
   useEffect(() => {
     const tick = () =>
@@ -101,10 +115,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    if (pathname === "/admin/login") {
-      setReady(true);
-      return;
-    }
+    // Страница входа рисуется без проверки сессии (см. ранний return ниже).
+    if (pathname === "/admin/login") return;
     fetch("/api/admin/session", { credentials: "include" })
       .then(async (response) => {
         if (!response.ok) {

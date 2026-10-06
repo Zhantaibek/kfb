@@ -1037,6 +1037,18 @@
   background: var(--admin-bg);
 }
 
+.mediaFile {
+  display: grid;
+  place-items: center;
+  height: 140px;
+  background: var(--admin-bg);
+  color: var(--admin-ink);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+
 .mediaCard div {
   display: flex;
   justify-content: space-between;
@@ -1051,6 +1063,43 @@
   object-fit: cover;
   border-radius: 8px;
   background: var(--admin-bg);
+}
+
+.rowActions a {
+  display: inline-flex;
+  align-items: center;
+}
+
+.note {
+  margin-top: 4px;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.docRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.docFile {
+  padding: 0 6px;
+  color: var(--admin-muted, inherit);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+a.docFile {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .docRow {
+    grid-template-columns: 1fr;
+  }
 }
 
 .careerRow {
@@ -1281,4 +1330,13 @@
   .fields {
     grid-template-columns: 1fr;
   }
+}
+
+.notice {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--up) 14%, white);
+  color: var(--up);
+  font-weight: 650;
 }

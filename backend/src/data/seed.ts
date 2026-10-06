@@ -1,7 +1,9 @@
 import type { CmsStore } from "../../../shared/cms";
 import { news as seedNews } from "./news";
-import { flattenNavSeed } from "../../../shared/nav-seed";
+import { allNavSeed } from "../../../shared/nav-seed";
 import { managementSeed } from "../../../shared/management-seed";
+import { issuerSeedRows } from "../../../shared/issuers-seed";
+import { listingSeedRows } from "../../../shared/listing-seed";
 import { defaultHomeHubs, defaultSiteSettings } from "../../../shared/site-defaults";
 
 const now = "2026-08-18T09:00:00.000Z";
@@ -99,9 +101,11 @@ export function createSeedStore(): CmsStore {
         updatedAt: now,
       },
     ],
-    menu: flattenNavSeed(),
+    menu: allNavSeed(),
     hubs: defaultHomeHubs,
     management: managementSeed,
+    issuers: issuerSeedRows(now),
+    listing: listingSeedRows(now),
     settings: [{ ...defaultSiteSettings, updatedAt: now }],
     requests: [],
     users: [

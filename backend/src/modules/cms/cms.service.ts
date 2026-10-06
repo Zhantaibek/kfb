@@ -6,6 +6,7 @@ import {
   insertRequest,
   insertVisit,
   readFullStore,
+  readIssuerData,
   updateItem,
 } from "../../db/repositories/cms.repository";
 import {
@@ -115,8 +116,36 @@ async function prepareItem(
   if (collection === "news" || collection === "media" || collection === "requests") {
     item.createdAt = (existing?.createdAt as string | undefined) ?? now;
   }
-  if (collection === "news" || collection === "pages" || collection === "settings" || collection === "management") {
+  if (
+    collection === "news" ||
+    collection === "pages" ||
+    collection === "settings" ||
+    collection === "management" ||
+    collection === "issuers" ||
+    collection === "listing"
+  ) {
     item.updatedAt = now;
+  }
+  if (collection === "issuers") {
+    const store = await readStore();
+    const slug = String(item.slug).toLowerCase();
+    if (store.issuers.some((row) => row.id !== id && row.slug.toLowerCase() === slug)) {
+      throw new AppError(`Эмитент со slug «${item.slug}» уже есть`, 400);
+    }
+  }
+  if (collection === "listing") {
+    const store = await readStore();
+    const code = String(item.code).toUpperCase();
+    if (store.listing.some((row) => row.id !== id && row.code.toUpperCase() === code)) {
+      throw new AppError(`Бумага с кодом «${item.code}» уже есть в листинге`, 400);
+    }
+  }
+  // issuer_slug — внешний ключ на issuers.slug: ссылку в никуда база не примет.
+  if ((collection === "listing" || collection === "news") && item.issuerSlug) {
+    const store = await readStore();
+    if (!store.issuers.some((row) => row.slug === item.issuerSlug)) {
+      throw new AppError(`Эмитент со slug «${item.issuerSlug}» не найден`, 400);
+    }
   }
   if (collection === "settings") {
     item.id = "site";
@@ -204,6 +233,7 @@ export async function mutateCollection(
         item.password = existing.password;
       }
     }
+    // Смена slug эмитента сама переносится в listing и news: внешний ключ ON UPDATE CASCADE.
     await updateItem(collection, id, item);
     await insertAudit({
       action: "update",
@@ -253,6 +283,10 @@ export async function getPublicContent() {
     management: publishedManagement(store),
     settings: store.settings[0] ?? defaultSiteSettings,
   };
+}
+
+export function getIssuerData() {
+  return readIssuerData();
 }
 
 export async function createRequest(source: string, payload: Record<string, string>) {

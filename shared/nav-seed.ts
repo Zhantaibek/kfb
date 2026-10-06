@@ -1,11 +1,91 @@
-import type { CmsMenuItem } from "./cms";
+import type { CmsI18n, CmsMenuItem } from "./cms";
 
 export type NavSeedNode = {
   id: string;
   label: string;
   href: string;
+  i18n?: CmsI18n;
   children?: NavSeedNode[];
 };
+
+/** Строка навигации в шапке — шесть разделов, как в шапке kse.kg (группа меню «primary»). */
+export const defaultPrimaryNav: NavSeedNode[] = [
+  { id: "menu-top-about", label: "О Бирже", href: "/about", i18n: { ky: { label: "Биржа жөнүндө" }, en: { label: "About the Exchange" } } },
+  { id: "menu-top-listing", label: "Листинг", href: "/listing", i18n: { ky: { label: "Листинг" }, en: { label: "Listing" } } },
+  { id: "menu-top-market", label: "Статистика торгов", href: "/market", i18n: { ky: { label: "Соода статистикасы" }, en: { label: "Trading statistics" } } },
+  {
+    id: "menu-top-disclosure",
+    label: "Центр раскрытия информации",
+    href: "/disclosure",
+    i18n: { ky: { label: "Маалыматты ачыкка чыгаруу борбору" }, en: { label: "Information Disclosure Center" } },
+  },
+  {
+    id: "menu-top-sustainable",
+    label: "Сектор устойчивого развития",
+    href: "/sustainable",
+    i18n: { ky: { label: "Туруктуу өнүгүү сектору" }, en: { label: "Sustainable development sector" } },
+  },
+  {
+    id: "menu-top-gcb-invest",
+    label: "Инвестиции в ГЦБ",
+    href: "/gcb/invest",
+    i18n: { ky: { label: "МБКга инвестициялар" }, en: { label: "Investing in government securities" } },
+  },
+];
+
+/**
+ * Футер (группа «footer»): верхний уровень — заголовки колонок, вложенные — ссылки.
+ * Повторяет колонки, которые раньше собирались из первых трёх групп бургер-меню.
+ */
+export const defaultFooterNav: NavSeedNode[] = [
+  {
+    id: "menu-foot-1",
+    label: "О нас",
+    href: "/about",
+    i18n: { ky: { label: "Биз жөнүндө" }, en: { label: "About us" } },
+    children: [
+      { id: "menu-foot-1-1", label: "О бирже", href: "/about", i18n: { ky: { label: "Биржа жөнүндө" }, en: { label: "About the exchange" } } },
+      { id: "menu-foot-1-2", label: "Органы управления", href: "/about/governance", i18n: { ky: { label: "Башкаруу органдары" }, en: { label: "Governing bodies" } } },
+      { id: "menu-foot-1-3", label: "Историческая справка", href: "/about/history", i18n: { ky: { label: "Тарыхый маалымат" }, en: { label: "History" } } },
+      { id: "menu-foot-1-4", label: "Акционеры", href: "/about/shareholders", i18n: { ky: { label: "Акционерлер" }, en: { label: "Shareholders" } } },
+    ],
+  },
+  {
+    id: "menu-foot-2",
+    label: "Направления",
+    href: "/listing",
+    i18n: { ky: { label: "Багыттар" }, en: { label: "Business lines" } },
+    children: [
+      { id: "menu-foot-2-1", label: "Товарно-сырьевой сектор", href: "/commodity", i18n: { ky: { label: "Товар-чийки зат сектору" }, en: { label: "Commodities sector" } } },
+      { id: "menu-foot-2-2", label: "Листинг", href: "/listing", i18n: { ky: { label: "Листинг" }, en: { label: "Listing" } } },
+      { id: "menu-foot-2-3", label: "Центр раскрытия информации", href: "/disclosure", i18n: { ky: { label: "Маалыматты ачыктоо борбору" }, en: { label: "Disclosure centre" } } },
+      { id: "menu-foot-2-4", label: "Тарифы", href: "/tariffs", i18n: { ky: { label: "Тарифтер" }, en: { label: "Fees" } } },
+    ],
+  },
+  {
+    id: "menu-foot-3",
+    label: "Нормативная база",
+    href: "/regulations/exchange",
+    i18n: { ky: { label: "Ченемдик база" }, en: { label: "Regulation" } },
+    children: [
+      { id: "menu-foot-3-1", label: "Биржевая деятельность", href: "/regulations/exchange", i18n: { ky: { label: "Биржа ишмердүүлүгү" }, en: { label: "Exchange operations" } } },
+      { id: "menu-foot-3-2", label: "Депозитарная деятельность", href: "/regulations/depository", i18n: { ky: { label: "Депозитардык ишмердүүлүк" }, en: { label: "Depository operations" } } },
+      { id: "menu-foot-3-3", label: "Центр раскрытия информации", href: "/regulations/disclosure", i18n: { ky: { label: "Маалыматты ачыктоо борбору" }, en: { label: "Disclosure centre" } } },
+    ],
+  },
+];
+
+/** Две кнопки в баннере футера (группа «footer-buttons»). */
+export const defaultFooterButtons: NavSeedNode[] = [
+  { id: "menu-foot-btn-market", label: "Открыть торги", href: "/market", i18n: { ky: { label: "Сооданы ачуу" }, en: { label: "Open trading" } } },
+  { id: "menu-foot-btn-contacts", label: "Написать в КФБ", href: "/contacts", i18n: { ky: { label: "КФБга жазуу" }, en: { label: "Write to KSE" } } },
+];
+
+/** Ссылки с иконкой документа рядом с телефонами (группа «footer-links»). */
+export const defaultFooterLinks: NavSeedNode[] = [
+  { id: "menu-foot-doc-rules", label: "Правила и тарифы", href: "/documents", i18n: { ky: { label: "Эрежелер жана тарифтер" }, en: { label: "Rules and fees" } } },
+  { id: "menu-foot-doc-disclosure", label: "Раскрытие", href: "/disclosure", i18n: { ky: { label: "Ачыктоо" }, en: { label: "Disclosure" } } },
+];
 
 /** Текущее меню шапки kse.kg — источник seed и запасной вариант на сайте. */
 export const defaultHeaderNav: NavSeedNode[] = [
@@ -15,6 +95,8 @@ export const defaultHeaderNav: NavSeedNode[] = [
     href: "/about",
     children: [
       { id: "menu-about-info", label: "Общая информация", href: "/about" },
+      { id: "menu-about-governance", label: "Органы управления", href: "/about/governance" },
+      { id: "menu-about-history", label: "Историческая справка", href: "/about/history" },
       { id: "menu-about-shareholders", label: "Акционеры", href: "/about/shareholders" },
       { id: "menu-about-management", label: "Руководство", href: "/about/management" },
       { id: "menu-about-auditor", label: "Внутренний аудитор", href: "/about/auditor" },
@@ -40,6 +122,7 @@ export const defaultHeaderNav: NavSeedNode[] = [
           { id: "menu-about-members-all", label: "Участники торгов", href: "/members" },
           { id: "menu-about-members-stdm", label: "Участники торгов СТДМ", href: "/members/stdm" },
           { id: "menu-about-members-commodity", label: "Участники товарно-сырьевого сектора", href: "/members/commodity" },
+          { id: "menu-about-members-rating", label: "Рейтинг участников", href: "/members/rating" },
           { id: "menu-about-members-gcb", label: "Участники торгов ГЦБ", href: "/members/gcb" },
         ],
       },
@@ -62,6 +145,8 @@ export const defaultHeaderNav: NavSeedNode[] = [
       { id: "menu-dir-finmarket", label: "Финансовый рынок KG", href: "/finmarket" },
       { id: "menu-dir-news", label: "Пресс-клуб", href: "/news" },
       { id: "menu-dir-25", label: "25 лет ЗАО КФБ", href: "/about/25-years" },
+      { id: "menu-dir-sustainable", label: "Сектор устойчивого развития", href: "/sustainable" },
+      { id: "menu-dir-gcb-invest", label: "Инвестиции в ГЦБ", href: "/gcb/invest" },
     ],
   },
   {
@@ -71,7 +156,7 @@ export const defaultHeaderNav: NavSeedNode[] = [
     children: [
       { id: "menu-reg-exchange", label: "Биржевая деятельность", href: "/regulations/exchange" },
       { id: "menu-reg-depository", label: "Депозитарная деятельность", href: "/regulations/depository" },
-      { id: "menu-reg-disclosure", label: "Центр раскрытия информации", href: "/disclosure" },
+      { id: "menu-reg-disclosure", label: "Центр раскрытия информации", href: "/regulations/disclosure" },
     ],
   },
   {
@@ -102,6 +187,17 @@ export const defaultHeaderNav: NavSeedNode[] = [
   },
 ];
 
+/** Все пункты меню из seed: дерево бургера (header) и строка навигации шапки (primary). */
+export function allNavSeed(): CmsMenuItem[] {
+  return [
+    ...flattenNavSeed(),
+    ...flattenNavSeed(defaultPrimaryNav, "primary"),
+    ...flattenNavSeed(defaultFooterNav, "footer"),
+    ...flattenNavSeed(defaultFooterButtons, "footer-buttons"),
+    ...flattenNavSeed(defaultFooterLinks, "footer-links"),
+  ];
+}
+
 export function flattenNavSeed(
   nodes: NavSeedNode[] = defaultHeaderNav,
   group = "header",
@@ -116,6 +212,7 @@ export function flattenNavSeed(
       group,
       order: index + 1,
       parentId,
+      ...(node.i18n ? { i18n: node.i18n } : {}),
     });
     if (node.children?.length) {
       out.push(...flattenNavSeed(node.children, group, node.id));

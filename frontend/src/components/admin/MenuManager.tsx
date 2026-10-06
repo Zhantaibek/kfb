@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Logo } from "@/components/Logo";
 import { LocaleTabs } from "@/components/admin/LocaleTabs";
+import { PrimaryNavManager } from "@/components/admin/PrimaryNavManager";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { useAdminStore } from "@/lib/cms/client";
-import { incompleteTranslation, readLocaleField, writeLocaleField, type ContentLang } from "@/lib/cms/locale";
+import { useContentLang } from "@/lib/cms/use-content-lang";
+import { incompleteTranslation, isLocaleValueFilled, readLocaleField, writeLocaleField } from "@/lib/cms/locale";
 import { resolveMenuHref, suggestedMenuHref } from "@/lib/cms/menu-href";
-import type { CmsMenuItem } from "@/lib/cms/types";
+import type { CmsI18n, CmsMenuItem, CmsPage, PublishStatus } from "@/lib/cms/types";
 import css from "@/app/admin/admin.module.css";
 
 const empty: Omit<CmsMenuItem, "id"> = {
@@ -18,6 +21,27 @@ const empty: Omit<CmsMenuItem, "id"> = {
   i18n: {},
 };
 const menuFields = ["label"];
+const pageFields = ["title", "lead", "body"];
+
+type PageDraft = {
+  id?: string;
+  lead: string;
+  body: string;
+  status: PublishStatus;
+  i18n?: CmsI18n;
+};
+
+const emptyPage: PageDraft = { lead: "", body: "", status: "published", i18n: {} };
+
+function isContentHref(href: string) {
+  const value = href.trim();
+  return value.startsWith("/") && value !== "/" && !/^\/\//.test(value);
+}
+
+function draftFromPage(page: CmsPage | undefined): PageDraft {
+  if (!page) return { ...emptyPage };
+  return { id: page.id, lead: page.lead, body: page.body, status: page.status, i18n: page.i18n ?? {} };
+}
 
 function childrenOf(menu: CmsMenuItem[], parentId: string | null) {
   return menu
@@ -26,24 +50,53 @@ function childrenOf(menu: CmsMenuItem[], parentId: string | null) {
 }
 
 export function MenuManager() {
-  const { store, error, busy, mutate, setError } = useAdminStore();
+  const { store, error, busy, mutate, upload, setError } = useAdminStore();
   const [editing, setEditing] = useState<Partial<CmsMenuItem> | null>(null);
+  const [pageDraft, setPageDraft] = useState<PageDraft | null>(null);
+  const [pageOnly, setPageOnly] = useState<Partial<CmsPage> | null>(null);
   const [hrefTouched, setHrefTouched] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
-  const [lang, setLang] = useState<ContentLang>("ru");
-  const menu = store?.menu ?? [];
+  // Дерево бургер-меню — группа «header»; строка навигации шапки («primary») правится отдельным блоком.
+  const allMenu = useMemo(() => store?.menu ?? [], [store?.menu]);
+  const menu = useMemo(() => allMenu.filter((item) => (item.group || "header") === "header"), [allMenu]);
+  const primaryItems = useMemo(() => allMenu.filter((item) => item.group === "primary"), [allMenu]);
   const pages = store?.pages ?? [];
   const sections = useMemo(() => childrenOf(menu, null), [menu]);
   const active = sections.find((item) => item.id === openId) ?? sections[0] ?? null;
   const dropdown = active ? childrenOf(menu, active.id) : [];
+  const linked = useMemo(() => new Set(menu.map((item) => item.href)), [menu]);
+  const orphans = pages.filter((page) => !linked.has(page.path));
+  const contentHref = isContentHref(editing?.href ?? "");
 
-  useEffect(() => {
-    setLang("ru");
-  }, [editing?.id]);
+  // Открыли другой пункт или страницу — вкладка языка снова «RU».
+  const [lang, setLang] = useContentLang(`${editing?.id ?? ""}|${pageOnly?.id ?? ""}`);
+
+  // Переход с кнопки «Редактировать» на сайте: /admin/menu?edit=/about/strategy.
+  // Админка рендерится только в браузере (AdminShell ждёт сессию), поэтому window здесь доступен.
+  // Обрабатываем во время рендера, как только пришли данные, — без эффекта.
+  const [deepLink, setDeepLink] = useState(() => new URLSearchParams(window.location.search).get("edit"));
+  if (store && deepLink) {
+    setDeepLink(null);
+    const item = menu.find((row) => row.href === deepLink);
+    const page = item ? undefined : pages.find((row) => row.path === deepLink);
+    if (item) startEdit(item);
+    else if (page) setPageOnly(page);
+  }
+
+  function attachPage(href: string, keepId: boolean) {
+    const match = pages.find((page) => page.path === href);
+    if (match) {
+      setPageDraft(draftFromPage(match));
+      return;
+    }
+    setPageDraft((current) => (keepId && current?.id ? { ...current, id: current.id } : { ...(current ?? emptyPage), id: undefined }));
+  }
 
   function startCreate(parentId: string | null) {
     const siblings = childrenOf(menu, parentId);
+    setPageOnly(null);
     setHrefTouched(false);
+    setPageDraft({ ...emptyPage });
     setEditing({ ...empty, parentId, order: siblings.length + 1, href: "" });
     const parent = parentId ? menu.find((item) => item.id === parentId) : undefined;
     if (parent && !parent.parentId) setOpenId(parent.id);
@@ -52,8 +105,11 @@ export function MenuManager() {
 
   function startEdit(item: CmsMenuItem) {
     const broken = !item.href.trim() || item.href.trim() === "/";
+    const href = broken ? suggestedMenuHref(menu, item.parentId, item.label) : item.href;
+    setPageOnly(null);
     setHrefTouched(!broken);
-    setEditing(broken ? { ...item, href: suggestedMenuHref(menu, item.parentId, item.label) } : item);
+    setPageDraft(draftFromPage(pages.find((page) => page.path === item.href) ?? pages.find((page) => page.path === href)));
+    setEditing(broken ? { ...item, href } : item);
     if (!item.parentId) {
       setOpenId(item.id);
       return;
@@ -84,16 +140,51 @@ export function MenuManager() {
     });
   }
 
+  function setPageField(field: "lead" | "body", value: string) {
+    setPageDraft((current) => (current ? writeLocaleField(current, lang, field, value) : current));
+  }
+
+  async function savePage(href: string, label: string, menuI18n: CmsI18n | undefined, draft: PageDraft) {
+    if (!isContentHref(href)) return;
+    const target = pages.find((page) => page.path === href) ?? (draft.id ? pages.find((page) => page.id === draft.id) : undefined);
+    const i18n: CmsI18n = { ...(draft.i18n ?? target?.i18n ?? {}) };
+    for (const code of ["ky", "en"] as const) {
+      const title = menuI18n?.[code]?.label?.trim();
+      if (!title) continue;
+      i18n[code] = { ...(i18n[code] ?? {}), title };
+    }
+    const item = {
+      path: href,
+      title: label,
+      lead: draft.lead.trim() ? draft.lead : (target?.lead ?? ""),
+      body: draft.body.trim() ? draft.body : (target?.body ?? "<p></p>"),
+      status: draft.status,
+      i18n,
+    };
+    if (target) await mutate("update", "pages", { ...target, ...item }, target.id);
+    else await mutate("create", "pages", item);
+  }
+
   async function save() {
     if (!editing?.label) return;
-    const gap = incompleteTranslation(editing, menuFields);
+    const href = resolveMenuHref(menu, editing.parentId ?? null, editing.label, editing.href ?? "");
+    if (!href) return;
+    const draft = pageDraft ?? emptyPage;
+    const translated = {
+      label: editing.label ?? "",
+      lead: draft.lead,
+      body: draft.body,
+      i18n: {
+        ky: { ...(draft.i18n?.ky ?? {}), label: editing.i18n?.ky?.label ?? "" },
+        en: { ...(draft.i18n?.en ?? {}), label: editing.i18n?.en?.label ?? "" },
+      },
+    };
+    const gap = incompleteTranslation(translated, isContentHref(href) ? ["label", "lead", "body"] : menuFields);
     if (gap) {
       setError(gap.message);
       setLang(gap.lang);
       return;
     }
-    const href = resolveMenuHref(menu, editing.parentId ?? null, editing.label, editing.href ?? "");
-    if (!href) return;
     const item = {
       ...empty,
       ...editing,
@@ -102,35 +193,38 @@ export function MenuManager() {
       order: Number(editing.order) || 1,
       parentId: editing.parentId || null,
     };
-    const hrefTaken = menu.some((row) => row.href === href && row.id !== editing.id);
-    const pageExists = pages.some((page) => page.path === href);
-    const previous = editing.id ? menu.find((row) => row.id === editing.id) : undefined;
-    const needsPage = !previous || !previous.href.trim() || previous.href.trim() === "/";
-    if (needsPage && href.startsWith("/") && !/^https?:\/\//i.test(href) && !hrefTaken && !pageExists) {
-      const kyTitle = readLocaleField(editing, "ky", "label");
-      const enTitle = readLocaleField(editing, "en", "label");
-      await mutate("create", "pages", {
-        path: href,
-        title: editing.label,
-        lead: "",
-        body: "<p>Страница создана из меню. Откройте «Страницы» в админке, чтобы добавить текст.</p>",
-        status: "published",
-        i18n: {
-          ky: {
-            title: kyTitle,
-            body: "<p>Барак менюдан түзүлдү. Текстти «Барактар» бөлүмүнөн кошуңуз.</p>",
-          },
-          en: {
-            title: enTitle,
-            body: "<p>This page was created from the menu. Open Pages in admin to add the text.</p>",
-          },
-        },
-      });
-    }
     if (editing.id) await mutate("update", "menu", item, editing.id);
     else await mutate("create", "menu", item);
+    await savePage(href, editing.label, editing.i18n, draft);
     if (!item.parentId && editing.id) setOpenId(editing.id);
     setEditing(null);
+    setPageDraft(null);
+  }
+
+  async function saveOrphan() {
+    if (!pageOnly?.title || !pageOnly.path) return;
+    if (!isLocaleValueFilled(pageOnly.body, "body")) {
+      setError("Укажите текст страницы на русском, кыргызском и английском.");
+      setLang("ru");
+      return;
+    }
+    const gap = incompleteTranslation(pageOnly, pageFields);
+    if (gap) {
+      setError(gap.message);
+      setLang(gap.lang);
+      return;
+    }
+    const item = {
+      path: pageOnly.path,
+      title: pageOnly.title,
+      lead: pageOnly.lead ?? "",
+      body: pageOnly.body ?? "",
+      status: pageOnly.status ?? "published",
+      i18n: pageOnly.i18n ?? {},
+    };
+    if (pageOnly.id) await mutate("update", "pages", { ...item }, pageOnly.id);
+    else await mutate("create", "pages", item);
+    setPageOnly(null);
   }
 
   async function remove(item: CmsMenuItem) {
@@ -153,11 +247,13 @@ export function MenuManager() {
   return (
     <>
       <p className={css.kicker}>CMS · КФБ</p>
-      <h1>Меню сайта</h1>
+      <h1>Меню и страницы</h1>
       <p className={css.lead}>
-        Это та же шапка, что у посетителя. Название каждого пункта обязательно на русском, кыргызском и английском.
+        Пункт шапки и текст страницы правятся здесь. Название обязательно на русском, кыргызском и английском. Если ссылка внутренняя, ниже тот же текст, который видит посетитель.
       </p>
       {error ? <p className={css.error}>{error}</p> : null}
+
+      <PrimaryNavManager items={primaryItems} busy={busy} mutate={mutate} setError={setError} />
 
       <div className={css.menuCanvas}>
         <div className={css.menuBar}>
@@ -193,7 +289,20 @@ export function MenuManager() {
           >
             <p className={css.menuFormHint}>{formHint(menu, editing)}</p>
             <div className={css.fields}>
-              <LocaleTabs lang={lang} onChange={setLang} i18n={editing.i18n} fields={menuFields} item={editing} />
+              <LocaleTabs
+                lang={lang}
+                onChange={setLang}
+                fields={contentHref ? ["label", "lead", "body"] : menuFields}
+                i18n={
+                  contentHref && pageDraft
+                    ? {
+                        ky: { ...(pageDraft.i18n?.ky ?? {}), label: editing.i18n?.ky?.label ?? "" },
+                        en: { ...(pageDraft.i18n?.en ?? {}), label: editing.i18n?.en?.label ?? "" },
+                      }
+                    : editing.i18n
+                }
+                item={contentHref && pageDraft ? { label: editing.label ?? "", lead: pageDraft.lead, body: pageDraft.body } : editing}
+              />
               <label className={css.field}>
                 <span>Название</span>
                 <input
@@ -208,8 +317,10 @@ export function MenuManager() {
                   list="menu-paths"
                   value={editing.href ?? ""}
                   onChange={(event) => {
+                    const href = event.target.value;
                     setHrefTouched(true);
-                    setEditing({ ...editing, href: event.target.value });
+                    setEditing({ ...editing, href });
+                    attachPage(href, true);
                   }}
                   placeholder="появится из названия"
                 />
@@ -242,6 +353,34 @@ export function MenuManager() {
                     ))}
                 </select>
               </label>
+              {contentHref && pageDraft ? (
+                <>
+                  <label className={`${css.field} ${css.wide}`}>
+                    <span>Лид</span>
+                    <input value={readLocaleField(pageDraft, lang, "lead")} onChange={(event) => setPageField("lead", event.target.value)} />
+                  </label>
+                  <div className={css.wide}>
+                    <RichTextEditor
+                      label="Текст страницы"
+                      hint="Этот текст открывается по ссылке пункта. Фото вставляется кнопкой ниже."
+                      value={readLocaleField(pageDraft, lang, "body")}
+                      onChange={(body) => setPageField("body", body)}
+                      media={store?.media}
+                      onUpload={async (file) => (await upload(file)).url}
+                    />
+                  </div>
+                  <label className={css.field}>
+                    <span>Статус страницы</span>
+                    <select
+                      value={pageDraft.status}
+                      onChange={(event) => setPageDraft({ ...pageDraft, status: event.target.value as PublishStatus })}
+                    >
+                      <option value="published">published</option>
+                      <option value="draft">draft</option>
+                    </select>
+                  </label>
+                </>
+              ) : null}
             </div>
             <datalist id="menu-paths">
               {pages.map((page) => (
@@ -254,7 +393,7 @@ export function MenuManager() {
               <button className={css.primary} disabled={busy} type="submit">
                 Сохранить
               </button>
-              <button className={css.ghost} type="button" onClick={() => setEditing(null)}>
+              <button className={css.ghost} type="button" onClick={() => { setEditing(null); setPageDraft(null); }}>
                 Отмена
               </button>
             </div>
@@ -350,6 +489,115 @@ export function MenuManager() {
           <p className={css.menuEmpty}>В шапке пока пусто. Добавьте первый пункт справа сверху.</p>
         )}
       </div>
+
+      <section className={css.menuCanvas}>
+        <div className={css.menuDropHead}>
+          <div>
+            <small>Без пункта в шапке</small>
+            <b>Отдельные страницы</b>
+          </div>
+          <button
+            className={css.primary}
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setPageDraft(null);
+              setPageOnly({ path: "/p/new", title: "", lead: "", body: "", status: "published", i18n: {} });
+            }}
+          >
+            + страница
+          </button>
+        </div>
+        <p className={css.menuEmpty}>Адреса, которых нет в меню. Текст пунктов шапки редактируется выше, в карточке пункта.</p>
+        {pageOnly ? (
+          <form
+            className={`${css.form} ${css.menuForm}`}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void saveOrphan();
+            }}
+          >
+            <div className={css.fields}>
+              <LocaleTabs lang={lang} onChange={setLang} i18n={pageOnly.i18n} fields={pageFields} item={pageOnly} />
+              <label className={css.field}>
+                <span>Заголовок</span>
+                <input
+                  value={readLocaleField(pageOnly, lang, "title")}
+                  onChange={(event) => setPageOnly(writeLocaleField(pageOnly, lang, "title", event.target.value))}
+                  required
+                />
+              </label>
+              <label className={css.field}>
+                <span>Path</span>
+                <input value={pageOnly.path ?? ""} onChange={(event) => setPageOnly({ ...pageOnly, path: event.target.value })} required />
+              </label>
+              <label className={`${css.field} ${css.wide}`}>
+                <span>Лид</span>
+                <input
+                  value={readLocaleField(pageOnly, lang, "lead")}
+                  onChange={(event) => setPageOnly(writeLocaleField(pageOnly, lang, "lead", event.target.value))}
+                />
+              </label>
+              <div className={css.wide}>
+                <RichTextEditor
+                  label="Текст страницы"
+                  value={readLocaleField(pageOnly, lang, "body")}
+                  onChange={(body) => setPageOnly(writeLocaleField(pageOnly, lang, "body", body))}
+                  media={store?.media}
+                  onUpload={async (file) => (await upload(file)).url}
+                />
+              </div>
+            </div>
+            <div className={css.rowActions}>
+              <button className={css.primary} disabled={busy} type="submit">
+                Сохранить
+              </button>
+              <button className={css.ghost} type="button" onClick={() => setPageOnly(null)}>
+                Отмена
+              </button>
+            </div>
+          </form>
+        ) : null}
+        {orphans.length ? (
+          <div className={css.table}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Страница</th>
+                  <th>Path</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orphans.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.title}</td>
+                    <td>{item.path}</td>
+                    <td>
+                      <div className={css.rowActions}>
+                        <button
+                          className={css.ghost}
+                          type="button"
+                          onClick={() => {
+                            setEditing(null);
+                            setPageDraft(null);
+                            setPageOnly(item);
+                          }}
+                        >
+                          Изменить
+                        </button>
+                        <button className={css.danger} type="button" onClick={() => void mutate("delete", "pages", undefined, item.id)}>
+                          Удалить
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+      </section>
     </>
   );
 }

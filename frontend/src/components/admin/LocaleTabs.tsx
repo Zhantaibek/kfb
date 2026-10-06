@@ -15,7 +15,7 @@ export function LocaleTabs({
   onChange: (lang: ContentLang) => void;
   i18n?: CmsI18n;
   fields: string[];
-  item?: { i18n?: CmsI18n } | null;
+  item?: object | null;
 }) {
   return (
     <div className={css.localeBar}>
@@ -54,7 +54,7 @@ export function LocaleDots({
 }: {
   i18n?: CmsI18n;
   fields: string[];
-  item?: { i18n?: CmsI18n };
+  item?: object;
 }) {
   return (
     <span className={css.localeDots} title="Переводы KY / EN">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
@@ -9,21 +9,23 @@ function currentTheme(): Theme {
   return value === "dark" ? "dark" : "light";
 }
 
+/** Тема — атрибут data-theme на <html> (его ставит скрипт в layout ещё до гидратации). */
+function subscribeTheme(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => observer.disconnect();
+}
+
 function applyTheme(next: Theme) {
   document.documentElement.setAttribute("data-theme", next);
   localStorage.setItem("kse-theme", next);
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  useEffect(() => {
-    setTheme(currentTheme());
-  }, []);
+  const theme = useSyncExternalStore<Theme>(subscribeTheme, currentTheme, () => "dark");
 
   function toggle() {
     const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
 
     const root = document.documentElement;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

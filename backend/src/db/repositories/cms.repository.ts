@@ -2,6 +2,8 @@ import type {
   CmsAudit,
   CmsCollection,
   CmsHomeHub,
+  CmsIssuer,
+  CmsListingEntry,
   CmsManagementPerson,
   CmsMedia,
   CmsMenuItem,
@@ -17,6 +19,8 @@ import { prisma } from "../prisma";
 import {
   toCmsAudit,
   toCmsHomeHub,
+  toCmsIssuer,
+  toCmsListingEntry,
   toCmsManagementPerson,
   toCmsMedia,
   toCmsMenuItem,
@@ -30,7 +34,8 @@ import {
 } from "../mappers";
 
 export async function readFullStore(): Promise<CmsStore> {
-  const [news, slides, media, pages, menu, hubs, management, settings, requests, users, visits, audit] = await Promise.all([
+  const [news, slides, media, pages, menu, hubs, management, issuers, listing, settings, requests, users, visits, audit] =
+    await Promise.all([
     prisma.news.findMany({ orderBy: { updatedAt: "desc" } }),
     prisma.slide.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.media.findMany({ orderBy: { createdAt: "desc" } }),
@@ -38,6 +43,8 @@ export async function readFullStore(): Promise<CmsStore> {
     prisma.menuItem.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.homeHub.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.managementPerson.findMany({ orderBy: [{ groupId: "asc" }, { sortOrder: "asc" }] }),
+    prisma.issuer.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
+    prisma.listingEntry.findMany({ orderBy: [{ category: "asc" }, { sortOrder: "asc" }] }),
     prisma.siteSettings.findMany(),
     prisma.request.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.user.findMany({ orderBy: { name: "asc" } }),
@@ -53,6 +60,8 @@ export async function readFullStore(): Promise<CmsStore> {
     menu: menu.map(toCmsMenuItem),
     hubs: hubs.map(toCmsHomeHub),
     management: management.map(toCmsManagementPerson),
+    issuers: issuers.map(toCmsIssuer),
+    listing: listing.map(toCmsListingEntry),
     settings: settings.map(toCmsSiteSettings),
     requests: requests.map(toCmsRequest),
     users: users.map(toCmsUser),
@@ -192,6 +201,14 @@ export async function detachMediaUrl(url: string) {
   }
 }
 
+export async function readIssuerData() {
+  const [issuers, listing] = await Promise.all([
+    prisma.issuer.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
+    prisma.listingEntry.findMany({ orderBy: [{ category: "asc" }, { sortOrder: "asc" }] }),
+  ]);
+  return { issuers: issuers.map(toCmsIssuer), listing: listing.map(toCmsListingEntry) };
+}
+
 type MutableCollection = Exclude<CmsCollection, "audit" | "visits">;
 
 export async function createItem(collection: MutableCollection, item: Record<string, unknown>) {
@@ -210,7 +227,7 @@ export async function createItem(collection: MutableCollection, item: Record<str
           excerpt: row.excerpt,
           body: row.body,
           photo: row.photo,
-          issuerSlug: row.issuerSlug ?? "",
+          issuerSlug: row.issuerSlug || null,
           i18n: row.i18n ?? {},
           createdAt: new Date(row.createdAt),
           updatedAt: new Date(row.updatedAt),
@@ -250,6 +267,57 @@ export async function createItem(collection: MutableCollection, item: Record<str
           sortOrder: row.order,
           status: row.status,
           i18n: row.i18n ?? {},
+          updatedAt: new Date(row.updatedAt),
+        },
+      });
+      break;
+    }
+    case "issuers": {
+      const row = item as unknown as CmsIssuer;
+      await prisma.issuer.create({
+        data: {
+          id: row.id,
+          slug: row.slug,
+          name: row.name,
+          activity: row.activity,
+          director: row.director,
+          position: row.position,
+          address: row.address,
+          phone: row.phone,
+          registrar: row.registrar,
+          security: row.security,
+          count: row.count,
+          price: row.price,
+          status: row.status,
+          sortOrder: row.order,
+          updatedAt: new Date(row.updatedAt),
+        },
+      });
+      break;
+    }
+    case "listing": {
+      const row = item as unknown as CmsListingEntry;
+      await prisma.listingEntry.create({
+        data: {
+          id: row.id,
+          code: row.code,
+          category: row.category,
+          sortOrder: row.order,
+          name: row.name,
+          issuerSlug: row.issuerSlug || null,
+          security: row.security,
+          price: row.price,
+          cap: row.cap,
+          count: row.count,
+          doc: row.doc,
+          symbols: row.symbols,
+          industry: row.industry,
+          activity: row.activity,
+          listedAt: row.listedAt,
+          auditor: row.auditor,
+          registrar: row.registrar,
+          marketMaker: row.marketMaker,
+          documents: row.documents ?? [],
           updatedAt: new Date(row.updatedAt),
         },
       });
@@ -363,7 +431,7 @@ export async function updateItem(collection: MutableCollection, id: string, item
           excerpt: row.excerpt,
           body: row.body,
           photo: row.photo,
-          issuerSlug: row.issuerSlug ?? "",
+          issuerSlug: row.issuerSlug || null,
           i18n: row.i18n ?? {},
           updatedAt: new Date(row.updatedAt),
         },
@@ -402,6 +470,57 @@ export async function updateItem(collection: MutableCollection, id: string, item
           sortOrder: row.order,
           status: row.status,
           i18n: row.i18n ?? {},
+          updatedAt: new Date(row.updatedAt),
+        },
+      });
+      break;
+    }
+    case "issuers": {
+      const row = item as unknown as CmsIssuer;
+      await prisma.issuer.update({
+        where: { id },
+        data: {
+          slug: row.slug,
+          name: row.name,
+          activity: row.activity,
+          director: row.director,
+          position: row.position,
+          address: row.address,
+          phone: row.phone,
+          registrar: row.registrar,
+          security: row.security,
+          count: row.count,
+          price: row.price,
+          status: row.status,
+          sortOrder: row.order,
+          updatedAt: new Date(row.updatedAt),
+        },
+      });
+      break;
+    }
+    case "listing": {
+      const row = item as unknown as CmsListingEntry;
+      await prisma.listingEntry.update({
+        where: { id },
+        data: {
+          code: row.code,
+          category: row.category,
+          sortOrder: row.order,
+          name: row.name,
+          issuerSlug: row.issuerSlug || null,
+          security: row.security,
+          price: row.price,
+          cap: row.cap,
+          count: row.count,
+          doc: row.doc,
+          symbols: row.symbols,
+          industry: row.industry,
+          activity: row.activity,
+          listedAt: row.listedAt,
+          auditor: row.auditor,
+          registrar: row.registrar,
+          marketMaker: row.marketMaker,
+          documents: row.documents ?? [],
           updatedAt: new Date(row.updatedAt),
         },
       });
@@ -537,6 +656,12 @@ export async function deleteItem(collection: MutableCollection, id: string) {
       case "management":
         await prisma.managementPerson.delete({ where: { id } });
         break;
+      case "issuers":
+        await prisma.issuer.delete({ where: { id } });
+        break;
+      case "listing":
+        await prisma.listingEntry.delete({ where: { id } });
+        break;
       case "settings":
         throw new Error("settings-locked");
       case "requests":
@@ -585,6 +710,14 @@ export async function findItem(
     case "management": {
       const row = await prisma.managementPerson.findUnique({ where: { id } });
       return row ? (toCmsManagementPerson(row) as unknown as Record<string, unknown>) : null;
+    }
+    case "issuers": {
+      const row = await prisma.issuer.findUnique({ where: { id } });
+      return row ? (toCmsIssuer(row) as unknown as Record<string, unknown>) : null;
+    }
+    case "listing": {
+      const row = await prisma.listingEntry.findUnique({ where: { id } });
+      return row ? (toCmsListingEntry(row) as unknown as Record<string, unknown>) : null;
     }
     case "settings": {
       const row = await prisma.siteSettings.findUnique({ where: { id: "site" } });

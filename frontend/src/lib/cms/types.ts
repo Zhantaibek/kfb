@@ -99,6 +99,84 @@ export function managementByGroup(items: CmsManagementPerson[], group: Managemen
   return items.filter((item) => item.group === group).sort((a, b) => a.order - b.order);
 }
 
+/** Эмитент в Центре раскрытия информации (/disclosure/<slug>). */
+export type CmsIssuer = {
+  id: string;
+  slug: string;
+  name: string;
+  activity: string;
+  director: string;
+  position: string;
+  address: string;
+  phone: string;
+  registrar: string;
+  security: string;
+  count: string;
+  price: string;
+  /** Статус профиля, как на oi.kse.kg: «Активен» и т.п. */
+  status: string;
+  order: number;
+  updatedAt: string;
+};
+
+export const listingCategoryIds = ["A", "B", "C", "delisted"] as const;
+export type ListingCategoryId = (typeof listingCategoryIds)[number];
+
+export const listingCategoryTitles: Record<ListingCategoryId, string> = {
+  A: "Категория A",
+  B: "Категория B",
+  C: "Категория C",
+  delisted: "Временный делистинг",
+};
+
+export type CmsListingDocument = { name: string; url: string };
+
+/** Бумага официального списка КФБ (/listing) вместе с карточкой листинга. */
+export type CmsListingEntry = {
+  id: string;
+  /** Код бумаги в системе КФБ, например MAIR4 */
+  code: string;
+  category: ListingCategoryId;
+  order: number;
+  name: string;
+  /** slug эмитента в Центре раскрытия информации, если он есть */
+  issuerSlug: string;
+  security: string;
+  price: string;
+  cap: string;
+  count: string;
+  /** Ссылка на анкету/проспект эмитента */
+  doc: string;
+  /** Торговые символы всех выпусков эмитента */
+  symbols: string;
+  industry: string;
+  activity: string;
+  /** Дата прохождения листинга, ГГГГ-ММ-ДД */
+  listedAt: string;
+  auditor: string;
+  registrar: string;
+  marketMaker: string;
+  documents: CmsListingDocument[];
+  updatedAt: string;
+};
+
+export function parseListingDocuments(value: unknown): CmsListingDocument[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== "object") return [];
+    const row = entry as Record<string, unknown>;
+    const name = typeof row.name === "string" ? row.name : "";
+    const url = typeof row.url === "string" ? row.url : "";
+    return name || url ? [{ name, url }] : [];
+  });
+}
+
+/** Публичные данные эмитентов: отдельный запрос, чтобы не утяжелять общий контент сайта. */
+export type IssuerData = {
+  issuers: CmsIssuer[];
+  listing: CmsListingEntry[];
+};
+
 export type CmsMenuItem = {
   id: string;
   label: string;
@@ -174,6 +252,8 @@ export type CmsStore = {
   menu: CmsMenuItem[];
   hubs: CmsHomeHub[];
   management: CmsManagementPerson[];
+  issuers: CmsIssuer[];
+  listing: CmsListingEntry[];
   settings: CmsSiteSettings[];
   requests: CmsRequest[];
   users: CmsUser[];

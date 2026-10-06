@@ -49,7 +49,8 @@ export function hasLocale(
   i18n: CmsI18n | undefined,
   lang: LocaleCode,
   fields: string[],
-  item?: { i18n?: CmsI18n } | null,
+  /** Сама запись — по ней видно, какие поля заполнены по-русски; читаются только поля из fields. */
+  item?: object | null,
 ) {
   const pack = i18n?.[lang] ?? {};
   return fields.every((field) => {

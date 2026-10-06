@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAdminStore } from "@/lib/cms/client";
-import { incompleteTranslation, readLocaleField, writeLocaleField, type ContentLang } from "@/lib/cms/locale";
+import { useContentLang } from "@/lib/cms/use-content-lang";
+import { incompleteTranslation, readLocaleField, writeLocaleField } from "@/lib/cms/locale";
 import type { CmsHomeHub } from "@/lib/cms/types";
 import { LocaleDots, LocaleTabs } from "@/components/admin/LocaleTabs";
 import css from "@/app/admin/admin.module.css";
@@ -13,12 +14,8 @@ const hubFields = ["title", "text"];
 export function HubsManager() {
   const { store, error, busy, mutate, upload, setError } = useAdminStore();
   const [editing, setEditing] = useState<Partial<CmsHomeHub> | null>(null);
-  const [lang, setLang] = useState<ContentLang>("ru");
+  const [lang, setLang] = useContentLang(editing?.id);
   const hubs = [...(store?.hubs ?? [])].sort((a, b) => a.order - b.order);
-
-  useEffect(() => {
-    setLang("ru");
-  }, [editing?.id]);
 
   function setField(field: string, value: string) {
     if (!editing) return;

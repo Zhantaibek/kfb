@@ -1,21 +1,9 @@
-export const ISSUERS_PER_PAGE = 15;
+import type { CmsIssuer } from "./cms";
 
-export type Issuer = {
-  slug: string;
-  name: string;
-  activity: string;
-  director: string;
-  position: string;
-  address: string;
-  phone: string;
-  registrar: string;
-  security: string;
-  count: string;
-  price: string;
-  status: string;
-};
+/** Начальный список эмитентов Центра раскрытия информации (перенесён с kse.kg). Попадает в БД один раз, дальше — через админку. */
+export type IssuerSeed = Omit<CmsIssuer, "id" | "order" | "updatedAt">;
 
-export const issuers: Issuer[] = [
+export const issuerSeed: IssuerSeed[] = [
   {
     slug: "JSC_LEXJapan",
     name: "OAO Либерти Эксчейндж Жапан (Liberty Exchange Japan)",
@@ -2734,16 +2722,6 @@ export const issuers: Issuer[] = [
   },
 ];
 
-export function getIssuer(slug: string) {
-  return issuers.find((item) => item.slug.toLowerCase() === slug.toLowerCase());
-}
-
-export function issuerPageCount() {
-  return Math.ceil(issuers.length / ISSUERS_PER_PAGE);
-}
-
-export function issuersOnPage(page: number) {
-  const safe = Math.min(Math.max(1, page), issuerPageCount());
-  const start = (safe - 1) * ISSUERS_PER_PAGE;
-  return issuers.slice(start, start + ISSUERS_PER_PAGE);
+export function issuerSeedRows(updatedAt: string): CmsIssuer[] {
+  return issuerSeed.map((item, index) => ({ ...item, id: `issuer-${item.slug}`, order: index + 1, updatedAt }));
 }

@@ -1,11 +1,8 @@
-﻿import type { Metadata } from "next";
-import { SectionPageByPath } from "@/components/SectionPage";
-import { sectionPages } from "@/data/site-nav";
+import type { Metadata } from "next";
+import { ResourceDirectory } from "@/components/ResourcePages";
 
-const path = "/about/partners";
-
-export const metadata: Metadata = { title: sectionPages[path].title };
+export const metadata: Metadata = { title: "Наши партнеры" };
 
 export default function Page() {
-  return <SectionPageByPath path={path} />;
+  return <ResourceDirectory />;
 }

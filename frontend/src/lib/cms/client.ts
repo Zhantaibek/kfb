@@ -33,9 +33,20 @@ export function useAdminStore() {
     setStore(data);
   }, []);
 
+  // Первая загрузка: состояние меняем только в колбэках запроса, не в теле эффекта.
   useEffect(() => {
-    reload().catch((err: Error) => setError(err.message));
-  }, [reload]);
+    let cancelled = false;
+    adminJson<AdminStore>("/api/admin/data")
+      .then((data) => {
+        if (!cancelled) setStore(data);
+      })
+      .catch((err: Error) => {
+        if (!cancelled) setError(err.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function mutate(op: "create" | "update" | "delete", collection: string, item?: object, id?: string) {
     setBusy(true);

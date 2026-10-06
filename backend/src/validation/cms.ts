@@ -102,7 +102,7 @@ export const newsItemSchema = z
     issuerSlug: z.string().trim().max(160).default(""),
     i18n: i18nSchema,
   })
-  .superRefine(requireI18n(["title", "tag", "excerpt", "body"]))
+  .superRefine(requireI18n(["title", "body"]))
   .superRefine((data, ctx) => {
     if (data.kind === "company" && !data.issuerSlug) {
       ctx.addIssue({
@@ -211,6 +211,69 @@ export const managementItemSchema = z
   })
   .superRefine(requireI18n(["name", "role"], ["name"]));
 
+const plain = (max: number) => z.string().trim().max(max).default("");
+
+export const issuerItemSchema = z.object({
+  slug: z
+    .string({ error: "Укажите slug" })
+    .trim()
+    .min(1, "Укажите slug")
+    .max(160)
+    .regex(/^[A-Za-z0-9_-]+$/, "Slug: только латиница, цифры, «_» и «-»"),
+  name: z.string({ error: "Укажите наименование" }).trim().min(1, "Укажите наименование").max(300),
+  activity: plain(500),
+  director: plain(200),
+  position: plain(200),
+  address: plain(500),
+  phone: plain(200),
+  registrar: plain(300),
+  security: plain(500),
+  count: plain(100),
+  price: plain(100),
+  status: plain(80),
+  order: z.coerce.number().int().min(0).max(100_000).default(0),
+});
+
+const listingDocumentSchema = z.object({
+  name: plain(300),
+  url: plain(1000),
+});
+
+export const listingItemSchema = z.object({
+  code: z
+    .string({ error: "Укажите код бумаги" })
+    .trim()
+    .min(1, "Укажите код бумаги")
+    .max(40)
+    .regex(/^[A-Za-z0-9_-]+$/, "Код бумаги: только латиница, цифры, «_» и «-»"),
+  category: z.enum(["A", "B", "C", "delisted"], { message: "Выберите категорию листинга" }),
+  order: z.coerce.number().int().min(0).max(10_000).default(0),
+  name: z.string({ error: "Укажите эмитента" }).trim().min(1, "Укажите эмитента").max(300),
+  issuerSlug: plain(160),
+  security: plain(500),
+  price: plain(100),
+  cap: plain(100),
+  count: plain(100),
+  doc: plain(1000),
+  symbols: plain(300),
+  industry: plain(300),
+  activity: plain(500),
+  listedAt: z
+    .string()
+    .trim()
+    .max(10)
+    .regex(/^(\d{4}-\d{2}-\d{2})?$/, "Дата листинга в формате ГГГГ-ММ-ДД")
+    .default(""),
+  auditor: plain(300),
+  registrar: plain(300),
+  marketMaker: plain(300),
+  documents: z
+    .array(listingDocumentSchema)
+    .max(100)
+    .default([])
+    .transform((rows) => rows.filter((row) => row.name || row.url)),
+});
+
 export const settingsItemSchema = z
   .object({
     tagline: z.string().trim().max(500).default(""),
@@ -235,6 +298,8 @@ const mutableCollections = z.enum([
   "menu",
   "hubs",
   "management",
+  "issuers",
+  "listing",
   "settings",
   "requests",
   "users",
@@ -254,6 +319,8 @@ export const itemSchemas = {
   menu: menuItemSchema,
   hubs: hubItemSchema,
   management: managementItemSchema,
+  issuers: issuerItemSchema,
+  listing: listingItemSchema,
   settings: settingsItemSchema,
   requests: requestItemSchema,
   users: userItemSchema,

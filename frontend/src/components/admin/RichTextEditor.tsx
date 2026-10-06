@@ -354,8 +354,10 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
     selectedRef.current = figure;
     syncFigureWidth(figure);
 
-    const img = figure.querySelector("img");
-    if (!img) return;
+    const found = figure.querySelector("img");
+    if (!found) return;
+    // Отдельная константа — чтобы сужение типа сохранилось внутри вложенных функций.
+    const img = found;
 
     const box = document.createElement("div");
     box.className = `rte-ui rte-img-box ${css.imgBox}`;

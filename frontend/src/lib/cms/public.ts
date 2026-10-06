@@ -1,4 +1,12 @@
-import type { CmsNews, CmsPage, CmsSiteSettings, PublicContent } from "@/lib/cms/types";
+import type {
+  CmsIssuer,
+  CmsListingEntry,
+  CmsNews,
+  CmsPage,
+  CmsSiteSettings,
+  IssuerData,
+  PublicContent,
+} from "@/lib/cms/types";
 
 const apiUrl = process.env.API_URL ?? "http://localhost:4000";
 
@@ -34,6 +42,26 @@ export async function getPublicContent(): Promise<PublicContent> {
     throw new Error("CMS API недоступен");
   }
   return (await response.json()) as PublicContent;
+}
+
+export async function loadIssuerData(): Promise<IssuerData> {
+  try {
+    const response = await fetch(`${apiUrl}/api/public/issuers`, { cache: "no-store" });
+    if (!response.ok) throw new Error("CMS API недоступен");
+    return (await response.json()) as IssuerData;
+  } catch {
+    return { issuers: [], listing: [] };
+  }
+}
+
+export function findIssuer(data: IssuerData, slug: string): CmsIssuer | undefined {
+  const key = slug.toLowerCase();
+  return data.issuers.find((item) => item.slug.toLowerCase() === key);
+}
+
+export function findListingBySlug(data: IssuerData, slug: string): CmsListingEntry | undefined {
+  const key = slug.toLowerCase();
+  return data.listing.find((item) => item.issuerSlug.toLowerCase() === key);
 }
 
 export function findNews(content: PublicContent, slug: string): CmsNews | undefined {

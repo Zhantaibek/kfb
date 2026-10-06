@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { HeaderSearch } from "@/components/HeaderSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/Logo";
 import { useApp } from "@/components/AppProviders";
@@ -22,54 +23,47 @@ function AppLink({
   className,
   onClick,
   role,
+  active,
 }: {
   href: string;
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
   role?: string;
+  active?: boolean;
 }) {
+  const on = active ? "true" : undefined;
   if (isExternalHref(href)) {
     return (
-      <a href={href} className={className} onClick={onClick} role={role} target="_blank" rel="noopener noreferrer">
+      <a href={href} className={className} onClick={onClick} role={role} data-on={on} target="_blank" rel="noopener noreferrer">
         {children}
       </a>
     );
   }
   return (
-    <Link href={href} className={className} onClick={onClick} role={role}>
+    <Link href={href} className={className} onClick={onClick} role={role} data-on={on}>
       {children}
     </Link>
   );
 }
 
-function NavLinks({
-  items,
-  onNavigate,
-}: {
-  items: SiteLink[];
-  onNavigate?: () => void;
-}) {
-  return (
-    <>
-      {items.map((item) =>
-        item.children?.length ? (
-          <div className={ui.navGroup} key={item.href + item.label}>
-            <p>{item.label}</p>
-            {item.children.map((child) => (
-              <AppLink href={child.href} key={child.href} role="menuitem" onClick={onNavigate}>
-                <b>{child.label}</b>
-              </AppLink>
-            ))}
-          </div>
-        ) : (
-          <AppLink href={item.href} key={item.href + item.label} role="menuitem" onClick={onNavigate}>
-            <b>{item.label}</b>
-          </AppLink>
-        ),
-      )}
-    </>
-  );
+/**
+ * Выпадашки шапки (язык, кабинет) закрываются сами, когда курсор уходит с кнопки и списка.
+ * Небольшая задержка — чтобы меню не мигало, если курсор на миг вышел за край.
+ */
+function useHoverClose() {
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  return {
+    onMouseLeave(event: React.MouseEvent<HTMLDetailsElement>) {
+      const details = event.currentTarget;
+      window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => details.removeAttribute("open"), 200);
+    },
+    onMouseEnter() {
+      window.clearTimeout(timer.current);
+    },
+  };
 }
 
 function closeDetails(ref: React.RefObject<HTMLDetailsElement | null>) {
@@ -82,6 +76,11 @@ function blurFocus() {
   }
 }
 
+function navOn(pathname: string, href: string) {
+  if (!href || href === "/" || isExternalHref(href)) return pathname === href;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 function translateNav(items: SiteLink[], translate: (text: string) => string): SiteLink[] {
   return items.map((item) => ({
     ...item,
@@ -91,15 +90,17 @@ function translateNav(items: SiteLink[], translate: (text: string) => string): S
 }
 
 export function SiteHeader() {
-  const { label, lang, setLang, user, logout, tr } = useApp();
+  const { label, lang, setLang, user, adminUser, logout, tr } = useApp();
   const pathname = usePathname();
-  const { nav } = useSiteNav();
+  // primary — строка навигации шапки (как на kse.kg), nav — полное меню в бургере. Оба из БД.
+  const { nav, primary } = useSiteNav();
   const menus = nav.map((menu) => ({
     ...menu,
     label: tr(menu.label),
     items: translateNav(menu.items, tr),
   }));
   const menuRef = useRef<HTMLDetailsElement>(null);
+  const hoverClose = useHoverClose();
 
   function closeMenus() {
     blurFocus();
@@ -118,53 +119,23 @@ export function SiteHeader() {
       </Link>
 
       <nav className={ui.nav} aria-label={tr("Основная навигация")}>
-        {menus.map((menu) => (
-          <div className={ui.navItem} key={menu.key}>
-            <Link className={ui.navLink} href={menu.href}>
-              {menu.label}
-            </Link>
-            {menu.items.length ? (
-              <div className={ui.navPanel} role="menu">
-                <NavLinks items={menu.items} onNavigate={closeMenus} />
-              </div>
-            ) : null}
-          </div>
+        {primary.map((item) => (
+          <AppLink
+            key={item.href + item.label}
+            className={ui.navLink}
+            href={item.href}
+            active={navOn(pathname, item.href)}
+          >
+            {tr(item.label)}
+          </AppLink>
         ))}
       </nav>
 
       <div className={ui.headerActions}>
-        <details className={ui.drop} name="kse-header" key={pathname + "-cab"}>
-          <summary className={ui.cabinetBtn}>{label("cabinet")}</summary>
-          <div className={ui.dropPanel}>
-            {user ? (
-              <>
-                <Link href="/cabinet">{user.name}</Link>
-                <button type="button" onClick={() => void logout()}>
-                  {label("logout")}
-                </button>
-              </>
-            ) : (
-              <Link href="/login">{label("login")}</Link>
-            )}
-          </div>
-        </details>
-
-        <Link className="icon-ghost" href="/search" aria-label={label("search")}>
-          <svg viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="7" />
-            <path d="M20 20l-3-3" />
-          </svg>
-        </Link>
-
-        <ThemeToggle />
-
-        <details className={ui.drop} name="kse-header" key={pathname + "-lang"}>
+        {/* Язык */}
+        <details className={ui.drop} name="kse-header" key={pathname + "-lang"} {...hoverClose}>
           <summary className={ui.langBtn}>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" />
-            </svg>
-            {languages.find((item) => item.id === lang)?.label}
+            {lang === "ky" ? "KY" : lang === "en" ? "EN" : "RU"}
           </summary>
           <div className={ui.dropPanel}>
             {languages.map((item) => (
@@ -180,6 +151,29 @@ export function SiteHeader() {
           </div>
         </details>
 
+        <HeaderSearch />
+
+        <ThemeToggle />
+
+        {/* Войти / Кабинет */}
+        {user || adminUser ? (
+          <details className={ui.drop} name="kse-header" key={pathname + "-cab"} {...hoverClose}>
+            <summary className={ui.cabinetBtn}>{user ? label("cabinet") : tr("Админ-панель")}</summary>
+            <div className={ui.dropPanel}>
+              {user ? <Link href="/cabinet">{user.name}</Link> : null}
+              {adminUser ? <Link href="/admin">{tr("Админ-панель")}</Link> : null}
+              <button type="button" onClick={() => void logout()}>
+                {label("logout")}
+              </button>
+            </div>
+          </details>
+        ) : (
+          <Link className={ui.cabinetBtn} href="/login">
+            {label("login")}
+          </Link>
+        )}
+
+        {/* Бургер-меню */}
         <details className={`${ui.drop} ${ui.menu}`} name="kse-header" ref={menuRef} key={pathname + "-menu"}>
           <summary aria-label={label("menu")}>
             <i />
@@ -212,6 +206,35 @@ export function SiteHeader() {
               ),
             )}
           </nav>
+          {/* На компьютере — панель на всю ширину с колонками по группам, как на kse.kg. */}
+          <nav className={ui.megaPanel} aria-label={tr("Все разделы")}>
+            <div className={ui.megaGrid}>
+              {menus.map((group) => (
+                <section key={group.key} className={ui.megaCol}>
+                  <AppLink className={ui.megaHead} href={group.href} onClick={closeMenus}>
+                    {group.label}
+                  </AppLink>
+                  {group.items.map((item) =>
+                    item.children?.length ? (
+                      <details key={item.href + item.label} className={ui.megaSub}>
+                        <summary>{item.label}</summary>
+                        {item.children.map((child) => (
+                          <AppLink key={child.href + child.label} href={child.href} onClick={closeMenus}>
+                            {child.label}
+                          </AppLink>
+                        ))}
+                      </details>
+                    ) : (
+                      <AppLink key={item.href + item.label} href={item.href} onClick={closeMenus}>
+                        {item.label}
+                      </AppLink>
+                    ),
+                  )}
+                </section>
+              ))}
+            </div>
+          </nav>
+          <button className={ui.megaBackdrop} type="button" aria-label={label("menu")} tabIndex={-1} onClick={closeMenus} />
         </details>
       </div>
     </header>

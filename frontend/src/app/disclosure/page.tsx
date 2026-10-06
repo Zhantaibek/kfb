@@ -1,11 +1,8 @@
-"use client";
-
-import { Suspense, useMemo } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { PageIntro } from "@/components/Forms";
 import { PublicMain } from "@/components/PublicMain";
-import { issuerPageCount, issuersOnPage } from "@/data/issuers";
+import { loadIssuerData } from "@/lib/cms/public";
 import ui from "@/app/ui.module.css";
 import css from "./disclosure.module.css";
 
@@ -24,11 +21,18 @@ function Pager({ page, pages }: { page: number; pages: number }) {
   );
 }
 
-function DisclosureIndex() {
-  const search = useSearchParams();
-  const pages = issuerPageCount();
-  const page = Math.min(Math.max(1, Number(search.get("page") || "1") || 1), pages);
-  const rows = useMemo(() => issuersOnPage(page), [page]);
+const perPage = 15;
+
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Центр раскрытия информации" };
+
+type Props = { searchParams: Promise<{ page?: string }> };
+
+export default async function DisclosurePage({ searchParams }: Props) {
+  const { issuers } = await loadIssuerData();
+  const pages = Math.max(1, Math.ceil(issuers.length / perPage));
+  const page = Math.min(Math.max(1, Number((await searchParams).page || "1") || 1), pages);
+  const rows = issuers.slice((page - 1) * perPage, page * perPage);
 
   return (
     <PublicMain>
@@ -69,13 +73,5 @@ function DisclosureIndex() {
       </div>
       <Pager page={page} pages={pages} />
     </PublicMain>
-  );
-}
-
-export default function DisclosurePage() {
-  return (
-    <Suspense>
-      <DisclosureIndex />
-    </Suspense>
   );
 }

@@ -29,7 +29,7 @@ export const openApiSpec = {
         type: "apiKey",
         in: "cookie",
         name: "kse-user",
-        description: "HttpOnly-cookie после POST /api/auth/session или /api/auth/register",
+        description: "HttpOnly-cookie после POST /api/auth/session",
       },
     },
     schemas: {
@@ -182,6 +182,63 @@ export const openApiSpec = {
           at: { type: "string", format: "date-time" },
         },
       },
+      CmsIssuer: {
+        type: "object",
+        description: "Эмитент Центра раскрытия информации (/disclosure/<slug>)",
+        properties: {
+          id: { type: "string" },
+          slug: { type: "string" },
+          name: { type: "string" },
+          activity: { type: "string" },
+          director: { type: "string" },
+          position: { type: "string" },
+          address: { type: "string" },
+          phone: { type: "string" },
+          registrar: { type: "string" },
+          security: { type: "string" },
+          count: { type: "string" },
+          price: { type: "string" },
+          status: { type: "string", description: "Статус профиля, например «Активен»" },
+          order: { type: "integer" },
+          updatedAt: { type: "string", format: "date-time" },
+        },
+      },
+      CmsListingEntry: {
+        type: "object",
+        description: "Бумага официального списка КФБ (/listing) с карточкой листинга",
+        properties: {
+          id: { type: "string" },
+          code: { type: "string", example: "MAIR4" },
+          category: { type: "string", enum: ["A", "B", "C", "delisted"] },
+          order: { type: "integer" },
+          name: { type: "string" },
+          issuerSlug: { type: "string" },
+          security: { type: "string" },
+          price: { type: "string" },
+          cap: { type: "string" },
+          count: { type: "string" },
+          doc: { type: "string" },
+          symbols: { type: "string" },
+          industry: { type: "string" },
+          activity: { type: "string" },
+          listedAt: { type: "string", description: "ГГГГ-ММ-ДД" },
+          auditor: { type: "string" },
+          registrar: { type: "string" },
+          marketMaker: { type: "string" },
+          documents: {
+            type: "array",
+            items: { type: "object", properties: { name: { type: "string" }, url: { type: "string" } } },
+          },
+          updatedAt: { type: "string", format: "date-time" },
+        },
+      },
+      IssuerData: {
+        type: "object",
+        properties: {
+          issuers: { type: "array", items: { $ref: "#/components/schemas/CmsIssuer" } },
+          listing: { type: "array", items: { $ref: "#/components/schemas/CmsListingEntry" } },
+        },
+      },
       AdminStore: {
         type: "object",
         properties: {
@@ -191,6 +248,8 @@ export const openApiSpec = {
           pages: { type: "array", items: { $ref: "#/components/schemas/CmsPage" } },
           menu: { type: "array", items: { $ref: "#/components/schemas/CmsMenuItem" } },
           management: { type: "array", items: { $ref: "#/components/schemas/CmsManagementPerson" } },
+          issuers: { type: "array", items: { $ref: "#/components/schemas/CmsIssuer" } },
+          listing: { type: "array", items: { $ref: "#/components/schemas/CmsListingEntry" } },
           requests: { type: "array", items: { $ref: "#/components/schemas/CmsRequest" } },
           users: { type: "array", items: { $ref: "#/components/schemas/CmsUserPublic" } },
           visits: { type: "array", items: { $ref: "#/components/schemas/CmsVisit" } },
@@ -215,7 +274,7 @@ export const openApiSpec = {
           op: { type: "string", enum: ["create", "update", "delete"] },
           collection: {
             type: "string",
-            enum: ["news", "slides", "media", "pages", "menu", "management", "requests", "users", "visits"],
+            enum: ["news", "slides", "media", "pages", "menu", "management", "issuers", "listing", "requests", "users", "visits"],
           },
           id: { type: "string", description: "Нужен для update и delete" },
           item: { type: "object", additionalProperties: true, description: "Поля записи для create/update" },
@@ -276,6 +335,18 @@ export const openApiSpec = {
           "200": {
             description: "Новости, слайды, медиа, страницы, меню",
             content: { "application/json": { schema: { $ref: "#/components/schemas/PublicContent" } } },
+          },
+        },
+      },
+    },
+    "/api/public/issuers": {
+      get: {
+        tags: ["Public"],
+        summary: "Эмитенты и официальный список КФБ",
+        responses: {
+          "200": {
+            description: "Эмитенты Центра раскрытия информации и бумаги листинга",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/IssuerData" } } },
           },
         },
       },
@@ -391,43 +462,6 @@ export const openApiSpec = {
           "200": {
             description: "Cookie сброшена",
             content: { "application/json": { schema: { type: "object", properties: { ok: { type: "boolean" } } } } },
-          },
-        },
-      },
-    },
-    "/api/auth/register": {
-      post: {
-        tags: ["Auth"],
-        summary: "Регистрация инвестора или эмитента",
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                required: ["name", "email", "password", "role"],
-                properties: {
-                  name: { type: "string" },
-                  email: { type: "string" },
-                  password: { type: "string" },
-                  role: { type: "string", enum: ["investor", "issuer"] },
-                },
-              },
-            },
-          },
-        },
-        responses: {
-          "201": {
-            description: "Аккаунт создан, cookie установлена",
-            content: {
-              "application/json": {
-                schema: { type: "object", properties: { user: { $ref: "#/components/schemas/UserSession" } } },
-              },
-            },
-          },
-          "400": {
-            description: "Некорректные данные или e-mail занят",
-            content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
           },
         },
       },

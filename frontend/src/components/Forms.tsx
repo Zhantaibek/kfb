@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type ReactNode } from "react";
 import ui from "@/app/ui.module.css";
+import { AdminEditButton } from "@/components/AdminEditButton";
 import { localizeNode, useTr } from "@/lib/use-tr";
 
 export function FeedbackForm({
@@ -69,7 +70,10 @@ export function PageIntro({
   return (
     <header>
       <p className={ui.crumb}>{localizeNode(crumb, tr)}</p>
-      <h1 className={ui.title}>{tr(title)}</h1>
+      <div className={ui.titleRow}>
+        <h1 className={ui.title}>{tr(title)}</h1>
+        <AdminEditButton />
+      </div>
       {lead ? <p className={ui.lead}>{tr(lead)}</p> : null}
     </header>
   );

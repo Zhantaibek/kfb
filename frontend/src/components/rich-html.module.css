@@ -102,3 +102,60 @@
   display: table;
   clear: both;
 }
+
+/* Таблицы из разделов, перенесённых с kse.kg: тарифы, участники торгов, комитеты. */
+.prose :global(table) {
+  width: 100%;
+  margin: 16px 0;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.prose :global(th),
+.prose :global(td) {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose :global(th) {
+  background: var(--pill-track, rgba(87, 182, 192, 0.08));
+  font-weight: 700;
+}
+
+.prose :global(td p),
+.prose :global(th p) {
+  margin: 0;
+}
+
+.prose :global(.table-wrapper) {
+  overflow-x: auto;
+}
+
+.prose :global(ul.inner_menu) {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.prose :global(ul.inner_menu a) {
+  display: block;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.prose :global(ul.inner_menu a:hover) {
+  border-color: var(--brand);
+  color: var(--brand-strong);
+}
+
+.prose :global(a:not(ul.inner_menu a)) {
+  color: var(--brand-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

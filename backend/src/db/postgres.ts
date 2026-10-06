@@ -4,12 +4,16 @@ import { existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { config } from "../config";
 import { createSeedStore } from "../data/seed";
-import { flattenNavSeed } from "../../../shared/nav-seed";
+import { allNavSeed } from "../../../shared/nav-seed";
 import { defaultHomeHubs, defaultSiteSettings } from "../../../shared/site-defaults";
 import { managementSeed } from "../../../shared/management-seed";
+import { issuerSeedRows } from "../../../shared/issuers-seed";
+import { listingSeedRows } from "../../../shared/listing-seed";
+import { ksePageSeed } from "../../../shared/kse-pages-seed";
+import { sanitizeRichHtml } from "../utils/sanitize-html";
 import type { CmsStore } from "../../../shared/cms";
 import { prisma } from "./prisma";
-import { seedDatabase } from "./seed";
+import { issuerCreateData, listingCreateData, seedDatabase } from "./seed";
 
 function resolveBackendRoot() {
   const fromSource = path.resolve(__dirname, "../..");
@@ -71,6 +75,8 @@ async function maybeImportJson(): Promise<CmsStore | null> {
       menu: parsed.menu ?? seed.menu,
       hubs: parsed.hubs ?? seed.hubs,
       management: parsed.management ?? seed.management,
+      issuers: parsed.issuers ?? seed.issuers,
+      listing: parsed.listing ?? seed.listing,
       settings: parsed.settings ?? seed.settings,
       requests: parsed.requests ?? seed.requests,
       users: parsed.users ?? seed.users,
@@ -97,6 +103,8 @@ export async function initDb() {
   await ensureDefaultSettings();
   await ensureDefaultHubs();
   await ensureDefaultManagement();
+  await ensureDefaultIssuers();
+  await ensureKsePages();
 }
 
 const legacyHeaderLabels = new Set(["Частным лицам", "Бизнесу", "Исламские финансы", "О бирже"]);
@@ -104,10 +112,13 @@ const legacyHeaderLabels = new Set(["Частным лицам", "Бизнесу
 async function ensureDefaultMenu() {
   const existing = await prisma.menuItem.findMany({ select: { id: true, label: true } });
   const ids = new Set(existing.map((item) => item.id));
-  const seed = flattenNavSeed();
+  const seed = allNavSeed();
 
   for (const item of seed) {
     if (ids.has(item.id)) continue;
+    // Родителя удалили в админке — подпункт без него не создаём (parent_id — внешний ключ).
+    if (item.parentId && !ids.has(item.parentId)) continue;
+    ids.add(item.id);
     await prisma.menuItem.create({
       data: {
         id: item.id,
@@ -116,9 +127,18 @@ async function ensureDefaultMenu() {
         menuGroup: item.group,
         sortOrder: item.order,
         parentId: item.parentId,
+        i18n: item.i18n ?? {},
       },
     });
   }
+
+  // Пункт «Нормативная база → Центр раскрытия информации» вёл на /disclosure, а на kse.kg это отдельная страница.
+  await prisma.menuItem.updateMany({
+    where: { id: "menu-reg-disclosure", href: "/disclosure" },
+    data: { href: "/regulations/disclosure" },
+  });
+
+  await fixMenuOrderCollisions(seed);
 
   for (const item of seed.filter((node) => !node.parentId)) {
     const row = existing.find((node) => node.id === item.id);
@@ -132,6 +152,33 @@ async function ensureDefaultMenu() {
         sortOrder: item.order,
       },
     });
+  }
+}
+
+/**
+ * Новые пункты из seed встают на свой номер и могут совпасть с уже существующими.
+ * Если в группе есть одинаковые номера — раскладываем её по порядку seed, ручные пункты ставим в конец.
+ * Группы без совпадений не трогаем, чтобы не сбить сортировку из админки.
+ */
+async function fixMenuOrderCollisions(seed: ReturnType<typeof allNavSeed>) {
+  const rows = await prisma.menuItem.findMany({ select: { id: true, parentId: true, menuGroup: true, sortOrder: true } });
+  const seedOrder = new Map(seed.map((item) => [item.id, item.order]));
+  const groups = new Map<string, typeof rows>();
+  for (const row of rows) {
+    const key = `${row.menuGroup}:${row.parentId ?? ""}`;
+    groups.set(key, [...(groups.get(key) ?? []), row]);
+  }
+  for (const siblings of groups.values()) {
+    if (new Set(siblings.map((row) => row.sortOrder)).size === siblings.length) continue;
+    const ordered = [...siblings].sort(
+      (a, b) =>
+        (seedOrder.get(a.id) ?? 10_000 + a.sortOrder) - (seedOrder.get(b.id) ?? 10_000 + b.sortOrder),
+    );
+    for (const [index, row] of ordered.entries()) {
+      if (row.sortOrder !== index + 1) {
+        await prisma.menuItem.update({ where: { id: row.id }, data: { sortOrder: index + 1 } });
+      }
+    }
   }
 }
 
@@ -202,6 +249,42 @@ async function ensureDefaultManagement() {
         status: item.status,
         i18n: item.i18n ?? {},
         updatedAt: new Date(item.updatedAt),
+      },
+    });
+  }
+}
+
+// Эмитенты и листинг раньше жили в коде фронтенда — при первом запуске переносим их в БД.
+async function ensureDefaultIssuers() {
+  const now = new Date().toISOString();
+  if ((await prisma.issuer.count()) === 0) {
+    await prisma.issuer.createMany({ data: issuerSeedRows(now).map(issuerCreateData), skipDuplicates: true });
+  }
+  if ((await prisma.listingEntry.count()) === 0) {
+    await prisma.listingEntry.createMany({ data: listingSeedRows(now).map(listingCreateData), skipDuplicates: true });
+  }
+}
+
+// Тексты разделов, перенесённые с kse.kg (backend/scripts/import-kse-pages.mjs).
+// Создаём страницу, только если по адресу ещё ничего нет, — правки из админки не трогаем.
+async function ensureKsePages() {
+  const existing = new Set((await prisma.page.findMany({ select: { path: true } })).map((row) => row.path));
+  const now = new Date();
+  for (const item of ksePageSeed) {
+    if (existing.has(item.path)) continue;
+    const i18n = Object.fromEntries(
+      Object.entries(item.i18n).map(([lang, pack]) => [lang, { ...pack, body: sanitizeRichHtml(pack?.body ?? "") }]),
+    );
+    await prisma.page.create({
+      data: {
+        id: `page-kse${item.path.replace(/[^a-z0-9]+/gi, "-")}`,
+        path: item.path,
+        title: item.title,
+        lead: item.lead,
+        body: sanitizeRichHtml(item.body),
+        status: "published",
+        i18n,
+        updatedAt: now,
       },
     });
   }

@@ -1,6 +1,8 @@
 import type {
   Audit,
   HomeHub,
+  Issuer,
+  ListingEntry,
   ManagementPerson,
   Media,
   MenuItem,
@@ -15,6 +17,8 @@ import type {
 import type {
   CmsAudit,
   CmsHomeHub,
+  CmsIssuer,
+  CmsListingEntry,
   CmsManagementPerson,
   CmsMedia,
   CmsMenuItem,
@@ -26,7 +30,7 @@ import type {
   CmsUser,
   CmsVisit,
 } from "../../../shared/cms";
-import { parseCareer, parseI18n } from "../../../shared/cms";
+import { listingCategoryIds, parseCareer, parseI18n, parseListingDocuments } from "../../../shared/cms";
 import { decodeUploadName } from "../utils/upload-name";
 
 function iso(value: Date | string) {
@@ -66,6 +70,52 @@ export function toCmsManagementPerson(row: ManagementPerson): CmsManagementPerso
     order: row.sortOrder,
     status: row.status as CmsManagementPerson["status"],
     i18n: parseI18n(row.i18n),
+    updatedAt: iso(row.updatedAt),
+  };
+}
+
+export function toCmsIssuer(row: Issuer): CmsIssuer {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    activity: row.activity,
+    director: row.director,
+    position: row.position,
+    address: row.address,
+    phone: row.phone,
+    registrar: row.registrar,
+    security: row.security,
+    count: row.count,
+    price: row.price,
+    status: row.status,
+    order: row.sortOrder,
+    updatedAt: iso(row.updatedAt),
+  };
+}
+
+export function toCmsListingEntry(row: ListingEntry): CmsListingEntry {
+  const category = (listingCategoryIds as readonly string[]).includes(row.category) ? row.category : "C";
+  return {
+    id: row.id,
+    code: row.code,
+    category: category as CmsListingEntry["category"],
+    order: row.sortOrder,
+    name: row.name,
+    issuerSlug: row.issuerSlug ?? "",
+    security: row.security,
+    price: row.price,
+    cap: row.cap,
+    count: row.count,
+    doc: row.doc,
+    symbols: row.symbols,
+    industry: row.industry,
+    activity: row.activity,
+    listedAt: row.listedAt,
+    auditor: row.auditor,
+    registrar: row.registrar,
+    marketMaker: row.marketMaker,
+    documents: parseListingDocuments(row.documents),
     updatedAt: iso(row.updatedAt),
   };
 }

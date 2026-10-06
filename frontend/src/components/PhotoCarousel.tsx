@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { mediaSrc } from "@/lib/cms/media-src";
 import styles from "./PhotoCarousel.module.css";
 
 const slides = [
@@ -11,7 +12,7 @@ const slides = [
     title: "Торги КФБ",
     text: "Котировки и индекс KSE — в ходе сессии.",
     href: "/market",
-    alt: "Графики торгов на мониторах",
+    alt: "Торговый зал биржи",
   },
   {
     src: "/carousel/city.jpg",
@@ -54,7 +55,7 @@ export function PhotoCarousel() {
       <div className={styles.stage}>
         {slides.map((item, i) => (
           <div key={item.src} className={styles.slide} data-active={i === index}>
-            <Image src={item.src} alt={item.alt} fill sizes="(max-width: 1200px) 100vw, 1200px" priority={i === 0} />
+            <Image src={mediaSrc(item.src)} alt={item.alt} fill sizes="(max-width: 1200px) 100vw, 1200px" priority={i === 0} unoptimized />
           </div>
         ))}
         <div className={styles.copy}>

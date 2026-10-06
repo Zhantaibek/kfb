@@ -1,0 +1,233 @@
+.wrap {
+  width: min(1480px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.head h2 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(24px, 2.6vw, 34px);
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  font-weight: 600;
+}
+
+.head p {
+  max-width: 52ch;
+  margin-top: 10px;
+  color: var(--ink-muted);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 11px 18px;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  transition: border-color 0.22s ease, color 0.22s ease;
+}
+
+.all:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+}
+
+.grid li {
+  display: flex;
+  min-width: 0;
+}
+
+.card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 8px;
+  width: 100%;
+  padding: 20px 20px 18px;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: inherit;
+  transition: border-color 0.22s ease, transform 0.22s ease;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.logo {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  background: #fff;
+  background-clip: padding-box;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.logo[data-wide="true"] {
+  width: 128px;
+}
+
+.logo img {
+  padding: 9px;
+  object-fit: contain;
+}
+
+.logo[data-wide="true"] img {
+  padding: 14px 12px;
+}
+
+.logo b {
+  color: var(--brand-strong);
+  font-size: 15px;
+}
+
+.meta {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  min-width: 0;
+  text-align: right;
+}
+
+.meta em {
+  color: var(--brand-strong);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.meta span {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card b {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.card small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: var(--brand);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.more svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.22s ease;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--brand) 45%, transparent);
+  transform: translateY(-2px);
+}
+
+.card:hover .logo {
+  border-color: color-mix(in srgb, var(--brand) 45%, transparent);
+  box-shadow: 0 8px 20px rgba(19, 33, 30, 0.08);
+}
+
+.card:hover .more svg {
+  transform: translateX(3px);
+}
+
+.card:focus-visible,
+.all:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    width: min(1200px, calc(100% - 20px));
+  }
+
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .logo,
+  .more svg,
+  .all {
+    transition: none;
+  }
+
+  .card:hover,
+  .card:hover .more svg {
+    transform: none;
+  }
+}

@@ -1,0 +1,441 @@
+.hero {
+  --edge: max(24px, calc((100% - 1480px) / 2));
+  --hero-ink: #0d2a2e;
+  --hero-muted: #4a6468;
+  --hero-line: rgba(13, 42, 46, 0.1);
+  --hero-bg-a: #f5fbfb;
+  --hero-bg-b: #e4f3f5;
+  --hero-bg-c: #d6ecef;
+  --blob-a: rgba(87, 182, 192, 0.5);
+  --blob-b: rgba(126, 196, 232, 0.5);
+  --blob-c: rgba(178, 232, 214, 0.65);
+  --ring: rgba(63, 154, 164, 0.22);
+  --orb-hi: rgba(255, 255, 255, 0.95);
+  --orb-lo: rgba(143, 211, 218, 0.55);
+  --stats-bg: rgba(255, 255, 255, 0.55);
+  --stat-hover: rgba(255, 255, 255, 0.6);
+  --up: #0f8f62;
+  --down: #c93a50;
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: var(--hero-ink);
+  background: var(--hero-bg-a);
+}
+
+:global([data-theme="dark"]) .hero {
+  --hero-ink: #fff;
+  --hero-muted: rgba(255, 255, 255, 0.68);
+  --hero-line: rgba(255, 255, 255, 0.12);
+  --hero-bg-a: #0b2125;
+  --hero-bg-b: #0a1c20;
+  --hero-bg-c: #071518;
+  --blob-a: rgba(87, 182, 192, 0.32);
+  --blob-b: rgba(46, 120, 170, 0.3);
+  --blob-c: rgba(60, 160, 130, 0.2);
+  --ring: rgba(127, 208, 216, 0.14);
+  --orb-hi: rgba(200, 245, 248, 0.5);
+  --orb-lo: rgba(87, 182, 192, 0.08);
+  --stats-bg: rgba(7, 22, 26, 0.5);
+  --stat-hover: rgba(255, 255, 255, 0.04);
+  --up: #5fe0a8;
+  --down: #ff8a93;
+}
+
+.main {
+  min-height: clamp(480px, 66vh, 660px);
+  display: flex;
+  align-items: center;
+}
+
+.copy {
+  max-width: calc(620px + var(--edge));
+  padding: 64px 32px 64px var(--edge);
+}
+
+.copy h1 {
+  max-width: 10em;
+  margin: 0 0 20px;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--hero-ink);
+}
+
+@media (min-width: 640px) {
+  .copy h1 {
+    font-size: 48px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .copy h1 {
+    font-size: 3.25rem;
+  }
+}
+
+.copy p {
+  max-width: 44ch;
+  margin: 24px 0 0;
+  color: var(--hero-muted);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 28px;
+  margin-top: 36px;
+}
+
+.primary,
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.primary {
+  height: 52px;
+  padding: 0 26px;
+  border-radius: 999px;
+  background: #57b6c0;
+  color: #0b2a2e;
+  box-shadow: 0 10px 30px -12px rgba(63, 154, 164, 0.7);
+  transition: background-color 0.18s ease;
+}
+
+.primary:hover {
+  background: #7fd0d8;
+}
+
+.link {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--hero-line);
+  color: var(--hero-ink);
+  transition: border-color 0.18s ease;
+}
+
+.link:hover {
+  border-color: var(--hero-ink);
+}
+
+.primary svg,
+.link svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: translate 0.18s ease;
+}
+
+.primary:hover svg,
+.link:hover svg {
+  translate: 3px 0;
+}
+
+.primary:focus-visible,
+.link:focus-visible,
+.stat:focus-visible {
+  outline: 2px solid #3f9aa4;
+  outline-offset: 3px;
+}
+
+/* Фон: градиент, размытые цветовые пятна и SVG-сцена поверх них. */
+.photo {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--hero-bg-a) 0%, var(--hero-bg-b) 55%, var(--hero-bg-c) 100%);
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+.blobA {
+  top: -18%;
+  right: 8%;
+  width: 40vw;
+  height: 40vw;
+  background: var(--blob-a);
+  animation: heroDrift 20s ease-in-out infinite alternate;
+}
+
+.blobB {
+  bottom: -30%;
+  right: 34%;
+  width: 34vw;
+  height: 34vw;
+  background: var(--blob-b);
+  animation: heroDrift 24s ease-in-out -8s infinite alternate-reverse;
+}
+
+.blobC {
+  top: 30%;
+  right: -8%;
+  width: 28vw;
+  height: 28vw;
+  background: var(--blob-c);
+  animation: heroDrift 18s ease-in-out -4s infinite alternate;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  translate: 0 var(--hero-shift, 0px);
+}
+
+.rings {
+  fill: none;
+  stroke: var(--ring);
+  stroke-width: 1;
+  transform-box: view-box;
+  transform-origin: 1220px 380px;
+  animation: heroSpin 120s linear infinite;
+}
+
+/* Шарики вращаются по кольцам; сам шарик крутится в обратную сторону, чтобы блик не «уезжал». */
+.orbit {
+  transform-box: view-box;
+  transform-origin: 1220px 380px;
+  animation: heroSpin 36s linear infinite;
+}
+
+.orb {
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heroSpin 36s linear infinite reverse;
+}
+
+/* Кольца расходятся из центра при загрузке. */
+.rings circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: heroRingIn 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Появление текста и показателей. */
+.copy > * {
+  opacity: 0;
+  animation: heroUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.copy > :nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.copy > :nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+.copy > :nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.stat {
+  opacity: 0;
+  animation: heroUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.stat:nth-child(1) {
+  animation-delay: 0.5s;
+}
+
+.stat:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.stat:nth-child(3) {
+  animation-delay: 0.7s;
+}
+
+.stat:nth-child(4) {
+  animation-delay: 0.8s;
+}
+
+/* Пока на экране заставка, появление баннера ждёт и стартует, когда она начинает исчезать. */
+:global(body:has([data-site-splash="show"])) .copy > *,
+:global(body:has([data-site-splash="show"])) .stat,
+:global(body:has([data-site-splash="show"])) .rings circle {
+  animation-play-state: paused;
+}
+
+@keyframes heroUp {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes heroRingIn {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes heroDrift {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    transform: translate(-5vw, 3vw) scale(1.12);
+  }
+}
+
+@keyframes heroSpin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob,
+  .rings,
+  .rings circle,
+  .orbit,
+  .orb,
+  .copy > *,
+  .stat {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 0 var(--edge);
+  border-top: 1px solid var(--hero-line);
+  background: var(--stats-bg);
+  backdrop-filter: blur(14px);
+}
+
+.stat {
+  display: grid;
+  gap: 8px;
+  padding: 22px 24px 24px;
+  border-left: 1px solid var(--hero-line);
+  color: var(--hero-ink);
+  transition: background-color 0.18s ease;
+}
+
+.stat:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.stat:hover {
+  background: var(--stat-hover);
+}
+
+.label {
+  color: var(--hero-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.value b {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(22px, 1.9vw, 30px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.value small {
+  color: var(--hero-muted);
+  font-size: 13px;
+}
+
+.value em {
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+@media (max-width: 980px) {
+  .main {
+    min-height: 0;
+  }
+
+  .copy {
+    padding: 72px var(--edge) 48px;
+  }
+
+  .scene {
+    opacity: 0.6;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .stat:nth-child(n + 3) {
+    border-top: 1px solid var(--hero-line);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    --edge: 16px;
+  }
+
+  .stat {
+    padding: 16px 14px 18px;
+  }
+}

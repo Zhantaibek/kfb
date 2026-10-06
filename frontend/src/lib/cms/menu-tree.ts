@@ -74,3 +74,35 @@ export function menuTreeRows(items: CmsMenuItem[]) {
   walk("", 0);
   return rows;
 }
+
+/** Строка навигации шапки — пункты группы «primary» по порядку. */
+export function menuToPrimaryNav(items: CmsMenuItem[]): SiteLink[] {
+  return items
+    .filter((item) => item.group === "primary" && !item.parentId)
+    .sort((a, b) => a.order - b.order)
+    .map((item) => ({ href: item.href, label: item.label }));
+}
+
+/** Колонки футера из группы «footer»: верхний уровень — заголовок, дети — ссылки. */
+export function menuToFooterNav(items: CmsMenuItem[]) {
+  const footer = items.filter((item) => item.group === "footer");
+  const byOrder = (a: CmsMenuItem, b: CmsMenuItem) => a.order - b.order;
+  return footer
+    .filter((item) => !item.parentId)
+    .sort(byOrder)
+    .map((column) => ({
+      title: column.label,
+      links: footer
+        .filter((item) => item.parentId === column.id)
+        .sort(byOrder)
+        .map((item): [string, string] => [item.href, item.label]),
+    }));
+}
+
+/** Плоский список ссылок одной группы меню (кнопки и ссылки футера). */
+export function menuGroupLinks(items: CmsMenuItem[], group: string): SiteLink[] {
+  return items
+    .filter((item) => item.group === group && !item.parentId)
+    .sort((a, b) => a.order - b.order)
+    .map((item) => ({ href: item.href, label: item.label }));
+}

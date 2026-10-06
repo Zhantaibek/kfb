@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { NewsArticle } from "@/components/NewsArticle";
-import { findNews, loadPublicContent } from "@/lib/cms/public";
+import { findIssuer, findNews, loadIssuerData, loadPublicContent } from "@/lib/cms/public";
 
 export const dynamic = "force-dynamic";
 
@@ -19,5 +19,7 @@ export default async function NewsItemPage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const item = await loadItem(slug);
   if (!item) notFound();
-  return <NewsArticle item={item} />;
+  const issuer =
+    item.kind === "company" && item.issuerSlug ? findIssuer(await loadIssuerData(), item.issuerSlug) : undefined;
+  return <NewsArticle item={item} issuer={issuer ? { slug: issuer.slug, name: issuer.name } : undefined} />;
 }

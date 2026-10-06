@@ -1,88 +1,166 @@
-.pulse {
+.board {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.55fr);
+  grid-template-columns: 210px minmax(0, 1fr) 270px;
   gap: 14px;
-  width: min(1480px, calc(100% - 20px));
+  align-items: start;
+  width: min(1480px, calc(100% - 48px));
   margin: 22px auto 0;
 }
 
-.chartCard,
-.barsCard {
+.side,
+.main {
+  display: grid;
+  gap: 14px;
   min-width: 0;
-  padding: 20px 22px 12px;
-  border-radius: 24px;
-  background: var(--surface);
+}
+
+.card {
+  position: relative;
+  min-width: 0;
   border: 1px solid var(--card-border);
-  box-shadow: var(--shadow);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.nav {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+}
+
+.nav button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav button:hover {
+  color: var(--ink);
+  background: var(--pill-track);
+}
+
+.nav button[data-active] {
+  color: var(--ink);
+  background: var(--pill-track);
+}
+
+.nav button[data-active]::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--up);
+}
+
+.nav svg,
+.cardHead svg,
+.marketsTools svg,
+.chartHead em svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chartCard {
+  padding: 18px 18px 10px;
 }
 
 .chartHead {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 8px;
 }
 
-.chartHead small,
-.barsCard > small {
-  display: block;
+.chartHead small {
   color: var(--ink-muted);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .chartHead p {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin-top: 4px;
+  gap: 12px;
+  margin: 6px 0 0;
 }
 
 .chartHead b {
-  font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: clamp(28px, 3vw, 40px);
-  letter-spacing: -0.05em;
+  font-size: clamp(26px, 2.4vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .chartHead em {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-style: normal;
+  font-size: 15px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
-.chartHead a {
-  flex: none;
+.periods {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--pill-track);
+}
+
+.periods button {
+  min-width: 36px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
   color: var(--ink-muted);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-.chartHead a:hover {
-  color: var(--brand-strong);
-}
-
-.up {
-  color: var(--up);
-}
-
-.down {
-  color: var(--down);
+.periods button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
 .chart {
   display: block;
   width: 100%;
   height: auto;
+  margin-top: 10px;
 }
 
 .fillTop {
   stop-color: var(--brand);
-  stop-opacity: 0.38;
+  stop-opacity: 0.42;
 }
 
 .fillBottom {
@@ -93,15 +171,346 @@
 .line {
   fill: none;
   stroke: var(--brand);
-  stroke-width: 2.8;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
+.grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.axis {
+  fill: var(--ink-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
 .dot {
-  fill: var(--surface);
-  stroke: var(--brand);
-  stroke-width: 2.4;
+  fill: var(--brand);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.markets {
+  padding: 16px 18px 8px;
+}
+
+.marketsHead,
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.marketsHead h3,
+.cardHead h3 {
+  margin: 0;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.marketsTools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.marketsTools input {
+  width: 180px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.marketsTools button,
+.marketsTools a,
+.cardHead a {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.marketsTools button:hover,
+.marketsTools a:hover,
+.cardHead a:hover {
+  background: var(--pill-track);
+  color: var(--ink);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs button {
+  position: relative;
+  height: 34px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs button[aria-selected="true"] {
+  color: var(--ink);
+}
+
+.tabs button[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--up);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) 0.8fr 0.7fr 0.8fr;
+  gap: 10px;
+  align-items: center;
+  min-height: 46px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row3 {
+  grid-template-columns: minmax(0, 1.4fr) 1fr 1fr;
+}
+
+.note {
+  margin: 4px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0 10px;
+}
+
+.stats div {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--pill-track);
+}
+
+.stats dt {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.stats dd {
+  margin: 6px 0 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.row > :not(:first-child) {
+  text-align: right;
+}
+
+.row[data-head] {
+  min-height: 36px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+a.row:hover {
+  background: color-mix(in srgb, var(--up) 6%, transparent);
+}
+
+.row em {
+  font-style: normal;
+  font-weight: 700;
+}
+
+.instrument {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.instrument b {
+  font-weight: 700;
+}
+
+.instrument small {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--brand) 18%, var(--surface));
+  color: var(--brand-strong);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.badge[data-type="bond"],
+.badge[data-type="gcb"] {
+  background: color-mix(in srgb, #3b82f6 18%, var(--surface));
+  color: #3b82f6;
+}
+
+.badge[data-type="metal"] {
+  background: color-mix(in srgb, #d4a017 22%, var(--surface));
+  color: #b8860b;
+}
+
+.badge[data-type="index"] {
+  background: color-mix(in srgb, var(--up) 16%, var(--surface));
+  color: var(--up);
+}
+
+.badge svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.side > .card:not(.nav) {
+  padding: 14px 16px 8px;
+}
+
+/* Итоги сессии */
+.sessionMeta {
+  margin: 4px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.session {
+  display: grid;
+  margin: 10px 0 6px;
+}
+
+.session div {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+
+.session dt {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.session dd {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+}
+
+.session b {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.session em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.movers {
+  display: grid;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.movers a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 38px;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.movers a:hover span {
+  color: var(--brand-strong);
+}
+
+.movers em {
+  font-style: normal;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  margin: 0;
+  padding: 16px 4px;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
 }
 
 .sparkFill {
@@ -116,44 +525,106 @@
   stroke-linejoin: round;
 }
 
-.barsCard ul {
-  display: grid;
-  gap: 12px;
-  margin-top: 16px;
-  list-style: none;
+.nav button:focus-visible,
+.periods button:focus-visible,
+.tabs button:focus-visible,
+.marketsTools button:focus-visible,
+.marketsTools a:focus-visible,
+.cardHead a:focus-visible,
+a.row:focus-visible,
+.movers a:focus-visible {
+  outline: 2px solid var(--up);
+  outline-offset: 2px;
 }
 
-.barsCard li {
-  display: grid;
-  gap: 6px;
+@media (min-width: 1181px) {
+  .board {
+    align-items: stretch;
+  }
+
+  .main {
+    align-content: start;
+  }
+
+  .side {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Последняя карточка колонки растягивается до высоты центральной части. */
+  .side > .fill {
+    flex: 1 1 auto;
+  }
 }
 
-.barsCard div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 13px;
+@media (max-width: 1180px) {
+  .board {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+
+  .board > .side:first-child {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+  }
+
+  .nav button[data-active]::before {
+    display: none;
+  }
+
+  /* Карточка итогов во всю ширину — показатели в ряд, а не столбиком. */
+  .session {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    column-gap: 20px;
+  }
 }
 
-.barsCard b {
-  letter-spacing: -0.02em;
-}
-
-.barsCard span {
-  color: var(--ink-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.barsCard i {
-  display: block;
-  height: 8px;
-  border-radius: 99px;
-  background: linear-gradient(90deg, var(--brand), color-mix(in srgb, var(--brand) 40%, var(--surface)));
-}
-
-@media (max-width: 900px) {
-  .pulse {
+@media (max-width: 820px) {
+  .board,
+  .board > .side:first-child {
     grid-template-columns: 1fr;
-    width: min(1480px, calc(100% - 20px));
+  }
+}
+
+@media (max-width: 640px) {
+  .board {
+    width: min(1200px, calc(100% - 20px));
+  }
+
+  .chartHead {
+    flex-direction: column;
+  }
+
+  .row {
+    grid-template-columns: minmax(0, 1.4fr) 0.7fr 0.8fr;
+  }
+
+  .row > :nth-child(4) {
+    display: none;
+  }
+
+  .instrument small {
+    display: none;
+  }
+
+  .row3 > :nth-child(3) {
+    display: block;
+  }
+
+  .row3 {
+    grid-template-columns: minmax(0, 1fr) 1fr 1fr;
+  }
+
+  .stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .marketsTools input {
+    width: 130px;
   }
 }

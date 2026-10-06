@@ -5,14 +5,14 @@ import Link from "next/link";
 import { PageIntro } from "@/components/Forms";
 import { RichHtml } from "@/components/RichHtml";
 import { PublicMain } from "@/components/PublicMain";
-import { getIssuer } from "@/data/issuers";
+import { mediaSrc } from "@/lib/cms/media-src";
 import { useLocalized } from "@/lib/cms/use-localized";
 import type { CmsNews } from "@/lib/cms/types";
 import ui from "@/app/ui.module.css";
 
-export function NewsArticle({ item }: { item: CmsNews }) {
+/** issuer — эмитент новости компании (для хлебных крошек), страница находит его на сервере. */
+export function NewsArticle({ item, issuer }: { item: CmsNews; issuer?: { slug: string; name: string } }) {
   const loc = useLocalized(item, ["title", "excerpt", "body", "tag"]);
-  const issuer = item.kind === "company" && item.issuerSlug ? getIssuer(item.issuerSlug) : undefined;
   return (
     <PublicMain>
       <PageIntro
@@ -34,7 +34,7 @@ export function NewsArticle({ item }: { item: CmsNews }) {
       {loc.photo ? (
         <div className={ui.card} style={{ overflow: "hidden", padding: 0, marginBottom: 16 }}>
           <div style={{ position: "relative", height: 320 }}>
-            <Image src={loc.photo} alt="" fill sizes="1200px" style={{ objectFit: "cover" }} />
+            <Image src={mediaSrc(loc.photo)} alt="" fill sizes="1200px" style={{ objectFit: "cover" }} unoptimized />
           </div>
         </div>
       ) : null}

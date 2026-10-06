@@ -5,10 +5,8 @@ import Link from "next/link";
 import { PageIntro } from "@/components/Forms";
 import { NewsList } from "@/components/NewsList";
 import { PublicMain } from "@/components/PublicMain";
-import { getIssuer } from "@/data/issuers";
 import type { DisclosureEvent } from "@/data/disclosure-news";
-import type { ListingDetail } from "@/data/listing-details";
-import type { CmsNews } from "@/lib/cms/types";
+import type { CmsIssuer, CmsListingEntry, CmsNews } from "@/lib/cms/types";
 import ui from "@/app/ui.module.css";
 import css from "./disclosure.module.css";
 
@@ -16,17 +14,15 @@ const tabs = ["Дополнительная информация", "Отчетн
 const eventsStep = 25;
 
 type Props = {
-  slug: string;
+  issuer: CmsIssuer;
   news: CmsNews[];
-  listing?: ListingDetail;
+  listing?: CmsListingEntry;
   disclosures: DisclosureEvent[];
 };
 
-export function IssuerView({ slug, news, listing, disclosures }: Props) {
-  const issuer = getIssuer(slug);
+export function IssuerView({ issuer, news, listing, disclosures }: Props) {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Дополнительная информация");
   const [shown, setShown] = useState(eventsStep);
-  if (!issuer) return null;
 
   const info = [
     ["Наименование компании", issuer.name],

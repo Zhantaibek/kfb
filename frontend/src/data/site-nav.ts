@@ -13,6 +13,16 @@ export type SiteNavGroup = {
   items: SiteLink[];
 };
 
+/** Запасная строка навигации шапки (если API недоступен) — как в шапке kse.kg. */
+export const sitePrimaryNav: SiteLink[] = [
+  { href: "/about", label: "О Бирже" },
+  { href: "/listing", label: "Листинг" },
+  { href: "/market", label: "Статистика торгов" },
+  { href: "/disclosure", label: "Центр раскрытия информации" },
+  { href: "/sustainable", label: "Сектор устойчивого развития" },
+  { href: "/gcb/invest", label: "Инвестиции в ГЦБ" },
+];
+
 /** Полная структура меню как на https://www.kse.kg/ru */
 export const siteNav: SiteNavGroup[] = [
   {
@@ -21,6 +31,8 @@ export const siteNav: SiteNavGroup[] = [
     href: "/about",
     items: [
       { href: "/about", label: "Общая информация" },
+      { href: "/about/governance", label: "Органы управления" },
+      { href: "/about/history", label: "Историческая справка" },
       { href: "/about/shareholders", label: "Акционеры" },
       { href: "/about/management", label: "Руководство" },
       { href: "/about/auditor", label: "Внутренний аудитор" },
@@ -40,6 +52,7 @@ export const siteNav: SiteNavGroup[] = [
           { href: "/members", label: "Участники торгов" },
           { href: "/members/stdm", label: "Участники торгов СТДМ" },
           { href: "/members/commodity", label: "Участники товарно-сырьевого сектора" },
+          { href: "/members/rating", label: "Рейтинг участников" },
           { href: "/members/gcb", label: "Участники торгов ГЦБ" },
         ],
       },
@@ -62,6 +75,8 @@ export const siteNav: SiteNavGroup[] = [
       { href: "/finmarket", label: "Финансовый рынок KG" },
       { href: "/news", label: "Пресс-клуб" },
       { href: "/about/25-years", label: "25 лет ЗАО КФБ" },
+      { href: "/sustainable", label: "Сектор устойчивого развития" },
+      { href: "/gcb/invest", label: "Инвестиции в ГЦБ" },
     ],
   },
   {
@@ -71,7 +86,7 @@ export const siteNav: SiteNavGroup[] = [
     items: [
       { href: "/regulations/exchange", label: "Биржевая деятельность" },
       { href: "/regulations/depository", label: "Депозитарная деятельность" },
-      { href: "/disclosure", label: "Центр раскрытия информации" },
+      { href: "/regulations/disclosure", label: "Центр раскрытия информации" },
     ],
   },
   {
@@ -426,3 +441,15 @@ export const sectionPages: Record<string, SectionContent> = {
     ],
   },
 };
+
+/** Кнопки баннера футера — запасной вариант, пока нет группы меню «footer-buttons». */
+export const siteFooterButtons: SiteLink[] = [
+  { href: "/market", label: "Открыть торги" },
+  { href: "/contacts", label: "Написать в КФБ" },
+];
+
+/** Ссылки с иконкой документа в футере — запасной вариант для группы «footer-links». */
+export const siteFooterLinks: SiteLink[] = [
+  { href: "/documents", label: "Правила и тарифы" },
+  { href: "/disclosure", label: "Раскрытие" },
+];

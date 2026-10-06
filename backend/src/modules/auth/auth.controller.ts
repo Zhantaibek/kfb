@@ -7,7 +7,6 @@ import {
   encodeSession,
   readSession,
   readUserSession,
-  registerPublicUser,
 } from "./auth.service";
 
 export function getSession(req: Request, res: Response) {
@@ -50,18 +49,21 @@ export async function loginUser(req: Request, res: Response) {
     res.status(401).json({ error: "Неверный логин или пароль. Демо: investor@kse.kg / kse" });
     return;
   }
+
+  // Админ или редактор, вошедший через основной вход: выдаём админскую cookie,
+  // ту же, что и в /api/admin/session. Так он сразу получает доступ к админке.
+  if (isStaffRole(session.role)) {
+    res.cookie(config.cookieName, encodeSession(session), cookieOptions());
+    res.json({ user: session });
+    return;
+  }
+
   if (!isPublicRole(session.role)) {
-    res.status(401).json({ error: "Для портала администратора откройте /admin" });
+    res.status(401).json({ error: "Эта учётная запись не может войти на сайт" });
     return;
   }
   res.cookie(config.userCookieName, encodeSession(session), cookieOptions());
   res.json({ user: session });
-}
-
-export async function registerUser(req: Request, res: Response) {
-  const session = await registerPublicUser(req.body ?? {});
-  res.cookie(config.userCookieName, encodeSession(session), cookieOptions());
-  res.status(201).json({ user: session });
 }
 
 export function logoutUser(_req: Request, res: Response) {

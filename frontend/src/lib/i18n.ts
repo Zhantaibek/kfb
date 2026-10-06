@@ -71,7 +71,7 @@ function getTemplates() {
   return templates;
 }
 
-function applyTemplate(lang: Lang, text: string) {
+function applyTemplate(lang: Exclude<Lang, "ru">, text: string) {
   const table = phrases[lang] as Record<string, string>;
   for (const item of getTemplates()) {
     const match = text.match(item.re);

@@ -3,13 +3,12 @@ import type { Request } from "express";
 import { config } from "../../config";
 import {
   findUserByEmail,
-  insertAudit,
   insertUser,
   updateUserPassword,
 } from "../../db/repositories/cms.repository";
 import { prisma } from "../../db/prisma";
 import { hashPassword, isHashed, verifyPassword } from "./password";
-import type { AdminSession, AuthSession, PublicRole, UserRole } from "../../../../shared/cms";
+import type { AdminSession, AuthSession, UserRole } from "../../../../shared/cms";
 import { isPublicRole, isStaffRole } from "../../../../shared/cms";
 
 function signToken(payload: string) {
@@ -70,27 +69,6 @@ export async function authenticate(email: string, password: string): Promise<Aut
   if (!isHashed(user.password)) {
     await updateUserPassword(user.id, await hashPassword(password));
   }
-  return toSession(user);
-}
-
-export async function registerPublicUser(input: {
-  name: string;
-  email: string;
-  password: string;
-  role: PublicRole;
-}): Promise<AuthSession> {
-  const name = input.name.trim();
-  const email = input.email.trim().toLowerCase();
-  const password = input.password;
-  const role = input.role;
-
-  const existing = await findUserByEmail(email);
-  if (existing) throw new Error("Этот e-mail уже зарегистрирован");
-
-  const hashed = await hashPassword(password);
-  const user = { id: crypto.randomUUID(), name, email, role, password: hashed };
-  await insertUser(user);
-  await insertAudit({ action: "create", entity: "users", detail: email, actor: "public" });
   return toSession(user);
 }
 

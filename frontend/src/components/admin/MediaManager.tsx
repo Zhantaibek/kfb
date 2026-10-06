@@ -43,7 +43,13 @@ export function MediaManager() {
       <div className={css.mediaGrid}>
         {(store?.media ?? []).map((item) => (
           <article className={css.mediaCard} key={item.id}>
-            <img src={item.url} alt={item.name} />
+            {/\.(pdf|docx?|xlsx?|zip)$/i.test(item.url) ? (
+              <a className={css.mediaFile} href={item.url} target="_blank" rel="noreferrer">
+                {item.url.split(".").pop()?.toUpperCase()}
+              </a>
+            ) : (
+              <img src={item.url} alt={item.name} />
+            )}
             <div>
               <b>{item.name}</b>
               <button className={css.danger} type="button" disabled={busy} onClick={() => void remove(item)}>

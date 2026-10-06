@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
 import { EDU_PLATFORM_URL } from "@/lib/edu";
-import { loadPublicContent } from "@/lib/cms/public";
+import { CmsPageView } from "@/components/CmsPageView";
+import { findPageByPath, loadPublicContent } from "@/lib/cms/public";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "План работы на год" };
 
 const courses = [
@@ -18,7 +20,11 @@ const courses = [
 ];
 
 export default async function EducationPlanPage() {
-  const { settings } = await loadPublicContent();
+  const content = await loadPublicContent();
+  // Если план заведён в админке (перенесён с kse.kg), показываем его вместо встроенной таблицы.
+  const page = findPageByPath(content, "/education/plan");
+  if (page) return <CmsPageView page={page} />;
+  const { settings } = content;
   const eduUrl = settings.eduUrl || EDU_PLATFORM_URL;
 
   return (

@@ -6,16 +6,42 @@ import type { AdminSession } from "../../../../shared/cms";
 import { decodeUploadName } from "../../utils/upload-name";
 
 const allowed = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const imageMaxBytes = 4 * 1024 * 1024;
+export const uploadMaxBytes = 20 * 1024 * 1024;
+
+// Отчёты эмитентов. Тип берём по расширению (Windows-браузеры часто шлют octet-stream)
+// и сверяем с сигнатурой файла, чтобы под .pdf не прислали что-то другое.
+const zipMagic = Buffer.from("504b0304", "hex");
+const oleMagic = Buffer.from("d0cf11e0a1b11ae1", "hex");
+const documentTypes: Record<string, Buffer> = {
+  pdf: Buffer.from("%PDF"),
+  docx: zipMagic,
+  xlsx: zipMagic,
+  zip: zipMagic,
+  doc: oleMagic,
+  xls: oleMagic,
+};
+
+function documentExt(file: { buffer: Buffer; originalname: string }) {
+  const ext = path.extname(file.originalname).slice(1).toLowerCase();
+  const magic = documentTypes[ext];
+  return magic && file.buffer.subarray(0, magic.length).equals(magic) ? ext : null;
+}
 
 export async function saveUpload(
   session: AdminSession,
   file: { buffer: Buffer; mimetype: string; originalname: string },
 ) {
-  if (!allowed.has(file.mimetype)) {
-    throw new Error("Можно загрузить JPG, PNG, WEBP или GIF");
+  let ext: string;
+  if (allowed.has(file.mimetype)) {
+    if (file.buffer.length > imageMaxBytes) throw new Error("Картинка больше 4 МБ");
+    ext = file.mimetype.split("/")[1] === "jpeg" ? "jpg" : file.mimetype.split("/")[1];
+  } else {
+    const doc = documentExt(file);
+    if (!doc) throw new Error("Можно загрузить JPG, PNG, WEBP, GIF или документ PDF, DOC, DOCX, XLS, XLSX, ZIP");
+    ext = doc;
   }
 
-  const ext = file.mimetype.split("/")[1] === "jpeg" ? "jpg" : file.mimetype.split("/")[1];
   const id = crypto.randomUUID();
   const filename = `${id}.${ext}`;
   await mkdir(config.uploadsDir, { recursive: true });

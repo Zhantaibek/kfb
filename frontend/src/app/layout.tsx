@@ -12,10 +12,8 @@ const sans = Manrope({
 });
 
 const display = Unbounded({
-  variable: "--font-display",
   subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700"],
-  display: "swap",
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +24,15 @@ export const metadata: Metadata = {
   },
   description:
     "Официальный портал Кыргызской фондовой биржи: котировки, итоги торгов, листинг, раскрытие информации и инвестиции в ГЦБ.",
-  keywords: ["Кыргызская фондовая биржа", "КФБ", "KSE", "котировки", "ценные бумаги", "ГЦБ", "Кыргызстан"],
+  keywords: [
+    "Кыргызская фондовая биржа",
+    "КФБ",
+    "KSE",
+    "котировки",
+    "ценные бумаги",
+    "ГЦБ",
+    "Кыргызстан",
+  ],
   icons: {
     icon: "/brand/kse-mark.jpg",
     apple: "/brand/kse-mark.jpg",
@@ -38,7 +44,8 @@ export const metadata: Metadata = {
     url: "/",
     siteName: "Кыргызская фондовая биржа",
     title: "Кыргызская фондовая биржа",
-    description: "Финансовый рынок Кыргызстана — котировки, листинг и раскрытие информации.",
+    description:
+      "Финансовый рынок Кыргызстана — котировки, листинг и раскрытие информации.",
   },
   twitter: {
     card: "summary_large_image",
@@ -51,7 +58,13 @@ const themeScript = `try{var t=localStorage.getItem("kse-theme");if(t==="dark"||
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ru" className={`${sans.variable} ${display.variable}`} data-theme="dark" suppressHydrationWarning>
+    <html
+      lang="ru"
+      className={`${sans.variable} ${display.variable}`}
+      data-theme="dark"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <AppProviders>

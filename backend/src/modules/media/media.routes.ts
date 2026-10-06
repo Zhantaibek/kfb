@@ -9,7 +9,7 @@ mediaRoutes.post(
   (req, res, next) => {
     upload.single("file")(req, res, (err) => {
       if (err) {
-        res.status(400).json({ error: "Файл больше 4 МБ" });
+        res.status(400).json({ error: "Файл больше 20 МБ" });
         return;
       }
       next();

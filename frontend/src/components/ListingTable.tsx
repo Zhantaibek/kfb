@@ -2,16 +2,21 @@
 
 import Link from "next/link";
 import { Fragment } from "react";
-import { listingCategories, type ListingRow } from "@/data/listing";
+import { listingCategoryIds, listingCategoryTitles, type CmsListingEntry } from "@/lib/cms/types";
 import { useTr } from "@/lib/use-tr";
 import ui from "@/app/ui.module.css";
 import css from "@/app/listing/listing.module.css";
 
-function Issuer({ row }: { row: ListingRow }) {
+export type ListingTableRow = Pick<
+  CmsListingEntry,
+  "id" | "code" | "category" | "order" | "name" | "issuerSlug" | "security" | "price" | "cap" | "count" | "doc"
+>;
+
+function Issuer({ row }: { row: ListingTableRow }) {
   return (
     <>
-      {row.slug ? (
-        <Link href={`/disclosure/${row.slug}`}>{row.name}</Link>
+      {row.issuerSlug ? (
+        <Link href={`/disclosure/${row.issuerSlug}`}>{row.name}</Link>
       ) : (
         <span className={css.plain}>{row.name}</span>
       )}
@@ -20,9 +25,17 @@ function Issuer({ row }: { row: ListingRow }) {
   );
 }
 
-export function ListingTable() {
+/** issuerSlug в строках уже очищен у эмитентов, которых нет в Центре раскрытия, — см. app/listing/page.tsx. */
+export function ListingTable({ entries }: { entries: ListingTableRow[] }) {
   const tr = useTr();
   const dash = "—";
+  const categories = listingCategoryIds
+    .map((id) => ({
+      id,
+      title: listingCategoryTitles[id],
+      rows: entries.filter((row) => row.category === id).sort((a, b) => a.order - b.order),
+    }))
+    .filter((category) => category.rows.length);
 
   return (
     <div className={`${ui.tableWrap} ${css.table}`}>
@@ -38,8 +51,8 @@ export function ListingTable() {
           </tr>
         </thead>
         <tbody>
-          {listingCategories.map((category) => (
-            <Fragment key={category.title}>
+          {categories.map((category) => (
+            <Fragment key={category.id}>
               <tr className={css.category}>
                 <td colSpan={6}>{tr(category.title)}</td>
               </tr>

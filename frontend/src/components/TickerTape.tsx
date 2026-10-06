@@ -13,10 +13,12 @@ const tapeItems = instruments
     volume: item.volume.toLocaleString("ru-KG", { maximumFractionDigits: 0 }),
   }));
 
+const laneItems = [...tapeItems, ...tapeItems, ...tapeItems];
+
 function TapeRow() {
   return (
     <>
-      {tapeItems.map((item, index) => (
+      {laneItems.map((item, index) => (
         <Link className={ui.tickerItem} href={`/market/${item.ticker}`} key={`${item.ticker}-${index}`}>
           <span>{item.ticker}</span>
           <b>{item.price}</b>

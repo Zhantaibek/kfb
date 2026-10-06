@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAdminStore } from "@/lib/cms/client";
-import { incompleteTranslation, readLocaleField, writeLocaleField, type ContentLang } from "@/lib/cms/locale";
+import { useContentLang } from "@/lib/cms/use-content-lang";
+import { incompleteTranslation, readLocaleField, writeLocaleField } from "@/lib/cms/locale";
 import {
   managementGroupIds,
   managementGroupTitles,
@@ -49,12 +50,8 @@ function slugify(name: string) {
 export function ManagementManager() {
   const { store, error, busy, mutate, upload, setError } = useAdminStore();
   const [editing, setEditing] = useState<Partial<CmsManagementPerson> | null>(null);
-  const [lang, setLang] = useState<ContentLang>("ru");
+  const [lang, setLang] = useContentLang(editing?.id);
   const people = [...(store?.management ?? [])].sort((a, b) => a.order - b.order);
-
-  useEffect(() => {
-    setLang("ru");
-  }, [editing?.id]);
 
   function setField(field: string, value: string) {
     if (!editing) return;

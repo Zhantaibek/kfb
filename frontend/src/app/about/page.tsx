@@ -2,14 +2,21 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
 import { siteNav } from "@/data/site-nav";
+import { CmsPageView } from "@/components/CmsPageView";
+import { findPageByPath, loadPublicContent } from "@/lib/cms/public";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "О бирже" };
 
 const aboutLinks = siteNav.find((item) => item.key === "about")?.items ?? [];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  // Текст «О бирже» перенесён с kse.kg в админку — показываем его; встроенная страница — запасной вариант.
+  const page = findPageByPath(await loadPublicContent(), "/about");
+  if (page) return <CmsPageView page={page} />;
+
   return (
     <PublicMain>
       <PageIntro
