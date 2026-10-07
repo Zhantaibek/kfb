@@ -1,42 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { auctions, formatChange, formatSom, instruments } from "@/data/catalog";
+import { formatChange, formatSom } from "@/data/catalog";
+import { useMarketData } from "@/components/MarketDataProvider";
+import { instrumentHref } from "@/lib/market-data";
 import { useTr } from "@/lib/use-tr";
 import styles from "./QuoteBoard.module.css";
 
-const quotes = instruments
-  .filter((item) => item.type === "stock")
-  .sort((a, b) => b.volume - a.volume)
-  .slice(0, 6);
-
 export function QuoteBoard() {
   const tr = useTr();
+  const market = useMarketData();
+  // Акции с наибольшим объёмом (в живых данных — сделки за неделю), затем самые дорогие.
+  const quotes = market.instruments
+    .filter((item) => item.type === "stock" && item.price > 0)
+    .sort((a, b) => b.volume - a.volume || b.price - a.price)
+    .slice(0, 6);
 
   return (
     <section className={styles.desk} aria-labelledby="quotes-title">
       <div className={styles.panel}>
         <header className={styles.head}>
           <h2 id="quotes-title">{tr("Котировки")}</h2>
-          <Link href="/market">{tr("Все инструменты")}</Link>
+          <Link href="/market/quotes">{tr("Все инструменты")}</Link>
         </header>
         <div className={styles.columns} aria-hidden="true">
           <span>{tr("Тикер")}</span>
           <span>{tr("Бумага")}</span>
           <span>{tr("Цена")}</span>
-          <span>{tr("Изменение")}</span>
-          <span>{tr("Объём")}</span>
+          {/* kse.kg не публикует изменение цены по бумаге — в живых данных показываем вид бумаги. */}
+          <span>{market.live ? tr("Вид") : tr("Изменение")}</span>
+          <span>{market.live ? tr("Объём, тыс.") : tr("Объём")}</span>
         </div>
         <div className={styles.rows}>
           {quotes.map((item) => (
-            <Link href={`/market/${item.ticker}`} key={item.ticker}>
+            <Link href={instrumentHref(market, item.ticker)} key={item.ticker}>
               <b>{item.ticker}</b>
               <span>{item.name}</span>
               <span>{formatSom(item.price)}</span>
-              <em className={item.change < 0 ? styles.down : item.change > 0 ? styles.up : undefined}>
-                {formatChange(item.change)}
-              </em>
-              <span>{formatSom(item.volume)}</span>
+              {market.live ? (
+                <span>{tr(item.description)}</span>
+              ) : (
+                <em className={item.change < 0 ? styles.down : item.change > 0 ? styles.up : undefined}>
+                  {formatChange(item.change)}
+                </em>
+              )}
+              <span>{item.volume ? formatSom(item.volume) : "—"}</span>
             </Link>
           ))}
         </div>
@@ -48,7 +56,7 @@ export function QuoteBoard() {
           <Link href="/gcb">{tr("Календарь")}</Link>
         </header>
         <div className={styles.auctions}>
-          {auctions.map((item) => (
+          {market.auctions.map((item) => (
             <Link href="/gcb" key={`${item.date}-${item.type}`}>
               <b>{item.type}</b>
               <time>{item.date}</time>
@@ -56,6 +64,7 @@ export function QuoteBoard() {
               <small data-state={item.status === "Состоялся" ? "done" : "plan"}>{tr(item.status)}</small>
             </Link>
           ))}
+          {!market.auctions.length ? <p>{tr("Ближайших аукционов нет")}</p> : null}
         </div>
       </div>
     </section>

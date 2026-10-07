@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { requireSession } from "../auth/auth.service";
-import { createRequest, getAdminData, getIssuerData, getPublicContent, mutateCollection, trackVisit } from "./cms.service";
+import { createRequest, getAdminData, getIssuerData, getPublicContent, mutateCollection } from "./cms.service";
 import type { MutableCollection } from "../../validation/cms";
 
 export async function readAdminData(req: Request, res: Response) {
@@ -67,8 +67,3 @@ export async function postRequest(req: Request, res: Response) {
   res.json({ ok: true });
 }
 
-export async function postVisit(req: Request, res: Response) {
-  const body = req.body as { path: string };
-  await trackVisit(body.path);
-  res.json({ ok: true });
-}

@@ -7,13 +7,15 @@ import { createSeedStore } from "../data/seed";
 import { allNavSeed } from "../../../shared/nav-seed";
 import { defaultHomeHubs, defaultSiteSettings } from "../../../shared/site-defaults";
 import { managementSeed } from "../../../shared/management-seed";
+import { partnersSeed } from "../../../shared/partners-seed";
+import { ensureDefaultLandings } from "./landing";
 import { issuerSeedRows } from "../../../shared/issuers-seed";
 import { listingSeedRows } from "../../../shared/listing-seed";
 import { ksePageSeed } from "../../../shared/kse-pages-seed";
 import { sanitizeRichHtml } from "../utils/sanitize-html";
 import type { CmsStore } from "../../../shared/cms";
 import { prisma } from "./prisma";
-import { issuerCreateData, listingCreateData, seedDatabase } from "./seed";
+import { issuerCreateData, listingCreateData, partnerCreateData, seedDatabase } from "./seed";
 
 function resolveBackendRoot() {
   const fromSource = path.resolve(__dirname, "../..");
@@ -36,7 +38,24 @@ async function waitForDb() {
   throw lastError;
 }
 
+function eduDatabaseUrl() {
+  if (process.env.EDU_DATABASE_URL) return process.env.EDU_DATABASE_URL;
+  const url = new URL(config.databaseUrl);
+  url.searchParams.set("schema", "edu");
+  return url.toString();
+}
+
+/** Учебный центр — своя Prisma-схема в схеме `edu` той же базы. */
+function runEduMigrations() {
+  execSync("npx prisma migrate deploy --schema prisma/edu/schema.prisma", {
+    cwd: resolveBackendRoot(),
+    stdio: "pipe",
+    env: { ...process.env, EDU_DATABASE_URL: eduDatabaseUrl() },
+  });
+}
+
 function runMigrations() {
+  runEduMigrations();
   try {
     execSync("npx prisma migrate deploy", {
       cwd: resolveBackendRoot(),
@@ -75,6 +94,12 @@ async function maybeImportJson(): Promise<CmsStore | null> {
       menu: parsed.menu ?? seed.menu,
       hubs: parsed.hubs ?? seed.hubs,
       management: parsed.management ?? seed.management,
+      partners: parsed.partners ?? seed.partners,
+      sustainableBonds: parsed.sustainableBonds ?? seed.sustainableBonds,
+      esgReports: parsed.esgReports ?? seed.esgReports,
+      verifiers: parsed.verifiers ?? seed.verifiers,
+      gcbParticipants: parsed.gcbParticipants ?? seed.gcbParticipants,
+      landingSections: parsed.landingSections ?? seed.landingSections,
       issuers: parsed.issuers ?? seed.issuers,
       listing: parsed.listing ?? seed.listing,
       settings: parsed.settings ?? seed.settings,
@@ -104,6 +129,8 @@ export async function initDb() {
   await ensureDefaultHubs();
   await ensureDefaultManagement();
   await ensureDefaultIssuers();
+  await ensureDefaultPartners();
+  await ensureDefaultLandings();
   await ensureKsePages();
 }
 
@@ -136,6 +163,11 @@ async function ensureDefaultMenu() {
   await prisma.menuItem.updateMany({
     where: { id: "menu-reg-disclosure", href: "/disclosure" },
     data: { href: "/regulations/disclosure" },
+  });
+  // «Статистика торгов» в шапке вела сразу на итоги торгов, а на kse.kg это раздел с карточками.
+  await prisma.menuItem.updateMany({
+    where: { id: "menu-top-market", href: "/market" },
+    data: { href: "/statistics" },
   });
 
   await fixMenuOrderCollisions(seed);
@@ -194,6 +226,9 @@ async function ensureDefaultSettings() {
       phones: item.phones,
       emails: item.emails,
       fax: item.fax,
+      facebookUrl: item.facebookUrl,
+      instagramUrl: item.instagramUrl,
+      telegramUrl: item.telegramUrl,
       license: item.license,
       copyright: item.copyright,
       eduUrl: item.eduUrl,
@@ -252,6 +287,12 @@ async function ensureDefaultManagement() {
       },
     });
   }
+}
+
+// Партнёры раньше были в коде фронтенда (data/resources.ts) — при первом запуске переносим в БД.
+async function ensureDefaultPartners() {
+  if ((await prisma.partner.count()) > 0) return;
+  await prisma.partner.createMany({ data: partnersSeed.map(partnerCreateData), skipDuplicates: true });
 }
 
 // Эмитенты и листинг раньше жили в коде фронтенда — при первом запуске переносим их в БД.

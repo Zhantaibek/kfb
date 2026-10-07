@@ -12,7 +12,7 @@ export type NavSeedNode = {
 export const defaultPrimaryNav: NavSeedNode[] = [
   { id: "menu-top-about", label: "О Бирже", href: "/about", i18n: { ky: { label: "Биржа жөнүндө" }, en: { label: "About the Exchange" } } },
   { id: "menu-top-listing", label: "Листинг", href: "/listing", i18n: { ky: { label: "Листинг" }, en: { label: "Listing" } } },
-  { id: "menu-top-market", label: "Статистика торгов", href: "/market", i18n: { ky: { label: "Соода статистикасы" }, en: { label: "Trading statistics" } } },
+  { id: "menu-top-market", label: "Статистика торгов", href: "/statistics", i18n: { ky: { label: "Соода статистикасы" }, en: { label: "Trading statistics" } } },
   {
     id: "menu-top-disclosure",
     label: "Центр раскрытия информации",
@@ -143,7 +143,7 @@ export const defaultHeaderNav: NavSeedNode[] = [
       { id: "menu-dir-tariffs", label: "Тарифы", href: "/tariffs" },
       { id: "menu-dir-analytics", label: "Аналитика", href: "/analytics" },
       { id: "menu-dir-finmarket", label: "Финансовый рынок KG", href: "/finmarket" },
-      { id: "menu-dir-news", label: "Пресс-клуб", href: "/news" },
+      { id: "menu-dir-news", label: "Пресс-клуб", href: "/press-club" },
       { id: "menu-dir-25", label: "25 лет ЗАО КФБ", href: "/about/25-years" },
       { id: "menu-dir-sustainable", label: "Сектор устойчивого развития", href: "/sustainable" },
       { id: "menu-dir-gcb-invest", label: "Инвестиции в ГЦБ", href: "/gcb/invest" },
@@ -182,9 +182,30 @@ export const defaultHeaderNav: NavSeedNode[] = [
     children: [
       { id: "menu-edu-info", label: "Общая информация", href: "/education" },
       { id: "menu-edu-plan", label: "План работы на год", href: "/education/plan" },
-      { id: "menu-edu-online", label: "Онлайн-платформа", href: "http://127.0.0.1:5173/education/app/" },
+      { id: "menu-edu-online", label: "Онлайн-платформа", href: "/education/app" },
     ],
   },
+];
+
+/** Карточки раздела «О Бирже» (/about), как на kse.kg/ru/GeneralInfo. */
+export const defaultHubAbout: NavSeedNode[] = [
+  { id: "menu-hub-about-management", label: "Органы управления", href: "/about/management", i18n: { ky: { label: "Башкаруу органдары" }, en: { label: "Governing bodies" } } },
+  { id: "menu-hub-about-history", label: "Историческая справка", href: "/about/history", i18n: { ky: { label: "Тарыхый маалымат" }, en: { label: "Historical background" } } },
+  {
+    id: "menu-hub-about-strategy",
+    label: "Стратегия развития ЗАО «КФБ» на 2026-2030 годы",
+    href: "/about/strategy",
+    i18n: { ky: { label: "«КФБ» ЖАКтын 2026-2030-жылдарга өнүгүү стратегиясы" }, en: { label: "KSE CJSC development strategy for 2026-2030" } },
+  },
+];
+
+/** Карточки раздела «Статистика торгов» (/statistics), как на kse.kg/ru/Statistics. */
+export const defaultHubStatistics: NavSeedNode[] = [
+  { id: "menu-hub-stat-results", label: "Итоги последних торгов", href: "/market", i18n: { ky: { label: "Акыркы сооданын жыйынтыктары" }, en: { label: "Latest trading results" } } },
+  { id: "menu-hub-stat-archive", label: "Архив торгов", href: "/market/archive", i18n: { ky: { label: "Соода архиви" }, en: { label: "Trading archive" } } },
+  { id: "menu-hub-stat-index", label: "Индекс и Капитализация", href: "/market/index", i18n: { ky: { label: "Индекс жана капиталдаштыруу" }, en: { label: "Index and capitalization" } } },
+  { id: "menu-hub-stat-quotes", label: "Котировки", href: "/market/quotes", i18n: { ky: { label: "Котировкалар" }, en: { label: "Quotes" } } },
+  { id: "menu-hub-stat-gcb", label: "Расписание аукционов по ГЦБ", href: "/gcb", i18n: { ky: { label: "МБК аукциондорунун графиги" }, en: { label: "Government securities auction schedule" } } },
 ];
 
 /** Все пункты меню из seed: дерево бургера (header) и строка навигации шапки (primary). */
@@ -195,6 +216,8 @@ export function allNavSeed(): CmsMenuItem[] {
     ...flattenNavSeed(defaultFooterNav, "footer"),
     ...flattenNavSeed(defaultFooterButtons, "footer-buttons"),
     ...flattenNavSeed(defaultFooterLinks, "footer-links"),
+    ...flattenNavSeed(defaultHubAbout, "hub-about"),
+    ...flattenNavSeed(defaultHubStatistics, "hub-statistics"),
   ];
 }
 

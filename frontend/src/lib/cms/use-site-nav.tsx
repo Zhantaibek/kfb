@@ -4,7 +4,8 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { siteFooterButtons, siteFooterColumns, siteFooterLinks, siteNav, sitePrimaryNav, type SiteLink, type SiteNavGroup } from "@/data/site-nav";
 import { applyLocale } from "@/lib/cms/locale";
 import { menuGroupLinks, menuToFooterColumns, menuToFooterNav, menuToPrimaryNav, menuToSiteNav } from "@/lib/cms/menu-tree";
-import type { CmsHomeHub, CmsMenuItem, CmsSiteSettings } from "@/lib/cms/types";
+import type { CmsHomeHub, CmsMenuItem, CmsPartner, CmsSiteSettings } from "@/lib/cms/types";
+import { partnerFields, partnersOrFallback } from "@/lib/cms/partners";
 import { useLang } from "@/lib/use-tr";
 
 const emptySettings: CmsSiteSettings = {
@@ -14,9 +15,12 @@ const emptySettings: CmsSiteSettings = {
   phones: "+996 312 31 14 84\n+996 551 31 14 84",
   emails: "office@kse.kg",
   fax: "+996 312 31 14 83",
+  facebookUrl: "https://ru-ru.facebook.com/KyrgyzStockExchange/",
+  instagramUrl: "https://www.instagram.com/kse.kg/",
+  telegramUrl: "https://t.me/kse_publicinfo",
   license: "№37 НКРЦБ от 30.11.2000",
   copyright: "© 2004–2026 ЗАО «Кыргызская фондовая биржа»",
-  eduUrl: "http://127.0.0.1:5173/education/app/",
+  eduUrl: "/education/app",
   disclosurePhone: "(0312) 45-40-53",
   eduPhone: "+996 (772) 63-79-97",
   i18n: {},
@@ -34,6 +38,8 @@ type SiteNavValue = {
   footerLinks: SiteLink[];
   settings: CmsSiteSettings;
   hubs: CmsHomeHub[];
+  /** Партнёры из админки (до загрузки — прежний список из кода). */
+  partners: CmsPartner[];
 };
 
 const SiteNavContext = createContext<SiteNavValue | null>(null);
@@ -54,14 +60,16 @@ function useSiteNavState(): SiteNavValue {
   const [menu, setMenu] = useState<CmsMenuItem[]>([]);
   const [settingsRaw, setSettingsRaw] = useState<CmsSiteSettings>(emptySettings);
   const [hubsRaw, setHubsRaw] = useState<CmsHomeHub[]>([]);
+  const [partnersRaw, setPartnersRaw] = useState<CmsPartner[]>([]);
 
   useEffect(() => {
     void fetch("/api/public/content")
       .then((response) => response.json())
-      .then((data: { menu?: CmsMenuItem[]; settings?: CmsSiteSettings; hubs?: CmsHomeHub[] }) => {
+      .then((data: { menu?: CmsMenuItem[]; settings?: CmsSiteSettings; hubs?: CmsHomeHub[]; partners?: CmsPartner[] }) => {
         if (data.menu?.length) setMenu(data.menu);
         if (data.settings) setSettingsRaw(data.settings);
         if (data.hubs?.length) setHubsRaw(data.hubs);
+        if (data.partners?.length) setPartnersRaw(data.partners);
       })
       .catch(() => undefined);
   }, []);
@@ -84,6 +92,7 @@ function useSiteNavState(): SiteNavValue {
       footerLinks,
       settings: applyLocale(settingsRaw, lang, ["tagline", "address", "license", "copyright"]),
       hubs: hubsRaw.map((item) => applyLocale(item, lang, ["title", "text"])),
+      partners: partnersOrFallback(partnersRaw).map((item) => applyLocale(item, lang, [...partnerFields])),
     };
-  }, [lang, menu, settingsRaw, hubsRaw]);
+  }, [lang, menu, settingsRaw, hubsRaw, partnersRaw]);
 }

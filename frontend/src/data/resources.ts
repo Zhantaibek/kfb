@@ -6,11 +6,14 @@ export type ResourceProfile = {
   name: string;
   lead: string;
   body: [string, string];
+  /** Официальный сайт — как в разделе «Наши партнеры» на kse.kg. */
+  site: string;
 };
 
 export const resourceProfiles: ResourceProfile[] = [
   {
     slug: "gfr",
+    site: "http://fsa.gov.kg/",
     mark: "ГФР",
     kind: "Регулятор",
     caption: "Госфиннадзор",
@@ -23,6 +26,7 @@ export const resourceProfiles: ResourceProfile[] = [
   },
   {
     slug: "gaugi",
+    site: "https://fgi.gov.kg/",
     mark: "ГАУГИ",
     kind: "Госорган",
     caption: "Госимущество",
@@ -35,6 +39,7 @@ export const resourceProfiles: ResourceProfile[] = [
   },
   {
     slug: "mab",
+    site: "http://mab-sng.org/",
     mark: "МАБ",
     kind: "Ассоциация",
     caption: "Биржи СНГ",
@@ -47,6 +52,7 @@ export const resourceProfiles: ResourceProfile[] = [
   },
   {
     slug: "nbkr",
+    site: "http://www.nbkr.kg/",
     mark: "НБКР",
     kind: "Центральный банк",
     caption: "Нацбанк",
@@ -59,6 +65,7 @@ export const resourceProfiles: ResourceProfile[] = [
   },
   {
     slug: "kase",
+    site: "http://www.kase.kz/",
     mark: "KASE",
     kind: "Биржа-партнёр",
     caption: "Казахстанская биржа",
@@ -71,6 +78,7 @@ export const resourceProfiles: ResourceProfile[] = [
   },
   {
     slug: "bist",
+    site: "https://borsaistanbul.com/en/",
     mark: "BIST",
     kind: "Биржа-партнёр",
     caption: "Borsa Istanbul",
@@ -83,6 +91,7 @@ export const resourceProfiles: ResourceProfile[] = [
   },
   {
     slug: "rkfr",
+    site: "http://rkdf.org",
     mark: "РКФР",
     kind: "Фонд развития",
     caption: "Фонд развития",
@@ -95,6 +104,7 @@ export const resourceProfiles: ResourceProfile[] = [
   },
   {
     slug: "cd",
+    site: "http://www.cds.kg/",
     mark: "ЦД",
     kind: "Инфраструктура",
     caption: "Депозитарий",

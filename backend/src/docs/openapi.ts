@@ -381,24 +381,71 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/public/market/{key}": {
+      get: {
+        tags: ["Public"],
+        summary: "Живые данные торгов с kse.kg",
+        description:
+          "Последний снимок раздела kse.kg (обновляется раз в 15 минут). stale=true — последняя попытка обновления не удалась, отдаются прежние данные.",
+        parameters: [
+          {
+            name: "key",
+            in: "path",
+            required: true,
+            schema: {
+              type: "string",
+              enum: ["trade-results", "trade-archive", "index", "quotes", "quotes-metals", "auction-schedule", "auction-results", "volume-gs", "deposit-auctions", "members-rating", "finmarket", "members"],
+            },
+          },
+        ],
+        responses: {
+          "200": { description: "{ key, data, fetchedAt, sourceUrl, stale }" },
+          "404": { description: "Неизвестный раздел или данные ещё не загружены" },
+        },
+      },
+    },
+    "/api/public/search": {
+      get: {
+        tags: ["Public"],
+        summary: "Поиск по всему сайту",
+        description:
+          "Страницы и пункты меню, новости, эмитенты, листинг и его документы, руководство, курсы учебного центра. Все слова запроса должны встретиться (в любом языке); регистр и «ё» не важны.",
+        parameters: [
+          { name: "q", in: "query", required: true, schema: { type: "string", example: "аэропорт" } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 5, maximum: 100 }, description: "Результатов в каждой группе" },
+        ],
+        responses: {
+          "200": { description: "{ query, total, groups: [{ kind, label, total, items: [{ title, href, meta?, snippet? }] }] }" },
+        },
+      },
+    },
     "/api/public/visit": {
       post: {
         tags: ["Public"],
         summary: "Учёт посещения страницы",
+        description:
+          "IP и устройство берутся из запроса. Повтор той же страницы тем же посетителем за 30 минут, а также /admin, /api и боты не записываются.",
         requestBody: {
           content: {
             "application/json": {
               schema: {
                 type: "object",
-                properties: { path: { type: "string", example: "/" } },
+                properties: {
+                  path: { type: "string", example: "/" },
+                  visitorId: { type: "string", description: "Случайный id посетителя из localStorage", example: "v_3k9f8a2d1c" },
+                },
               },
             },
           },
         },
         responses: {
           "200": {
-            description: "Записано (или проигнорировано для /admin и /api)",
-            content: { "application/json": { schema: { type: "object", properties: { ok: { type: "boolean" } } } } },
+            description: "recorded=false — посещение не засчитано (повтор, бот, служебный путь)",
+            content: {
+              "application/json": {
+                schema: { type: "object", properties: { ok: { type: "boolean" }, recorded: { type: "boolean" } } },
+              },
+            },
           },
         },
       },
@@ -537,6 +584,28 @@ export const openApiSpec = {
             content: { "application/json": { schema: { type: "object", properties: { ok: { type: "boolean" } } } } },
           },
         },
+      },
+    },
+    "/api/admin/analytics/summary": {
+      get: {
+        tags: ["CMS"],
+        summary: "Посещения: сводка и графики",
+        description: "Сегодня / 7 дней / месяц / всего (+ уникальные), 14 дней по дням, по дням недели, устройства, популярные страницы.",
+        security: [{ cookieAuth: [] }],
+        responses: { "200": { description: "Сводка" }, "401": { description: "Нет сессии админки" } },
+      },
+    },
+    "/api/admin/analytics/visits": {
+      get: {
+        tags: ["CMS"],
+        summary: "Посещения: список с фильтром и страницами",
+        security: [{ cookieAuth: [] }],
+        parameters: [
+          { name: "period", in: "query", schema: { type: "string", enum: ["today", "week", "month", "all"], default: "today" } },
+          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+          { name: "pageSize", in: "query", schema: { type: "integer", default: 10, maximum: 100 } },
+        ],
+        responses: { "200": { description: "{ items: [{ id, path, ip, device, at }], total, page, pageSize, pageCount }" } },
       },
     },
     "/api/admin/data": {

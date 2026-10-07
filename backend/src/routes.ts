@@ -3,6 +3,7 @@ import { dbHealth } from "./db/postgres";
 import { authRoutes, publicAuthRoutes } from "./modules/auth/auth.routes";
 import { adminCmsRoutes, publicCmsRoutes } from "./modules/cms/cms.routes";
 import { mediaRoutes } from "./modules/media/media.routes";
+import { adminAnalyticsRoutes } from "./modules/analytics/analytics.routes";
 
 export const api = Router();
 
@@ -18,5 +19,6 @@ api.get("/health", async (_req, res, next) => {
 api.use("/admin", authRoutes);
 api.use("/admin", adminCmsRoutes);
 api.use("/admin", mediaRoutes);
+api.use("/admin/analytics", adminAnalyticsRoutes);
 api.use("/auth", publicAuthRoutes);
 api.use("/public", publicCmsRoutes);

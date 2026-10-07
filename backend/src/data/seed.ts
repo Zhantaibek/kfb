@@ -2,6 +2,14 @@ import type { CmsStore } from "../../../shared/cms";
 import { news as seedNews } from "./news";
 import { allNavSeed } from "../../../shared/nav-seed";
 import { managementSeed } from "../../../shared/management-seed";
+import { partnersSeed } from "../../../shared/partners-seed";
+import {
+  esgReportsSeed,
+  gcbParticipantsSeed,
+  landingSectionsSeed,
+  sustainableBondsSeed,
+  verifiersSeed,
+} from "../../../shared/landings-seed";
 import { issuerSeedRows } from "../../../shared/issuers-seed";
 import { listingSeedRows } from "../../../shared/listing-seed";
 import { defaultHomeHubs, defaultSiteSettings } from "../../../shared/site-defaults";
@@ -104,6 +112,12 @@ export function createSeedStore(): CmsStore {
     menu: allNavSeed(),
     hubs: defaultHomeHubs,
     management: managementSeed,
+    partners: partnersSeed,
+    sustainableBonds: sustainableBondsSeed,
+    esgReports: esgReportsSeed,
+    verifiers: verifiersSeed,
+    gcbParticipants: gcbParticipantsSeed,
+    landingSections: landingSectionsSeed,
     issuers: issuerSeedRows(now),
     listing: listingSeedRows(now),
     settings: [{ ...defaultSiteSettings, updatedAt: now }],

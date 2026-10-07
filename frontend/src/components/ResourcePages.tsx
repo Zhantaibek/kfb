@@ -2,13 +2,17 @@
 
 import Link from "next/link";
 import { PageIntro } from "@/components/Forms";
-import { resourceProfiles, type ResourceProfile } from "@/data/resources";
+import { partnerFields, paragraphs } from "@/lib/cms/partners";
+import { useLocalized, useLocalizedList } from "@/lib/cms/use-localized";
+import type { CmsPartner } from "@/lib/cms/types";
 import ui from "@/app/ui.module.css";
 import { useTr } from "@/lib/use-tr";
 import styles from "./ResourcePages.module.css";
 
-export function ResourceDirectory() {
+/** /about/partners — все партнёры из админки. */
+export function ResourceDirectory({ partners }: { partners: CmsPartner[] }) {
   const tr = useTr();
+  const list = useLocalizedList(partners, [...partnerFields]);
   return (
     <main className={ui.wrap}>
       <PageIntro
@@ -21,14 +25,14 @@ export function ResourceDirectory() {
         lead="Кратко о каждом партнёре биржи."
       />
       <div className={styles.list}>
-        {resourceProfiles.map((item) => (
+        {list.map((item) => (
           <Link className={styles.item} href={`/about/partners/${item.slug}`} key={item.slug}>
             <span>
               <b>
-                {item.mark} · {tr(item.caption)}
+                {item.mark} · {item.caption}
               </b>
-              <small>{tr(item.name)}</small>
-              <p>{tr(item.lead)}</p>
+              <small>{item.name}</small>
+              <p>{item.lead}</p>
             </span>
           </Link>
         ))}
@@ -37,15 +41,20 @@ export function ResourceDirectory() {
   );
 }
 
-export function ResourceDetail({ item }: { item: ResourceProfile }) {
+/** /about/partners/[slug] — страница партнёра. */
+export function ResourceDetail({ item: raw, partners }: { item: CmsPartner; partners: CmsPartner[] }) {
   const tr = useTr();
-  const others = resourceProfiles.filter((entry) => entry.slug !== item.slug);
+  const item = useLocalized(raw, [...partnerFields]);
+  const others = useLocalizedList(
+    partners.filter((entry) => entry.slug !== raw.slug),
+    [...partnerFields],
+  );
   return (
     <main className={ui.wrap}>
       <PageIntro
         crumb={
           <>
-            <Link href="/">Главная</Link> / <Link href="/about/partners">{tr("Наши партнеры")}</Link> / {tr(item.caption)}
+            <Link href="/">Главная</Link> / <Link href="/about/partners">{tr("Наши партнеры")}</Link> / {item.caption}
           </>
         }
         title={item.caption}
@@ -53,11 +62,19 @@ export function ResourceDetail({ item }: { item: ResourceProfile }) {
       />
       <div className={ui.grid}>
         <article className={ui.card}>
-          <p>{tr(item.lead)}</p>
-          {item.body.map((paragraph) => (
-            <p key={paragraph}>{tr(paragraph)}</p>
+          <p>{item.lead}</p>
+          {paragraphs(item.body).map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
           ))}
           <p>
+            {item.site ? (
+              <>
+                <a href={item.site} target="_blank" rel="noopener noreferrer">
+                  {tr("Официальный сайт")} ↗
+                </a>
+                {" · "}
+              </>
+            ) : null}
             <Link href="/about/partners">{tr("Все партнеры")}</Link>
           </p>
         </article>
@@ -67,7 +84,7 @@ export function ResourceDetail({ item }: { item: ResourceProfile }) {
             {others.map((entry) => (
               <li key={entry.slug}>
                 <Link href={`/about/partners/${entry.slug}`}>
-                  {entry.mark} · {tr(entry.caption)}
+                  {entry.mark} · {entry.caption}
                 </Link>
               </li>
             ))}

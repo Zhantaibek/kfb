@@ -204,15 +204,13 @@ export function NewsManager() {
                 onChange={(issuerSlug) => setEditing({ ...editing, issuerSlug })}
               />
             ) : (
-              <label className={`${css.field} ${css.wide}`}>
-                <span>
-                  <input
-                    type="checkbox"
-                    checked={editing.kind === "urgent"}
-                    onChange={(event) => setKind(event.target.checked ? "urgent" : "exchange")}
-                  />{" "}
-                  Пометить как срочную
-                </span>
+              <label className={`${css.check} ${css.wide}`}>
+                <input
+                  type="checkbox"
+                  checked={editing.kind === "urgent"}
+                  onChange={(event) => setKind(event.target.checked ? "urgent" : "exchange")}
+                />
+                Пометить как срочную
               </label>
             )}
             <LocaleTabs lang={lang} onChange={setLang} i18n={editing.i18n} fields={newsFields} item={editing} />

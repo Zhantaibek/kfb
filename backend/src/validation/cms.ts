@@ -18,10 +18,6 @@ export const publicRequestSchema = z.object({
   payload: z.record(z.string(), z.string()).default({}),
 });
 
-export const visitSchema = z.object({
-  path: z.string().trim().min(1).max(180).default("/"),
-});
-
 const publishStatus = z.enum(["draft", "published"]);
 const newsKind = z.enum(["exchange", "company", "urgent"]);
 const i18nSchema = z
@@ -213,6 +209,112 @@ export const managementItemSchema = z
 
 const plain = (max: number) => z.string().trim().max(max).default("");
 
+const siteUrl = z
+  .string()
+  .trim()
+  .max(300)
+  .regex(/^(https?:\/\/\S+)?$/i, "Сайт: ссылка вида https://…")
+  .default("");
+
+export const sustainableBondItemSchema = z
+  .object({
+    name: z.string({ error: "Укажите название выпуска" }).trim().min(1, "Укажите название выпуска").max(200),
+    issuerSlug: plain(160),
+    regNumber: plain(40),
+    kind: plain(120),
+    volume: plain(40),
+    nominal: plain(40),
+    currency: plain(20),
+    yieldRate: plain(60),
+    startDate: plain(20),
+    endDate: plain(20),
+    category: plain(10),
+    standard: plain(500),
+    order: z.coerce.number().int().min(0).max(10_000).default(0),
+    status: publishStatus,
+    i18n: i18nSchema,
+  })
+  // Название выпуска — имя эмитента, его можно не переводить.
+  .superRefine(requireI18n(["name", "kind", "yieldRate", "standard"], ["name"]));
+
+export const esgReportItemSchema = z
+  .object({
+    title: z.string({ error: "Укажите название отчёта" }).trim().min(1, "Укажите название отчёта").max(300),
+    file: plain(500),
+    order: z.coerce.number().int().min(0).max(10_000).default(0),
+    status: publishStatus,
+    i18n: i18nSchema,
+  })
+  .superRefine(requireI18n(["title"]));
+
+export const verifierItemSchema = z
+  .object({
+    name: z.string({ error: "Укажите название организации" }).trim().min(1, "Укажите название организации").max(200),
+    site: siteUrl,
+    order: z.coerce.number().int().min(0).max(10_000).default(0),
+    status: publishStatus,
+    i18n: i18nSchema,
+  })
+  .superRefine(requireI18n(["name"], ["name"]));
+
+export const gcbParticipantItemSchema = z
+  .object({
+    title: z.string({ error: "Укажите название" }).trim().min(1, "Укажите название").max(200),
+    type: z.enum(["broker", "bank"], { error: "Выберите: брокер или банк" }),
+    address: plain(300),
+    phones: z.string().trim().max(1000).default(""),
+    emails: z.string().trim().max(1000).default(""),
+    website: siteUrl,
+    order: z.coerce.number().int().min(0).max(10_000).default(0),
+    status: publishStatus,
+    i18n: i18nSchema,
+  })
+  .superRefine(requireI18n(["title"], ["title"]));
+
+export const landingSectionItemSchema = z
+  .object({
+    page: z.enum(["sustainable", "gcb"]),
+    key: z.string().trim().min(1).max(60).regex(/^[a-z0-9-]+$/, "Ключ блока: латиница, цифры и «-»"),
+    kicker: plain(120),
+    title: plain(300),
+    text: z.string().trim().max(20_000).default(""),
+    items: z.string().trim().max(5_000).default(""),
+    link: plain(500),
+    photo: plain(500),
+    order: z.coerce.number().int().min(0).max(10_000).default(0),
+    i18n: i18nSchema,
+  })
+  .superRefine(requireI18n(["kicker", "title", "text", "items"]));
+
+export const partnerItemSchema = z
+  .object({
+    slug: z
+      .string({ error: "Укажите адрес страницы (slug)" })
+      .trim()
+      .min(1, "Укажите адрес страницы (slug)")
+      .max(80)
+      .regex(/^[a-z0-9-]+$/, "Адрес страницы: латиница в нижнем регистре, цифры и «-»"),
+    mark: z.string({ error: "Укажите обозначение" }).trim().min(1, "Укажите обозначение (например, KASE)").max(20),
+    kind: plain(80),
+    caption: z.string({ error: "Укажите название" }).trim().min(1, "Укажите название на карточке").max(120),
+    name: plain(300),
+    lead: plain(500),
+    body: z.string().max(20_000).default(""),
+    site: z
+      .string()
+      .trim()
+      .max(300)
+      .regex(/^(https?:\/\/\S+)?$/i, "Сайт партнёра: ссылка вида https://…")
+      .default(""),
+    logo: plain(500),
+    logoWide: z.coerce.boolean().default(false),
+    order: z.coerce.number().int().min(0).max(10_000).default(0),
+    status: publishStatus,
+    i18n: i18nSchema,
+  })
+  // Названия партнёров (KASE, Borsa Istanbul) — имена собственные: их можно не переводить.
+  .superRefine(requireI18n(["kind", "caption", "name", "lead", "body"], ["caption", "name"]));
+
 export const issuerItemSchema = z.object({
   slug: z
     .string({ error: "Укажите slug" })
@@ -274,6 +376,14 @@ export const listingItemSchema = z.object({
     .transform((rows) => rows.filter((row) => row.name || row.url)),
 });
 
+/** Ссылка на соцсеть в подвале: пусто (иконка скрыта) или https-адрес. */
+const socialUrl = z
+  .string()
+  .trim()
+  .max(300)
+  .regex(/^(https?:\/\/\S+)?$/i, "Ссылка на соцсеть должна начинаться с https://")
+  .default("");
+
 export const settingsItemSchema = z
   .object({
     tagline: z.string().trim().max(500).default(""),
@@ -281,6 +391,9 @@ export const settingsItemSchema = z
     phones: z.string().trim().max(1000).default(""),
     emails: z.string().trim().max(500).default(""),
     fax: z.string().trim().max(80).default(""),
+    facebookUrl: socialUrl,
+    instagramUrl: socialUrl,
+    telegramUrl: socialUrl,
     license: z.string().trim().max(200).default(""),
     copyright: z.string().trim().max(300).default(""),
     eduUrl: z.string().trim().max(500).default(""),
@@ -298,6 +411,12 @@ const mutableCollections = z.enum([
   "menu",
   "hubs",
   "management",
+  "partners",
+  "sustainableBonds",
+  "esgReports",
+  "verifiers",
+  "gcbParticipants",
+  "landingSections",
   "issuers",
   "listing",
   "settings",
@@ -319,6 +438,12 @@ export const itemSchemas = {
   menu: menuItemSchema,
   hubs: hubItemSchema,
   management: managementItemSchema,
+  partners: partnerItemSchema,
+  sustainableBonds: sustainableBondItemSchema,
+  esgReports: esgReportItemSchema,
+  verifiers: verifierItemSchema,
+  gcbParticipants: gcbParticipantItemSchema,
+  landingSections: landingSectionItemSchema,
   issuers: issuerItemSchema,
   listing: listingItemSchema,
   settings: settingsItemSchema,

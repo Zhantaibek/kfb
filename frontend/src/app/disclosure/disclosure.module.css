@@ -111,3 +111,40 @@
   border-color: color-mix(in srgb, var(--brand) 50%, transparent);
   background: color-mix(in srgb, var(--brand) 12%, var(--surface));
 }
+
+.search {
+  position: relative;
+  margin: 0 0 14px;
+}
+
+.search input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 52px 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.search input:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.search button {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-muted);
+  transform: translateY(-50%);
+  cursor: pointer;
+}

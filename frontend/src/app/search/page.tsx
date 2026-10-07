@@ -1,49 +1,32 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
-import { instruments, members } from "@/data/catalog";
-import { loadPublicContent } from "@/lib/cms/public";
-import { sectionPages, siteNav } from "@/data/site-nav";
-import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
+import { isExternal, mergeResults, searchStatic, type SearchResult } from "@/lib/site-search";
+import ui from "@/app/ui.module.css";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Поиск" };
 
-const sectionIndex = [
-  ...siteNav.flatMap((group) =>
-    group.items.flatMap((item) =>
-      item.children?.length
-        ? item.children.map((child) => ({ href: child.href, label: child.label }))
-        : [{ href: item.href, label: item.label }],
-    ),
-  ),
-  ...Object.entries(sectionPages).map(([href, item]) => ({ href, label: item.title })),
-];
+const apiUrl = process.env.API_URL ?? "http://localhost:4000";
+/** На странице поиска — до 50 результатов в каждой группе. */
+const PER_GROUP = 50;
 
-export default async function SearchPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
+async function searchDatabase(query: string): Promise<SearchResult | null> {
+  try {
+    const response = await fetch(`${apiUrl}/api/public/search?q=${encodeURIComponent(query)}&limit=${PER_GROUP}`, {
+      cache: "no-store",
+    });
+    return response.ok ? ((await response.json()) as SearchResult) : null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q = "" } = await searchParams;
-  const query = q.trim().toLowerCase();
-  const news = (await loadPublicContent()).news;
-  const papers = query
-    ? instruments.filter((item) => `${item.ticker} ${item.name} ${item.issuer}`.toLowerCase().includes(query))
-    : [];
-  const stories = query ? news.filter((item) => `${item.title} ${item.excerpt}`.toLowerCase().includes(query)) : [];
-  const orgs = query ? members.filter((item) => item.name.toLowerCase().includes(query)) : [];
-  const sections = query
-    ? [
-        ...new Map(
-          sectionIndex
-            .filter((item) => item.label.toLowerCase().includes(query))
-            .map((item) => [item.href, item]),
-        ).values(),
-      ]
-    : [];
-  const total = papers.length + stories.length + orgs.length + sections.length;
+  const query = q.trim();
+  const result = query ? mergeResults(await searchDatabase(query), searchStatic(query, PER_GROUP), PER_GROUP) : null;
 
   return (
     <PublicMain>
@@ -54,57 +37,52 @@ export default async function SearchPage({
           </>
         }
         title="Поиск по сайту"
-        lead="Ищите раздел, тикер, эмитента, новость или участника торгов."
+        lead="Разделы и тексты страниц, эмитенты и их отчёты, листинг, котировки, новости, руководство, участники торгов, партнёры и курсы учебного центра."
       />
       <form className={ui.toolbar} action="/search">
-        <input className={ui.search} name="q" defaultValue={q} placeholder="Например: комитеты, KTEL или ГЦБ" />
+        <input className={ui.search} name="q" defaultValue={q} placeholder="Например: аэропорт, MAIR4, аудиторский отчёт, ГЦБ" />
         <button className={ui.primary} type="submit">
           Найти
         </button>
       </form>
+
       {!query ? <p className={ui.muted}>Введите запрос.</p> : null}
-      {query && total === 0 ? <p>Ничего не найдено.</p> : null}
-      {sections.length ? (
-        <section className={ui.list}>
-          <h2>Разделы</h2>
-          {sections.map((item) => (
-            <Link className={ui.row} href={item.href} key={item.href + item.label}>
-              {item.label}
-            </Link>
-          ))}
-        </section>
+      {result ? (
+        <p className={ui.muted}>
+          {result.total ? `Найдено: ${result.total}` : "Ничего не найдено. Попробуйте другое слово или часть названия."}
+        </p>
       ) : null}
-      {papers.length ? (
-        <section className={ui.list}>
-          <h2>Инструменты</h2>
-          {papers.map((item) => (
-            <Link className={ui.row} href={`/market/${item.ticker}`} key={item.ticker}>
-              <b>{item.ticker}</b>
-              <span>{item.name}</span>
-            </Link>
-          ))}
+
+      {result?.groups.map((group) => (
+        <section className={ui.list} key={group.kind}>
+          <h2>
+            {group.label} <small>{group.total}</small>
+          </h2>
+          {group.items.map((item) => {
+            const body = (
+              <>
+                <b>{item.title}</b>
+                {item.meta ? <small>{item.meta}</small> : null}
+                {item.snippet ? <span>{item.snippet}</span> : null}
+              </>
+            );
+            return isExternal(item.href) ? (
+              <a className={`${ui.row} ${ui.searchRow}`} href={item.href} target="_blank" rel="noopener noreferrer" key={item.href + item.title}>
+                {body}
+              </a>
+            ) : (
+              <Link className={`${ui.row} ${ui.searchRow}`} href={item.href} key={item.href + item.title}>
+                {body}
+              </Link>
+            );
+          })}
+          {group.total > group.items.length ? (
+            <p className={ui.muted}>
+              Показаны первые {group.items.length} из {group.total} — уточните запрос.
+            </p>
+          ) : null}
         </section>
-      ) : null}
-      {stories.length ? (
-        <section className={ui.list}>
-          <h2>Новости</h2>
-          {stories.map((item) => (
-            <Link className={ui.row} href={`/news/${item.slug}`} key={item.slug}>
-              {item.title}
-            </Link>
-          ))}
-        </section>
-      ) : null}
-      {orgs.length ? (
-        <section className={ui.list}>
-          <h2>Участники</h2>
-          {orgs.map((item) => (
-            <Link className={ui.row} href="/members" key={item.name}>
-              {item.name}
-            </Link>
-          ))}
-        </section>
-      ) : null}
+      ))}
     </PublicMain>
   );
 }

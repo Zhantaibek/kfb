@@ -10,6 +10,7 @@ import {
   type CmsListingEntry,
   type ListingCategoryId,
 } from "@/lib/cms/types";
+import { DocumentViewer } from "@/components/admin/DocumentViewer";
 import css from "@/app/admin/admin.module.css";
 
 type Tab = "issuers" | "listing";
@@ -109,6 +110,8 @@ function TextField({
 
 export function IssuersManager() {
   const { store, error, busy, mutate, upload, setError } = useAdminStore();
+  // Просмотр отчётов бумаги поверх страницы, без перехода в другое окно.
+  const [viewing, setViewing] = useState<{ title: string; documents: CmsListingDocument[]; index: number } | null>(null);
   // Переход с кнопки «Редактировать» на сайте: ?tab=listing или ?edit=<slug эмитента>.
   // Админка рендерится только в браузере (AdminShell ждёт сессию), поэтому window здесь доступен.
   const [tab, setTab] = useState<Tab>(() => (urlParam("tab") === "listing" ? "listing" : "issuers"));
@@ -476,9 +479,21 @@ export function IssuersManager() {
                     <div key={index} className={css.docRow}>
                       <input placeholder="Название" value={doc.name} onChange={(event) => setDocumentCell(index, "name", event.target.value)} />
                       {doc.url ? (
-                        <a className={css.docFile} href={doc.url} target="_blank" rel="noreferrer">
+                        <button
+                          className={css.docFile}
+                          type="button"
+                          onClick={() => {
+                            const docs = entry.documents ?? [];
+                            setViewing({
+                              title: entry.code ? `${entry.code} — ${entry.name ?? ""}` : (entry.name ?? "Документы"),
+                              documents: docs,
+                              // в окне только документы с файлом — пересчитываем позицию
+                              index: docs.slice(0, index).filter((item) => item.url).length,
+                            });
+                          }}
+                        >
                           Открыть файл
-                        </a>
+                        </button>
                       ) : (
                         <span className={css.docFile}>Файл не загружен</span>
                       )}
@@ -563,6 +578,15 @@ export function IssuersManager() {
                         <td>{row.cap || "—"}</td>
                         <td>
                           <div className={css.rowActions}>
+                            {row.documents?.some((doc) => doc.url) ? (
+                              <button
+                                className={css.ghost}
+                                type="button"
+                                onClick={() => setViewing({ title: `${row.code} — ${row.name}`, documents: row.documents, index: 0 })}
+                              >
+                                Отчёты ({row.documents.filter((doc) => doc.url).length})
+                              </button>
+                            ) : null}
                             <button className={css.ghost} type="button" onClick={() => setEntry(row)}>
                               Изменить
                             </button>
@@ -580,6 +604,14 @@ export function IssuersManager() {
           </div>
         </>
       )}
+      {viewing ? (
+        <DocumentViewer
+          title={viewing.title}
+          documents={viewing.documents}
+          startIndex={viewing.index}
+          onClose={() => setViewing(null)}
+        />
+      ) : null}
     </>
   );
 }

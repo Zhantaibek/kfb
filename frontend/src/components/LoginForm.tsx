@@ -7,6 +7,12 @@ import { useTr } from "@/lib/use-tr";
 import ui from "@/app/ui.module.css";
 import styles from "@/app/login/login.module.css";
 
+/** Куда вернуть после входа: только пути этого же сайта (защита от открытого редиректа). */
+function nextPath() {
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+}
+
 function MailIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -43,7 +49,15 @@ export function LoginForm() {
       setError(result.error);
       return;
     }
-    router.push(result.staff ? "/admin" : "/cabinet");
+    const next = nextPath();
+    const isEdu = result.role === "student" || result.role === "teacher";
+    const target = next ?? (result.staff ? "/admin" : isEdu ? "/education/app" : "/cabinet");
+    // Учебный центр — отдельное приложение со своими стилями: открываем его полной загрузкой.
+    if (target.startsWith("/education/app")) {
+      window.location.href = target;
+      return;
+    }
+    router.push(target);
   }
 
   return (

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FeedbackForm, PageIntro } from "@/components/Forms";
-import { EDU_PLATFORM_URL } from "@/lib/edu";
-import { loadPublicContent } from "@/lib/cms/public";
+import { CmsSection } from "@/components/CmsSection";
+import { EDU_PLATFORM_URL, eduLinkProps } from "@/lib/edu";
+import { findPageByPath, loadPublicContent } from "@/lib/cms/public";
 import { splitLines, telHref } from "@/lib/cms/contacts";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
@@ -19,7 +20,10 @@ const courses = [
 ];
 
 export default async function EducationPage() {
-  const { settings } = await loadPublicContent();
+  const content = await loadPublicContent();
+  const { settings } = content;
+  // История и задачи Учебного центра — страница /education в админке (перенесена с kse.kg).
+  const about = findPageByPath(content, "/education");
   const eduUrl = settings.eduUrl || EDU_PLATFORM_URL;
   const phones = splitLines(settings.phones);
 
@@ -42,7 +46,7 @@ export default async function EducationPage() {
             Курсы, уроки, задания, прогресс и кабинет студента / преподавателя / администратора — в учебной CRM КФБ.
           </p>
           <p style={{ marginTop: 28 }}>
-            <a className={ui.primary} href={eduUrl} target="_blank" rel="noopener noreferrer">
+            <a className={ui.primary} href={eduUrl} {...eduLinkProps(eduUrl)}>
               Открыть учебную платформу →
             </a>
           </p>
@@ -131,6 +135,8 @@ export default async function EducationPage() {
         </div>
       </section>
 
+      <CmsSection page={about} title="Об Учебном центре" />
+
       <div className={ui.grid} style={{ marginTop: 20 }}>
         <FeedbackForm
           title="Запись на семинар"
@@ -150,7 +156,7 @@ export default async function EducationPage() {
             <li>Выберите курс и проходите уроки онлайн</li>
           </ol>
           <p>
-            <a href={eduUrl} target="_blank" rel="noopener noreferrer">
+            <a href={eduUrl} {...eduLinkProps(eduUrl)}>
               Перейти на учебную платформу →
             </a>
           </p>

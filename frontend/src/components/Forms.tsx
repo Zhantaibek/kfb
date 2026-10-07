@@ -68,7 +68,7 @@ export function PageIntro({
 }) {
   const tr = useTr();
   return (
-    <header>
+    <header className={ui.pageIntro}>
       <p className={ui.crumb}>{localizeNode(crumb, tr)}</p>
       <div className={ui.titleRow}>
         <h1 className={ui.title}>{tr(title)}</h1>

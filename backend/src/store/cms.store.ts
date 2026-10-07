@@ -42,6 +42,15 @@ export function publishedManagement(store: CmsStore) {
     .sort((a, b) => a.order - b.order);
 }
 
+export function publishedPartners(store: CmsStore) {
+  return [...store.partners].filter((item) => item.status === "published").sort((a, b) => a.order - b.order);
+}
+
+/** Опубликованные записи по порядку из админки (бумаги сектора, отчёты, верификаторы, участники ГЦБ). */
+export function publishedOrdered<T extends { status: string; order: number }>(items: T[]) {
+  return items.filter((item) => item.status === "published").sort((a, b) => a.order - b.order);
+}
+
 export function sanitizeStore(store: CmsStore) {
   return { ...store, users: publicUsers(store) };
 }

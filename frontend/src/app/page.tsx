@@ -1,21 +1,9 @@
 import { HomeView } from "@/components/HomeView";
 import { isGeneralNews } from "@/lib/cms/types";
 import { findIssuer, loadIssuerData, loadPublicContent } from "@/lib/cms/public";
-import {
-  indexHistory,
-  indexKse,
-  instruments,
-  sessionDate,
-  sessionHours,
-  stats,
-} from "@/data/catalog";
+import { loadMarketData } from "@/lib/market-data";
 
 export const dynamic = "force-dynamic";
-
-const gold = instruments.find((item) => item.ticker === "GOLDB1");
-const stocks = instruments.filter((item) => item.type === "stock").length;
-const gcb = instruments.filter((item) => item.type === "gcb").length;
-const metals = instruments.filter((item) => item.type === "metal").length;
 
 function bishkekSession() {
   const parts = Object.fromEntries(
@@ -40,7 +28,11 @@ function bishkekSession() {
 }
 
 export default async function Home() {
-  const [content, issuerData] = await Promise.all([loadPublicContent(), loadIssuerData()]);
+  const [content, issuerData, market] = await Promise.all([loadPublicContent(), loadIssuerData(), loadMarketData()]);
+  // Рынок — живые данные kse.kg (или демо, пока их нет).
+  const { instruments } = market;
+  const count = (type: string) => instruments.filter((item) => item.type === type).length;
+  const gold = instruments.find((item) => item.type === "metal" && item.price > 0);
   const settings = content.settings;
   const session = bishkekSession();
   const schema = {
@@ -82,15 +74,15 @@ export default async function Home() {
             i18n: item.i18n,
             company: (item.issuerSlug && findIssuer(issuerData, item.issuerSlug)?.name) || item.tag,
           }))}
-        session={{ ...session, hours: sessionHours, date: sessionDate }}
+        session={{ ...session, hours: market.sessionHours, date: market.sessionDate }}
         index={{
-          value: indexKse.value,
-          change: indexKse.change,
-          history: indexHistory.map((item) => item.index),
-          capitalization: indexKse.capitalization,
+          value: market.index.value,
+          change: market.index.change,
+          history: market.indexHistory.map((item) => item.index),
+          capitalization: market.index.capitalization,
         }}
-        volume={{ value: stats.volumeMln, change: stats.volumeChange, trades: stats.trades }}
-        listing={{ total: instruments.length, stocks, gcb, metals }}
+        volume={{ value: market.stats.volumeMln, change: market.stats.volumeChange, trades: market.stats.trades }}
+        listing={{ total: instruments.length, stocks: count("stock"), gcb: count("gcb"), metals: count("metal") }}
         gold={gold ? { price: gold.price, change: gold.change } : undefined}
       />
     </>

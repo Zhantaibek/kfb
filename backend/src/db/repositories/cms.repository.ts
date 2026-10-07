@@ -5,6 +5,7 @@ import type {
   CmsIssuer,
   CmsListingEntry,
   CmsManagementPerson,
+  CmsPartner,
   CmsMedia,
   CmsMenuItem,
   CmsNews,
@@ -22,6 +23,7 @@ import {
   toCmsIssuer,
   toCmsListingEntry,
   toCmsManagementPerson,
+  toCmsPartner,
   toCmsMedia,
   toCmsMenuItem,
   toCmsNews,
@@ -32,9 +34,18 @@ import {
   toCmsUser,
   toCmsVisit,
 } from "../mappers";
+import {
+  createLandingItem,
+  deleteLandingItem,
+  detachLandingMedia,
+  findLandingItem,
+  isLandingCollection,
+  readLandingStore,
+  updateLandingItem,
+} from "../landing";
 
 export async function readFullStore(): Promise<CmsStore> {
-  const [news, slides, media, pages, menu, hubs, management, issuers, listing, settings, requests, users, visits, audit] =
+  const [news, slides, media, pages, menu, hubs, management, partners, issuers, listing, settings, requests, users, visits, audit] =
     await Promise.all([
     prisma.news.findMany({ orderBy: { updatedAt: "desc" } }),
     prisma.slide.findMany({ orderBy: { sortOrder: "asc" } }),
@@ -43,6 +54,7 @@ export async function readFullStore(): Promise<CmsStore> {
     prisma.menuItem.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.homeHub.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.managementPerson.findMany({ orderBy: [{ groupId: "asc" }, { sortOrder: "asc" }] }),
+    prisma.partner.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.issuer.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
     prisma.listingEntry.findMany({ orderBy: [{ category: "asc" }, { sortOrder: "asc" }] }),
     prisma.siteSettings.findMany(),
@@ -51,8 +63,10 @@ export async function readFullStore(): Promise<CmsStore> {
     prisma.visit.findMany({ orderBy: { at: "desc" }, take: 300 }),
     prisma.audit.findMany({ orderBy: { at: "desc" }, take: 200 }),
   ]);
+  const landing = await readLandingStore();
 
   return {
+    ...landing,
     news: news.map(toCmsNews),
     slides: slides.map(toCmsSlide),
     media: media.map(toCmsMedia),
@@ -60,6 +74,7 @@ export async function readFullStore(): Promise<CmsStore> {
     menu: menu.map(toCmsMenuItem),
     hubs: hubs.map(toCmsHomeHub),
     management: management.map(toCmsManagementPerson),
+    partners: partners.map(toCmsPartner),
     issuers: issuers.map(toCmsIssuer),
     listing: listing.map(toCmsListingEntry),
     settings: settings.map(toCmsSiteSettings),
@@ -118,24 +133,6 @@ export async function insertAudit(entry: Omit<CmsAudit, "id" | "at">) {
   await trimAudit();
 }
 
-async function trimVisits() {
-  const keep = await prisma.visit.findMany({
-    orderBy: { at: "desc" },
-    take: 300,
-    select: { id: true },
-  });
-  const ids = keep.map((row) => row.id);
-  if (ids.length === 0) return;
-  await prisma.visit.deleteMany({ where: { id: { notIn: ids } } });
-}
-
-export async function insertVisit(path: string) {
-  await prisma.visit.create({
-    data: { id: crypto.randomUUID(), path, at: new Date() },
-  });
-  await trimVisits();
-}
-
 async function trimRequests() {
   const keep = await prisma.request.findMany({
     orderBy: { createdAt: "desc" },
@@ -187,6 +184,8 @@ export async function detachMediaUrl(url: string) {
   await prisma.slide.updateMany({ where: { photo: url }, data: { photo: "" } });
   await prisma.homeHub.updateMany({ where: { photo: url }, data: { photo: "" } });
   await prisma.managementPerson.updateMany({ where: { photo: url }, data: { photo: "" } });
+  await prisma.partner.updateMany({ where: { logo: url }, data: { logo: "" } });
+  await detachLandingMedia(url);
 
   const news = await prisma.news.findMany({ where: { body: { contains: url } }, select: { id: true, body: true } });
   for (const row of news) {
@@ -212,6 +211,10 @@ export async function readIssuerData() {
 type MutableCollection = Exclude<CmsCollection, "audit" | "visits">;
 
 export async function createItem(collection: MutableCollection, item: Record<string, unknown>) {
+  if (isLandingCollection(collection)) {
+    await createLandingItem(collection, item);
+    return;
+  }
   switch (collection) {
     case "news": {
       const row = item as unknown as CmsNews;
@@ -270,6 +273,26 @@ export async function createItem(collection: MutableCollection, item: Record<str
           updatedAt: new Date(row.updatedAt),
         },
       });
+      break;
+    }
+    case "partners": {
+      const row = item as unknown as CmsPartner;
+      await prisma.partner.create({ data: { id: row.id, ...{
+          slug: row.slug,
+          mark: row.mark,
+          kind: row.kind,
+          caption: row.caption,
+          name: row.name,
+          lead: row.lead,
+          body: row.body,
+          site: row.site,
+          logo: row.logo,
+          logoWide: row.logoWide,
+          sortOrder: row.order,
+          status: row.status,
+          i18n: row.i18n ?? {},
+          updatedAt: new Date(row.updatedAt),
+        } } });
       break;
     }
     case "issuers": {
@@ -382,6 +405,9 @@ export async function createItem(collection: MutableCollection, item: Record<str
           phones: row.phones,
           emails: row.emails,
           fax: row.fax,
+          facebookUrl: row.facebookUrl,
+          instagramUrl: row.instagramUrl,
+          telegramUrl: row.telegramUrl,
           license: row.license,
           copyright: row.copyright,
           eduUrl: row.eduUrl,
@@ -416,6 +442,10 @@ export async function createItem(collection: MutableCollection, item: Record<str
 
 export async function updateItem(collection: MutableCollection, id: string, item: Record<string, unknown>) {
   try {
+    if (isLandingCollection(collection)) {
+      await updateLandingItem(collection, id, item);
+      return;
+    }
     switch (collection) {
     case "news": {
       const row = item as unknown as CmsNews;
@@ -473,6 +503,26 @@ export async function updateItem(collection: MutableCollection, id: string, item
           updatedAt: new Date(row.updatedAt),
         },
       });
+      break;
+    }
+    case "partners": {
+      const row = item as unknown as CmsPartner;
+      await prisma.partner.update({ where: { id }, data: {
+          slug: row.slug,
+          mark: row.mark,
+          kind: row.kind,
+          caption: row.caption,
+          name: row.name,
+          lead: row.lead,
+          body: row.body,
+          site: row.site,
+          logo: row.logo,
+          logoWide: row.logoWide,
+          sortOrder: row.order,
+          status: row.status,
+          i18n: row.i18n ?? {},
+          updatedAt: new Date(row.updatedAt),
+        } });
       break;
     }
     case "issuers": {
@@ -590,6 +640,9 @@ export async function updateItem(collection: MutableCollection, id: string, item
           phones: row.phones,
           emails: row.emails,
           fax: row.fax,
+          facebookUrl: row.facebookUrl,
+          instagramUrl: row.instagramUrl,
+          telegramUrl: row.telegramUrl,
           license: row.license,
           copyright: row.copyright,
           eduUrl: row.eduUrl,
@@ -634,6 +687,10 @@ export async function updateItem(collection: MutableCollection, id: string, item
 
 export async function deleteItem(collection: MutableCollection, id: string) {
   try {
+    if (isLandingCollection(collection)) {
+      await deleteLandingItem(collection, id);
+      return;
+    }
     switch (collection) {
       case "news":
         await prisma.news.delete({ where: { id } });
@@ -655,6 +712,9 @@ export async function deleteItem(collection: MutableCollection, id: string) {
         break;
       case "management":
         await prisma.managementPerson.delete({ where: { id } });
+        break;
+      case "partners":
+        await prisma.partner.delete({ where: { id } });
         break;
       case "issuers":
         await prisma.issuer.delete({ where: { id } });
@@ -682,6 +742,7 @@ export async function findItem(
   collection: MutableCollection,
   id: string,
 ): Promise<Record<string, unknown> | null> {
+  if (isLandingCollection(collection)) return findLandingItem(collection, id);
   switch (collection) {
     case "news": {
       const row = await prisma.news.findUnique({ where: { id } });
@@ -710,6 +771,10 @@ export async function findItem(
     case "management": {
       const row = await prisma.managementPerson.findUnique({ where: { id } });
       return row ? (toCmsManagementPerson(row) as unknown as Record<string, unknown>) : null;
+    }
+    case "partners": {
+      const row = await prisma.partner.findUnique({ where: { id } });
+      return row ? (toCmsPartner(row) as unknown as Record<string, unknown>) : null;
     }
     case "issuers": {
       const row = await prisma.issuer.findUnique({ where: { id } });

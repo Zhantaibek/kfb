@@ -4,6 +4,7 @@ import type {
   Issuer,
   ListingEntry,
   ManagementPerson,
+  Partner,
   Media,
   MenuItem,
   News,
@@ -20,6 +21,7 @@ import type {
   CmsIssuer,
   CmsListingEntry,
   CmsManagementPerson,
+  CmsPartner,
   CmsMedia,
   CmsMenuItem,
   CmsNews,
@@ -69,6 +71,26 @@ export function toCmsManagementPerson(row: ManagementPerson): CmsManagementPerso
     career: parseCareer(row.career),
     order: row.sortOrder,
     status: row.status as CmsManagementPerson["status"],
+    i18n: parseI18n(row.i18n),
+    updatedAt: iso(row.updatedAt),
+  };
+}
+
+export function toCmsPartner(row: Partner): CmsPartner {
+  return {
+    id: row.id,
+    slug: row.slug,
+    mark: row.mark,
+    kind: row.kind,
+    caption: row.caption,
+    name: row.name,
+    lead: row.lead,
+    body: row.body,
+    site: row.site,
+    logo: row.logo,
+    logoWide: row.logoWide,
+    order: row.sortOrder,
+    status: row.status as CmsPartner["status"],
     i18n: parseI18n(row.i18n),
     updatedAt: iso(row.updatedAt),
   };
@@ -175,6 +197,9 @@ export function toCmsSiteSettings(row: SiteSettings): CmsSiteSettings {
     phones: row.phones,
     emails: row.emails,
     fax: row.fax,
+    facebookUrl: row.facebookUrl,
+    instagramUrl: row.instagramUrl,
+    telegramUrl: row.telegramUrl,
     license: row.license,
     copyright: row.copyright,
     eduUrl: row.eduUrl,

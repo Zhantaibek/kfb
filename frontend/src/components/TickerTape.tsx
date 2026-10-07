@@ -1,44 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { instruments } from "@/data/catalog";
+import { useMarketData } from "@/components/MarketDataProvider";
+import { instrumentHref } from "@/lib/market-data";
 import { useTr } from "@/lib/use-tr";
 import ui from "@/app/ui.module.css";
 
-const tapeItems = instruments
-  .slice(0, 10)
-  .map((item) => ({
-    ticker: item.ticker,
-    price: item.price.toLocaleString("ru-KG", { maximumFractionDigits: 2 }),
-    volume: item.volume.toLocaleString("ru-KG", { maximumFractionDigits: 0 }),
-  }));
+type TapeItem = { ticker: string; price: string; volume: string; href: string };
 
-const laneItems = [...tapeItems, ...tapeItems, ...tapeItems];
-
-function TapeRow() {
+function TapeRow({ items }: { items: TapeItem[] }) {
+  // Лента повторяется трижды, чтобы бесшовно прокручиваться на широких экранах.
+  const lane = [...items, ...items, ...items];
   return (
     <>
-      {laneItems.map((item, index) => (
-        <Link className={ui.tickerItem} href={`/market/${item.ticker}`} key={`${item.ticker}-${index}`}>
+      {lane.map((item, index) => (
+        <Link className={ui.tickerItem} href={item.href} key={`${item.ticker}-${index}`}>
           <span>{item.ticker}</span>
           <b>{item.price}</b>
-          <small>{item.volume}</small>
+          {item.volume ? <small>{item.volume}</small> : null}
         </Link>
       ))}
     </>
   );
 }
 
+/** Бегущая строка котировок — живые данные kse.kg (цена последней сделки или лучшей заявки). */
 export function TickerTape() {
   const tr = useTr();
+  const market = useMarketData();
+  const items = market.instruments.slice(0, 16).map((item) => ({
+    ticker: item.ticker,
+    price: item.price.toLocaleString("ru-KG", { maximumFractionDigits: 2 }),
+    volume: item.volume ? item.volume.toLocaleString("ru-KG", { maximumFractionDigits: 0 }) : "",
+    href: instrumentHref(market, item.ticker),
+  }));
+  if (!items.length) return null;
   return (
     <div className={ui.tickerBar} aria-label={tr("Биржевая лента")}>
       <div className={ui.tickerTrack}>
         <div className={ui.tickerLane}>
-          <TapeRow />
+          <TapeRow items={items} />
         </div>
         <div className={ui.tickerLane} aria-hidden="true">
-          <TapeRow />
+          <TapeRow items={items} />
         </div>
       </div>
     </div>

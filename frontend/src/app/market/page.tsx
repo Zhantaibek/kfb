@@ -1,30 +1,24 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { QuotesTable } from "@/components/QuotesTable";
-import { MarketDashboard } from "@/components/MarketDashboard";
-import { SessionMovers } from "@/components/SessionMovers";
-import { PageIntro } from "@/components/Forms";
-import { sessionDate, sessionHours } from "@/data/catalog";
-import ui from "@/app/ui.module.css";
-import { PublicMain } from "@/components/PublicMain";
+import { LivePage } from "@/components/live/LiveParts";
+import { loadSnapshot, type TradeResults } from "@/lib/kse-live";
+import { TradeResultsView, MarketLinks } from "@/components/live/LiveViews";
 
-export const metadata: Metadata = { title: "Торги и котировки" };
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Итоги торгов" };
 
-export default function MarketPage() {
+/** Живые данные с kse.kg/ru/TradeResults (обновляются раз в 15 минут). */
+export default async function Page() {
+  const snapshot = await loadSnapshot<TradeResults>("trade-results");
   return (
-    <PublicMain>
-      <PageIntro
-        crumb={
-          <>
-            <Link href="/">Главная</Link> / Торги
-          </>
-        }
-        title="Котировки и итоги торгов"
-        lead={`Сессия ${sessionHours}. Данные на ${sessionDate}.`}
-      />
-      <MarketDashboard compact />
-      <SessionMovers />
-      <QuotesTable />
-    </PublicMain>
+    <LivePage
+      title="Итоги торгов"
+      crumb="Статистика торгов"
+      lead="Объём торгов по рынкам и сделки по ценным бумагам: последний торговый день, неделя, месяц и год."
+      snapshot={snapshot}
+      sourceUrl="https://www.kse.kg/ru/TradeResults"
+    >
+      {snapshot ? <TradeResultsView data={snapshot.data} /> : null}
+      <MarketLinks current="/market" />
+    </LivePage>
   );
 }

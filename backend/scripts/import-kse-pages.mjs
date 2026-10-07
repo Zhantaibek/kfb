@@ -37,7 +37,20 @@ const sections = [
   ["OpenInformation", "/regulations/disclosure"],
   ["Sustainable", "/sustainable"],
   ["EduPlan", "/education/plan"],
+  // Добавлены позже: страницы, у которых на сайте свой интерфейс, — их текст выводится внутри него.
+  ["CorporateDocuments", "/documents"],
+  ["Contacts", "/contacts"],
+  ["PressClub", "/press-club"],
+  ["Education", "/education"],
 ];
+
+/** Из «Контактов» берём только таблицу отделов: адрес, телефоны и почта у сайта уже есть в настройках. */
+const bodyTransforms = {
+  Contacts: (body) => {
+    const at = body.search(/<table[\s>]/i);
+    return at >= 0 ? body.slice(at) : body;
+  },
+};
 
 /** Остальные разделы kse.kg, у которых на нашем сайте уже есть свои страницы. */
 const knownRoutes = {
@@ -46,11 +59,8 @@ const knownRoutes = {
   Management: "/about/management",
   Members: "/members",
   Partners: "/about/partners",
-  CorporateDocuments: "/documents",
-  Contacts: "/contacts",
   Listing: "/listing",
   PublicInfo: "/disclosure",
-  PressClub: "/news",
   Statistics: "/market",
   TradeResults: "/market",
   TradeArchive: "/market/archive",
@@ -61,7 +71,6 @@ const knownRoutes = {
   AuctionResult: "/gcb/results",
   VolumeGs: "/gcb/volume",
   MfaResult: "/gcb/deposits",
-  Education: "/education",
 };
 const routeBySlug = { ...knownRoutes, ...Object.fromEntries(sections) };
 
@@ -154,7 +163,7 @@ for (const [slug, route] of sections) {
   const byLang = {};
   for (const lang of langs) {
     const { title, body } = splitTitle(clean(pageText(await fetchHtml(`${ORIGIN}/${lang}/${slug}`))));
-    byLang[lang] = { title: labels[lang][slug] || title, body };
+    byLang[lang] = { title: labels[lang][slug] || title, body: bodyTransforms[slug] ? bodyTransforms[slug](body) : body };
   }
   const ru = byLang.ru;
   if (!textOf(ru.body)) {

@@ -4,16 +4,18 @@ import {
   findItem,
   insertAudit,
   insertRequest,
-  insertVisit,
   readFullStore,
   readIssuerData,
   updateItem,
 } from "../../db/repositories/cms.repository";
+import { isLandingCollection } from "../../db/landing";
 import {
   auditDetail,
   orderedHubs,
   orderedSlides,
   publishedManagement,
+  publishedOrdered,
+  publishedPartners,
   publishedNews,
   readStore,
   sanitizeStore,
@@ -121,10 +123,24 @@ async function prepareItem(
     collection === "pages" ||
     collection === "settings" ||
     collection === "management" ||
+    collection === "partners" ||
+    isLandingCollection(collection) ||
     collection === "issuers" ||
     collection === "listing"
   ) {
     item.updatedAt = now;
+  }
+  if (collection === "landingSections") {
+    const store = await readStore();
+    if (store.landingSections.some((row) => row.id !== id && row.page === item.page && row.key === item.key)) {
+      throw new AppError(`Блок «${item.key}» на этой странице уже есть`, 400);
+    }
+  }
+  if (collection === "partners") {
+    const store = await readStore();
+    if (store.partners.some((row) => row.id !== id && row.slug === item.slug)) {
+      throw new AppError(`Партнёр с адресом «${item.slug}» уже есть`, 400);
+    }
   }
   if (collection === "issuers") {
     const store = await readStore();
@@ -141,7 +157,7 @@ async function prepareItem(
     }
   }
   // issuer_slug — внешний ключ на issuers.slug: ссылку в никуда база не примет.
-  if ((collection === "listing" || collection === "news") && item.issuerSlug) {
+  if ((collection === "listing" || collection === "news" || collection === "sustainableBonds") && item.issuerSlug) {
     const store = await readStore();
     if (!store.issuers.some((row) => row.slug === item.issuerSlug)) {
       throw new AppError(`Эмитент со slug «${item.issuerSlug}» не найден`, 400);
@@ -160,6 +176,8 @@ async function prepareItem(
     collection === "menu" ||
     collection === "hubs" ||
     collection === "management" ||
+    collection === "partners" ||
+    isLandingCollection(collection) ||
     collection === "settings"
   ) {
     const htmlFields = collection === "news" || collection === "pages" ? ["body"] : [];
@@ -281,6 +299,12 @@ export async function getPublicContent() {
     menu: [...store.menu].sort((a, b) => a.order - b.order),
     hubs: orderedHubs(store),
     management: publishedManagement(store),
+    partners: publishedPartners(store),
+    sustainableBonds: publishedOrdered(store.sustainableBonds),
+    esgReports: publishedOrdered(store.esgReports),
+    verifiers: publishedOrdered(store.verifiers),
+    gcbParticipants: publishedOrdered(store.gcbParticipants),
+    landingSections: [...store.landingSections].sort((a, b) => a.order - b.order),
     settings: store.settings[0] ?? defaultSiteSettings,
   };
 }
@@ -301,7 +325,3 @@ export async function createRequest(source: string, payload: Record<string, stri
   await insertAudit({ action: "create", entity: "requests", detail: trimmedSource, actor: "public" });
 }
 
-export async function trackVisit(page: string) {
-  if (page.startsWith("/admin") || page.startsWith("/api")) return;
-  await insertVisit(page.slice(0, 180));
-}

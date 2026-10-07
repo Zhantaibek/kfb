@@ -1,13 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FeedbackForm, PageIntro } from "@/components/Forms";
-import { auctions } from "@/data/catalog";
+import { DataTable, LiveSource } from "@/components/live/LiveParts";
+import { MarketLinks } from "@/components/live/LiveViews";
+import { loadSnapshot, type TablesPage } from "@/lib/kse-live";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Государственные ценные бумаги" };
 
-export default function GcbPage() {
+export default async function GcbPage() {
+  // Расписание аукционов — живые данные с kse.kg/ru/ScheduleGS.
+  const schedule = await loadSnapshot<TablesPage>("auction-schedule");
   return (
     <PublicMain>
       <PageIntro
@@ -19,28 +24,24 @@ export default function GcbPage() {
         title="Инвестируйте в ГЦБ"
         lead="Государственные казначейские векселя ГКВ-12 и облигации ГКО-2 выпускает Министерство финансов КР. Один из самых надёжных инструментов на рынке Кыргызстана."
       />
-      <div className={ui.tableWrap}>
-        <table>
-          <thead>
-            <tr>
-              <th>Дата</th>
-              <th>Тип</th>
-              <th>Объём</th>
-              <th>Статус</th>
-            </tr>
-          </thead>
-          <tbody>
-            {auctions.map((row) => (
-              <tr key={`${row.date}-${row.type}`}>
-                <td>{row.date}</td>
-                <td>{row.type}</td>
-                <td>{row.volume}</td>
-                      <td data-status={row.status === "Состоялся" ? "done" : "soon"}>{row.status}</td>
-              </tr>
+      <section style={{ marginBottom: 22 }}>
+        <h2 style={{ margin: "0 0 10px", fontSize: 22 }}>{schedule?.data.title || "Расписание аукционов по ГЦБ"}</h2>
+        {schedule ? (
+          <>
+            <LiveSource snapshot={schedule} />
+            {schedule.data.tables.map((table, i) => (
+              <DataTable key={i} table={table} />
             ))}
-          </tbody>
-        </table>
-      </div>
+          </>
+        ) : (
+          <p className={ui.muted}>
+            Расписание загружается с kse.kg.{" "}
+            <a href="https://www.kse.kg/ru/ScheduleGS" target="_blank" rel="noopener noreferrer">
+              Открыть на kse.kg
+            </a>
+          </p>
+        )}
+      </section>
       <div className={ui.grid}>
         <article className={ui.card}>
           <h2>Как купить</h2>
@@ -62,6 +63,7 @@ export default function GcbPage() {
           success="Заявка принята. Это демо: письмо не отправляется, аукционы смотрите в таблице."
         />
       </div>
+      <MarketLinks current="/gcb" />
     </PublicMain>
   );
 }

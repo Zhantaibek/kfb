@@ -66,6 +66,22 @@ function useHoverClose() {
   };
 }
 
+/**
+ * Пока открыто меню, страница под ним не прокручивается и её полоса прокрутки не видна.
+ * Ширину пропавшей полосы возвращаем отступом — иначе шапка дёрнулась бы вбок.
+ */
+function lockPageScroll(lock: boolean) {
+  const root = document.documentElement;
+  if (lock) {
+    const scrollbar = window.innerWidth - root.clientWidth;
+    root.style.overflow = "hidden";
+    root.style.paddingRight = scrollbar > 0 ? `${scrollbar}px` : "";
+  } else {
+    root.style.overflow = "";
+    root.style.paddingRight = "";
+  }
+}
+
 function closeDetails(ref: React.RefObject<HTMLDetailsElement | null>) {
   ref.current?.removeAttribute("open");
 }
@@ -76,7 +92,11 @@ function blurFocus() {
   }
 }
 
+/** Разделы-«хабы»: пункт меню горит и на страницах, куда ведут их карточки. */
+const hubSections: Record<string, string[]> = { "/statistics": ["/market", "/gcb"] };
+
 function navOn(pathname: string, href: string) {
+  if (hubSections[href]?.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return pathname !== "/gcb/invest";
   if (!href || href === "/" || isExternalHref(href)) return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -106,6 +126,9 @@ export function SiteHeader() {
     blurFocus();
     closeDetails(menuRef);
   }
+
+  // Переход на другую страницу пересоздаёт меню без события toggle — снимаем блокировку прокрутки сами.
+  useEffect(() => () => lockPageScroll(false), [pathname]);
 
   useEffect(() => {
     closeMenus();
@@ -174,7 +197,13 @@ export function SiteHeader() {
         )}
 
         {/* Бургер-меню */}
-        <details className={`${ui.drop} ${ui.menu}`} name="kse-header" ref={menuRef} key={pathname + "-menu"}>
+        <details
+          className={`${ui.drop} ${ui.menu}`}
+          name="kse-header"
+          ref={menuRef}
+          key={pathname + "-menu"}
+          onToggle={(event) => lockPageScroll(event.currentTarget.open)}
+        >
           <summary aria-label={label("menu")}>
             <i />
             <i />

@@ -1,4 +1,6 @@
 import { AppProviders } from "@/components/AppProviders";
+import { MarketDataProvider } from "@/components/MarketDataProvider";
+import { loadMarketData } from "@/lib/market-data";
 import { SiteChrome } from "@/components/SiteChrome";
 import type { Metadata } from "next";
 import { Manrope, Unbounded } from "next/font/google";
@@ -56,7 +58,9 @@ export const metadata: Metadata = {
 
 const themeScript = `try{var t=localStorage.getItem("kse-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}else{document.documentElement.setAttribute("data-theme","dark")}}catch(e){}`;
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Живые данные kse.kg для бегущей строки, подвала и главной (или демо, если их ещё нет).
+  const market = await loadMarketData();
   return (
     <html
       lang="ru"
@@ -68,7 +72,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <AppProviders>
-          <SiteChrome>{children}</SiteChrome>
+          <MarketDataProvider value={market}>
+            <SiteChrome>{children}</SiteChrome>
+          </MarketDataProvider>
         </AppProviders>
       </body>
     </html>

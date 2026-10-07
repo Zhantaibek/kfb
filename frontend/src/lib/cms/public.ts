@@ -17,6 +17,9 @@ const emptySettings: CmsSiteSettings = {
   phones: "",
   emails: "",
   fax: "",
+  facebookUrl: "",
+  instagramUrl: "",
+  telegramUrl: "",
   license: "",
   copyright: "",
   eduUrl: "",
@@ -30,7 +33,7 @@ export async function loadPublicContent(): Promise<PublicContent> {
   try {
     return await getPublicContent();
   } catch {
-    return { news: [], slides: [], media: [], pages: [], menu: [], hubs: [], management: [], settings: emptySettings };
+    return { news: [], slides: [], media: [], pages: [], menu: [], hubs: [], management: [], partners: [], sustainableBonds: [], esgReports: [], verifiers: [], gcbParticipants: [], landingSections: [], settings: emptySettings };
   }
 }
 

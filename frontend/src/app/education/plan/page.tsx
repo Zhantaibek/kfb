@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
-import { EDU_PLATFORM_URL } from "@/lib/edu";
+import { EDU_PLATFORM_URL, eduLinkProps } from "@/lib/edu";
 import { CmsPageView } from "@/components/CmsPageView";
 import { findPageByPath, loadPublicContent } from "@/lib/cms/public";
 import ui from "@/app/ui.module.css";
@@ -95,7 +95,7 @@ export default async function EducationPlanPage() {
           проведения могут корректироваться в зависимости от количества зарегистрированных участников.
         </p>
         <p>
-          <a className={ui.primary} href={eduUrl} target="_blank" rel="noopener noreferrer">
+          <a className={ui.primary} href={eduUrl} {...eduLinkProps(eduUrl)}>
             Открыть учебную платформу →
           </a>
         </p>

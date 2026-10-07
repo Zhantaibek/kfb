@@ -14,6 +14,9 @@ const blank: CmsSiteSettings = {
   phones: "",
   emails: "",
   fax: "",
+  facebookUrl: "",
+  instagramUrl: "",
+  telegramUrl: "",
   license: "",
   copyright: "",
   eduUrl: "",
@@ -83,6 +86,30 @@ export function SettingsManager() {
           <label className={css.field}>
             <span>Почта (каждая с новой строки)</span>
             <textarea value={editing.emails} onChange={(event) => patch({ emails: event.target.value })} />
+          </label>
+          <label className={css.field}>
+            <span>Facebook (иконка в подвале; пусто — скрыта)</span>
+            <input
+              value={editing.facebookUrl}
+              placeholder="https://facebook.com/…"
+              onChange={(event) => patch({ facebookUrl: event.target.value })}
+            />
+          </label>
+          <label className={css.field}>
+            <span>Instagram</span>
+            <input
+              value={editing.instagramUrl}
+              placeholder="https://instagram.com/…"
+              onChange={(event) => patch({ instagramUrl: event.target.value })}
+            />
+          </label>
+          <label className={css.field}>
+            <span>Telegram</span>
+            <input
+              value={editing.telegramUrl}
+              placeholder="https://t.me/…"
+              onChange={(event) => patch({ telegramUrl: event.target.value })}
+            />
           </label>
           <label className={css.field}>
             <span>Факс</span>

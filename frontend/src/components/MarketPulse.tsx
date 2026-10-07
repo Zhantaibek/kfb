@@ -2,19 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  auctions,
-  formatChange,
-  formatSom,
-  indexHistory,
-  indexKse,
-  instruments,
-  sessionDate,
-  sessionHours,
-  tradingRows,
-  type Instrument,
-  type InstrumentType,
-} from "@/data/catalog";
+import { formatChange, formatSom, type Instrument, type InstrumentType } from "@/data/catalog";
+import { useMarketData } from "@/components/MarketDataProvider";
+import { instrumentHref, type MarketData, type TradeRow } from "@/lib/market-data";
 import { useTr } from "@/lib/use-tr";
 import styles from "./MarketPulse.module.css";
 
@@ -65,7 +55,7 @@ function historyDate(value: string) {
   return new Date(year, month - 1, day);
 }
 
-function sliceHistory(days: number) {
+function sliceHistory(indexHistory: MarketData["indexHistory"], days: number) {
   if (!days) return indexHistory;
   const end = historyDate(indexHistory[indexHistory.length - 1].date);
   const start = new Date(end);
@@ -169,27 +159,66 @@ function Badge({ item }: { item: Pick<Instrument, "ticker" | "type"> }) {
 
 type Mover = { key: string; href: string; label: string; change: number; type: InstrumentType | "index" };
 
-const indexMover: Mover = {
-  key: "KSE",
-  href: "/market/index",
-  label: "KSE Index",
-  change: indexKse.change,
-  type: "index",
-};
+function moversOf(market: MarketData) {
+  const movers: Mover[] = [
+    { key: "KSE", href: "/market/index", label: "KSE Index", change: market.index.change, type: "index" },
+    ...market.instruments.map((item) => ({
+      key: item.ticker,
+      href: instrumentHref(market, item.ticker),
+      label: item.ticker,
+      change: item.change,
+      type: item.type,
+    })),
+  ];
+  return {
+    gainers: movers.filter((item) => item.change > 0).sort((a, b) => b.change - a.change).slice(0, 5),
+    losers: movers.filter((item) => item.change < 0).sort((a, b) => a.change - b.change).slice(0, 5),
+  };
+}
 
-const movers: Mover[] = [
-  indexMover,
-  ...instruments.map((item) => ({
-    key: item.ticker,
-    href: `/market/${item.ticker}`,
-    label: item.ticker,
-    change: item.change,
-    type: item.type,
-  })),
-];
-
-const gainers = movers.filter((item) => item.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
-const losers = movers.filter((item) => item.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
+/** Сделки с kse.kg (последняя сессия или лидеры недели): тикер и цена или объём. */
+function TradeList({
+  title,
+  rows,
+  href,
+  metric,
+  fill,
+}: {
+  title: string;
+  rows: TradeRow[];
+  href: string;
+  metric: "price" | "volume";
+  fill?: boolean;
+}) {
+  const tr = useTr();
+  const market = useMarketData();
+  return (
+    <article className={fill ? `${styles.card} ${styles.fill}` : styles.card}>
+      <header className={styles.cardHead}>
+        <h3>{tr(title)}</h3>
+        <Link href={href} aria-label={tr(title)}>
+          <Arrow />
+        </Link>
+      </header>
+      {rows.length ? (
+        <ul className={styles.movers}>
+          {rows.map((item) => (
+            <li key={item.ticker}>
+              <Link href={instrumentHref(market, item.ticker)} title={item.name}>
+                <Badge item={{ ticker: item.ticker, type: "stock" }} />
+                <span>{item.ticker}</span>
+                {/* Объём недели у kse.kg — в тысячах сомов. */}
+                <em>{metric === "price" ? `${formatSom(item.price)} ${tr("сом")}` : formatSom(item.volume)}</em>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className={styles.empty}>{tr("Сделок не было")}</p>
+      )}
+    </article>
+  );
+}
 
 function MoverList({ title, list, href, fill }: { title: string; list: Mover[]; href: string; fill?: boolean }) {
   const tr = useTr();
@@ -230,6 +259,65 @@ function MoverList({ title, list, href, fill }: { title: string; list: Mover[]; 
   );
 }
 
+/** Под топами: ширина рынка (растут / падают / без изменений) и лидеры по объёму торгов. */
+function MarketOverviewCard() {
+  const tr = useTr();
+  const market = useMarketData();
+  const { instruments } = market;
+  const breadth = {
+    up: instruments.filter((item) => item.change > 0).length,
+    down: instruments.filter((item) => item.change < 0).length,
+    flat: instruments.filter((item) => item.change === 0).length,
+  };
+  const volumeLeaders = [...instruments].sort((a, b) => b.volume - a.volume).slice(0, 4);
+  const total = breadth.up + breadth.down + breadth.flat || 1;
+  const share = (value: number) => `${(value / total) * 100}%`;
+  return (
+    <article className={`${styles.card} ${styles.fill}`}>
+      <header className={styles.cardHead}>
+        <h3>{tr("Обзор рынка")}</h3>
+        <Link href="/market/quotes" aria-label={tr("Обзор рынка")}>
+          <Arrow />
+        </Link>
+      </header>
+
+      <p className={styles.overviewLabel}>{tr("Ширина рынка")}</p>
+      <div className={styles.breadthBar} aria-hidden="true">
+        <i className={styles.breadthUp} style={{ width: share(breadth.up) }} />
+        <i className={styles.breadthFlat} style={{ width: share(breadth.flat) }} />
+        <i className={styles.breadthDown} style={{ width: share(breadth.down) }} />
+      </div>
+      <dl className={styles.breadth}>
+        <div>
+          <dt>{tr("Растут")}</dt>
+          <dd className={styles.up}>{breadth.up}</dd>
+        </div>
+        <div>
+          <dt>{tr("Без изменений")}</dt>
+          <dd>{breadth.flat}</dd>
+        </div>
+        <div>
+          <dt>{tr("Падают")}</dt>
+          <dd className={styles.down}>{breadth.down}</dd>
+        </div>
+      </dl>
+
+      <p className={styles.overviewLabel}>{tr("Лидеры по объёму")}</p>
+      <ul className={styles.movers}>
+        {volumeLeaders.map((item) => (
+          <li key={item.ticker}>
+            <Link href={instrumentHref(market, item.ticker)}>
+              <Badge item={item} />
+              <span>{item.ticker}</span>
+              <em>{formatSom(item.volume)}</em>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
 function Arrow() {
   return (
     <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -241,6 +329,7 @@ function Arrow() {
 /** Итоги последней торговой сессии: объём по сегментам рынка и изменение к прошлой сессии. */
 function SessionCard() {
   const tr = useTr();
+  const { sessionDate, sessionHours, tradingRows } = useMarketData();
   return (
     <article className={`${styles.card} ${styles.fill}`}>
       <header className={styles.cardHead}>
@@ -288,7 +377,8 @@ function SectionHead({ title, href }: { title: string; href: string }) {
 
 function InstrumentTable({ title, href, types }: { title: string; href: string; types: InstrumentType[] }) {
   const tr = useTr();
-  const rows = instruments.filter((item) => types.includes(item.type)).sort((a, b) => b.volume - a.volume);
+  const market = useMarketData();
+  const rows = market.instruments.filter((item) => types.includes(item.type)).sort((a, b) => b.volume - a.volume);
   return (
     <article className={`${styles.card} ${styles.markets}`}>
       <SectionHead title={title} href={href} />
@@ -296,22 +386,11 @@ function InstrumentTable({ title, href, types }: { title: string; href: string; 
         <div className={styles.row} data-head="true">
           <span>{tr("Инструмент")}</span>
           <span>{tr("Цена")}</span>
-          <span>{tr("Изм.")}</span>
-          <span>{tr("Объём")}</span>
+          <span>{market.live ? tr("Вид") : tr("Изм.")}</span>
+          <span>{market.live ? tr("Объём, тыс.") : tr("Объём")}</span>
         </div>
         {rows.map((item) => (
-          <Link key={item.ticker} href={`/market/${item.ticker}`} className={styles.row}>
-            <span className={styles.instrument}>
-              <Badge item={item} />
-              <b>{item.ticker}</b>
-              <small>{item.name}</small>
-            </span>
-            <span>{formatSom(item.price)}</span>
-            <em className={item.change < 0 ? styles.down : item.change > 0 ? styles.up : undefined}>
-              {formatChange(item.change)}
-            </em>
-            <span>{formatSom(item.volume)}</span>
-          </Link>
+          <InstrumentRow key={item.ticker} item={item} market={market} />
         ))}
       </div>
     </article>
@@ -320,6 +399,7 @@ function InstrumentTable({ title, href, types }: { title: string; href: string; 
 
 function AuctionsCard() {
   const tr = useTr();
+  const { auctions } = useMarketData();
   return (
     <article className={`${styles.card} ${styles.markets}`}>
       <SectionHead title="Аукционы ГЦБ" href="/gcb" />
@@ -348,6 +428,7 @@ function AuctionsCard() {
 
 function ArchiveView({ scale }: { scale: number }) {
   const tr = useTr();
+  const { indexHistory, sessionDate, tradingRows } = useMarketData();
   const history = [...indexHistory].reverse();
   return (
     <>
@@ -400,6 +481,7 @@ function ArchiveView({ scale }: { scale: number }) {
 
 function IndexStats() {
   const tr = useTr();
+  const { indexHistory, index: indexKse, sessionDate } = useMarketData();
   const first = indexHistory[0];
   const last = indexHistory[indexHistory.length - 1];
   const yearChange = ((last.index - first.index) / first.index) * 100;
@@ -424,8 +506,32 @@ function IndexStats() {
   );
 }
 
+/** Строка таблицы «Рынки»: в живых данных вместо изменения цены (его нет на kse.kg) — вид бумаги. */
+function InstrumentRow({ item, market }: { item: Instrument; market: MarketData }) {
+  const tr = useTr();
+  return (
+    <Link href={instrumentHref(market, item.ticker)} className={styles.row}>
+      <span className={styles.instrument}>
+        <Badge item={item} />
+        <b>{item.ticker}</b>
+        <small>{item.name}</small>
+      </span>
+      <span>{item.price ? formatSom(item.price) : "—"}</span>
+      {market.live ? (
+        <span>{tr(item.description)}</span>
+      ) : (
+        <em className={item.change < 0 ? styles.down : item.change > 0 ? styles.up : undefined}>{formatChange(item.change)}</em>
+      )}
+      <span>{item.volume ? formatSom(item.volume) : "—"}</span>
+    </Link>
+  );
+}
+
 export function MarketPulse() {
   const tr = useTr();
+  const market = useMarketData();
+  const { indexHistory, index: indexKse, instruments } = market;
+  const { gainers, losers } = moversOf(market);
   const [view, setView] = useState<View>("overview");
   const [period, setPeriod] = useState<(typeof periods)[number]["id"]>("all");
   const [tab, setTab] = useState("all");
@@ -434,7 +540,7 @@ export function MarketPulse() {
 
   const selected = periods.find((item) => item.id === period) ?? periods[4];
   const anchor = indexHistory.at(-1)?.index || 1;
-  const series = sliceHistory(selected.days).map((item) => ({
+  const series = sliceHistory(indexHistory, selected.days).map((item) => ({
     date: item.date,
     value: (item.index / anchor) * indexKse.value,
   }));
@@ -588,24 +694,11 @@ export function MarketPulse() {
             <div className={styles.row} data-head="true">
               <span>{tr("Инструмент")}</span>
               <span>{tr("Цена")}</span>
-              <span>{tr("Изм.")}</span>
-              <span>{tr("Объём")}</span>
+              <span>{market.live ? tr("Вид") : tr("Изм.")}</span>
+              <span>{market.live ? tr("Объём, тыс.") : tr("Объём")}</span>
             </div>
             {rows.length ? (
-              rows.map((item) => (
-                <Link key={item.ticker} href={`/market/${item.ticker}`} className={styles.row}>
-                  <span className={styles.instrument}>
-                    <Badge item={item} />
-                    <b>{item.ticker}</b>
-                    <small>{item.name}</small>
-                  </span>
-                  <span>{formatSom(item.price)}</span>
-                  <em className={item.change < 0 ? styles.down : item.change > 0 ? styles.up : undefined}>
-                    {formatChange(item.change)}
-                  </em>
-                  <span>{formatSom(item.volume)}</span>
-                </Link>
-              ))
+              rows.map((item) => <InstrumentRow key={item.ticker} item={item} market={market} />)
             ) : (
               <p className={styles.empty}>{tr("Нет инструментов")}</p>
             )}
@@ -615,8 +708,18 @@ export function MarketPulse() {
       </div>
 
       <aside className={styles.side}>
-        <MoverList title="Топ роста" list={gainers} href="/market" />
-        <MoverList title="Топ падения" list={losers} href="/market" fill />
+        {market.live ? (
+          <>
+            <TradeList title={`Сделки ${market.sessionDate}`} rows={market.lastTrades} href="/market" metric="price" />
+            <TradeList title="Лидеры недели по объёму, тыс. сом" rows={market.weekLeaders} href="/market" metric="volume" fill />
+          </>
+        ) : (
+          <>
+            <MoverList title="Топ роста" list={gainers} href="/market" />
+            <MoverList title="Топ падения" list={losers} href="/market" />
+            <MarketOverviewCard />
+          </>
+        )}
       </aside>
     </section>
   );

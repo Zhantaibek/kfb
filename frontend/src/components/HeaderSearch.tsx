@@ -2,45 +2,43 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { instruments, members } from "@/data/catalog";
-import { sectionPages, siteNav } from "@/data/site-nav";
+import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "@/components/AppProviders";
+import { isExternal, mergeResults, searchStatic, type SearchItem, type SearchResult } from "@/lib/site-search";
 import ui from "@/app/ui.module.css";
 
-type NewsHit = { slug: string; title: string; excerpt: string; status: string };
+/** В выпадающем окне — по несколько результатов на группу; всё остальное — на странице /search. */
+const PER_GROUP = 4;
 
-const sections = [
-  ...siteNav.flatMap((group) =>
-    group.items.flatMap((item) =>
-      item.children?.length
-        ? item.children.map((child) => ({ href: child.href, label: child.label }))
-        : [{ href: item.href, label: item.label }],
-    ),
-  ),
-  ...Object.entries(sectionPages).map(([href, item]) => ({ href, label: item.title })),
-];
-
-function takeUnique(items: { href: string; label: string }[], query: string, limit: number) {
-  const seen = new Set<string>();
-  const hits: { href: string; label: string }[] = [];
-  for (const item of items) {
-    if (!item.label.toLowerCase().includes(query) || seen.has(item.href)) continue;
-    seen.add(item.href);
-    hits.push(item);
-    if (hits.length >= limit) break;
-  }
-  return hits;
+function HitLink({ item, onPick }: { item: SearchItem; onPick: () => void }) {
+  const body = (
+    <>
+      <b>{item.title}</b>
+      {item.meta ? <small>{item.meta}</small> : null}
+    </>
+  );
+  // Отчёты эмитентов — внешние PDF, открываем в новой вкладке.
+  return isExternal(item.href) ? (
+    <a href={item.href} target="_blank" rel="noopener noreferrer" onClick={onPick}>
+      {body}
+    </a>
+  ) : (
+    <Link href={item.href} onClick={onPick}>
+      {body}
+    </Link>
+  );
 }
 
 export function HeaderSearch() {
   const { label, tr } = useApp();
   const pathname = usePathname();
+  const router = useRouter();
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [news, setNews] = useState<NewsHit[]>([]);
+  // Ответ бэкенда (всё, что в базе) и запрос, к которому он относится.
+  const [remote, setRemote] = useState<SearchResult | null>(null);
 
   // Перешли на другую страницу — поиск закрываем (прямо в рендере, без эффекта).
   const [openedOn, setOpenedOn] = useState(pathname);
@@ -49,17 +47,29 @@ export function HeaderSearch() {
     setOpen(false);
   }
 
+  const q = query.trim();
+
   useEffect(() => {
-    if (!open) return;
-    inputRef.current?.focus();
-    if (news.length) return;
-    void fetch("/api/public/content")
-      .then((response) => response.json())
-      .then((data: { news?: NewsHit[] }) => {
-        setNews((data.news ?? []).filter((item) => item.status === "published"));
-      })
-      .catch(() => undefined);
-  }, [open, news.length]);
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  // Запрос к бэкенду — через 250 мс после последней буквы.
+  useEffect(() => {
+    if (!q) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      fetch(`/api/public/search?q=${encodeURIComponent(q)}&limit=${PER_GROUP}`)
+        .then((response) => (response.ok ? (response.json() as Promise<SearchResult>) : null))
+        .then((data) => {
+          if (!cancelled && data) setRemote(data);
+        })
+        .catch(() => undefined);
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [q]);
 
   useEffect(() => {
     if (!open) return;
@@ -77,19 +87,13 @@ export function HeaderSearch() {
     };
   }, [open]);
 
-  const q = query.trim().toLowerCase();
+  // Данные из кода показываем сразу, ответ базы подмешиваем, когда придёт (только если он для этого же запроса).
   const results = useMemo(() => {
-    if (!q) return { pages: [], papers: [], stories: [], orgs: [] };
-    return {
-      pages: takeUnique(sections, q, 5),
-      papers: instruments
-        .filter((item) => `${item.ticker} ${item.name} ${item.issuer}`.toLowerCase().includes(q))
-        .slice(0, 5),
-      stories: news.filter((item) => `${item.title} ${item.excerpt}`.toLowerCase().includes(q)).slice(0, 5),
-      orgs: members.filter((item) => item.name.toLowerCase().includes(q)).slice(0, 5),
-    };
-  }, [q, news]);
-  const total = results.pages.length + results.papers.length + results.stories.length + results.orgs.length;
+    if (!q) return null;
+    return mergeResults(remote?.query === q ? remote : null, searchStatic(q, PER_GROUP), PER_GROUP);
+  }, [q, remote]);
+  const waiting = Boolean(q) && remote?.query !== q;
+  const close = () => setOpen(false);
 
   return (
     <div className={ui.searchBox} ref={boxRef}>
@@ -107,56 +111,39 @@ export function HeaderSearch() {
       </button>
       {open ? (
         <div className={ui.searchPop} role="search">
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={tr("Например: комитеты, KTEL или ГЦБ")}
-            aria-label={label("search")}
-          />
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!q) return;
+              close();
+              router.push(`/search?q=${encodeURIComponent(q)}`);
+            }}
+          >
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={tr("Эмитент, тикер, отчёт, новость или раздел")}
+              aria-label={label("search")}
+            />
+          </form>
           <div className={ui.searchHits}>
             {!q ? <p>{tr("Введите запрос")}</p> : null}
-            {q && total === 0 ? <p>{tr("Ничего не найдено")}</p> : null}
-            {results.pages.length ? (
-              <section>
-                <h3>{tr("Разделы")}</h3>
-                {results.pages.map((item) => (
-                  <Link href={item.href} key={item.href} onClick={() => setOpen(false)}>
-                    {tr(item.label)}
-                  </Link>
+            {results && results.total === 0 ? <p>{waiting ? tr("Ищем…") : tr("Ничего не найдено")}</p> : null}
+            {results?.groups.map((group) => (
+              <section key={group.kind}>
+                <h3>
+                  {tr(group.label)} · {group.total}
+                </h3>
+                {group.items.map((item) => (
+                  <HitLink key={item.href + item.title} item={item} onPick={close} />
                 ))}
               </section>
-            ) : null}
-            {results.papers.length ? (
-              <section>
-                <h3>{tr("Инструменты")}</h3>
-                {results.papers.map((item) => (
-                  <Link href={`/market/${item.ticker}`} key={item.ticker} onClick={() => setOpen(false)}>
-                    <b>{item.ticker}</b>
-                    <span>{item.name}</span>
-                  </Link>
-                ))}
-              </section>
-            ) : null}
-            {results.stories.length ? (
-              <section>
-                <h3>{tr("Новости")}</h3>
-                {results.stories.map((item) => (
-                  <Link href={`/news/${item.slug}`} key={item.slug} onClick={() => setOpen(false)}>
-                    {item.title}
-                  </Link>
-                ))}
-              </section>
-            ) : null}
-            {results.orgs.length ? (
-              <section>
-                <h3>{tr("Участники")}</h3>
-                {results.orgs.map((item) => (
-                  <Link href="/members" key={item.name} onClick={() => setOpen(false)}>
-                    {item.name}
-                  </Link>
-                ))}
-              </section>
+            ))}
+            {results && results.total > 0 ? (
+              <Link className={ui.searchAll} href={`/search?q=${encodeURIComponent(q)}`} onClick={close}>
+                {tr("Все результаты")} ({results.total}) →
+              </Link>
             ) : null}
           </div>
         </div>

@@ -1,7 +1,8 @@
-import type { CmsIssuer, CmsListingEntry, CmsStore } from "../../../shared/cms";
+import type { CmsIssuer, CmsListingEntry, CmsPartner, CmsStore } from "../../../shared/cms";
 import { createSeedStore } from "../data/seed";
 import { hashPassword } from "../modules/auth/password";
 import { prisma } from "./prisma";
+import { esgReportData, gcbParticipantData, landingSectionData, sustainableBondData, verifierData } from "./landing";
 
 export async function seedDatabase(store: CmsStore = createSeedStore()) {
   for (const user of store.users) {
@@ -136,6 +137,22 @@ export async function seedDatabase(store: CmsStore = createSeedStore()) {
     });
   }
 
+  await prisma.partner.createMany({ data: (store.partners ?? []).map(partnerCreateData), skipDuplicates: true });
+  await prisma.sustainableBond.createMany({
+    data: (store.sustainableBonds ?? []).map((row) => ({ id: row.id, ...sustainableBondData(row), issuerSlug: knownSlug(row.issuerSlug, issuerSlugs) })),
+    skipDuplicates: true,
+  });
+  await prisma.esgReport.createMany({ data: (store.esgReports ?? []).map((row) => ({ id: row.id, ...esgReportData(row) })), skipDuplicates: true });
+  await prisma.verifier.createMany({ data: (store.verifiers ?? []).map((row) => ({ id: row.id, ...verifierData(row) })), skipDuplicates: true });
+  await prisma.gcbParticipant.createMany({
+    data: (store.gcbParticipants ?? []).map((row) => ({ id: row.id, ...gcbParticipantData(row) })),
+    skipDuplicates: true,
+  });
+  await prisma.landingSection.createMany({
+    data: (store.landingSections ?? []).map((row) => ({ id: row.id, ...landingSectionData(row) })),
+    skipDuplicates: true,
+  });
+
   for (const item of store.settings) {
     await prisma.siteSettings.upsert({
       where: { id: item.id },
@@ -146,6 +163,9 @@ export async function seedDatabase(store: CmsStore = createSeedStore()) {
         phones: item.phones,
         emails: item.emails,
         fax: item.fax,
+        facebookUrl: item.facebookUrl,
+        instagramUrl: item.instagramUrl,
+        telegramUrl: item.telegramUrl,
         license: item.license,
         copyright: item.copyright,
         eduUrl: item.eduUrl,
@@ -208,6 +228,26 @@ function parentsFirst(menu: CmsStore["menu"]) {
     }
   }
   return ordered;
+}
+
+export function partnerCreateData(item: CmsPartner) {
+  return {
+    id: item.id,
+    slug: item.slug,
+    mark: item.mark,
+    kind: item.kind,
+    caption: item.caption,
+    name: item.name,
+    lead: item.lead,
+    body: item.body,
+    site: item.site,
+    logo: item.logo,
+    logoWide: item.logoWide,
+    sortOrder: item.order,
+    status: item.status,
+    i18n: item.i18n ?? {},
+    updatedAt: new Date(item.updatedAt),
+  };
 }
 
 export function issuerCreateData(item: CmsIssuer) {

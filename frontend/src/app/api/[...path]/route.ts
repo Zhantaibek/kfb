@@ -11,6 +11,16 @@ async function proxy(request: Request, context: { params: Promise<{ path: string
   const contentType = request.headers.get("content-type");
   if (cookie) headers.set("cookie", cookie);
   if (contentType) headers.set("content-type", contentType);
+  // Учебный центр (/api/edu) авторизует запросы JWT-токеном, а не cookie.
+  const authorization = request.headers.get("authorization");
+  if (authorization) headers.set("authorization", authorization);
+  // Для статистики посещений — IP и браузер посетителя. IP идёт отдельным заголовком, а не X-Forwarded-For:
+  // клиент может прислать свой X-Forwarded-For, и тогда он обошёл бы ограничение попыток входа на бэкенде.
+  // Берём последний адрес цепочки — его добавил ближайший прокси (nginx) или сам Next.
+  const visitorIp = (request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "").split(",").pop()?.trim();
+  if (visitorIp) headers.set("x-visitor-ip", visitorIp);
+  const userAgent = request.headers.get("user-agent");
+  if (userAgent) headers.set("user-agent", userAgent);
 
   const init: RequestInit = { method: request.method, headers };
   if (request.method !== "GET" && request.method !== "HEAD") {

@@ -8,6 +8,20 @@ import { SiteSplash } from "@/components/SiteSplash";
 import { TickerTape } from "@/components/TickerTape";
 import { SiteNavProvider } from "@/lib/cms/use-site-nav";
 
+/** Случайный id браузера для подсчёта уникальных посетителей (без cookie и личных данных). */
+function visitorId() {
+  try {
+    let id = localStorage.getItem("kse-visitor");
+    if (!id) {
+      id = `v_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
+      localStorage.setItem("kse-visitor", id);
+    }
+    return id;
+  } catch {
+    return undefined;
+  }
+}
+
 function collectRevealNodes() {
   const nodes: Element[] = [...document.querySelectorAll('main section:not([aria-roledescription]), footer')];
   const main = document.querySelector("main");
@@ -25,18 +39,21 @@ function collectStaggerItems(root: Element) {
 export function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
+  // Учебный центр, как и админка, рисует свой интерфейс — без шапки, подвала и анимаций сайта.
+  const isEduApp = pathname.startsWith("/education/app");
+  const bare = isAdmin || isEduApp;
 
   useEffect(() => {
     if (isAdmin) return;
     void fetch("/api/public/visit", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ path: pathname }),
+      body: JSON.stringify({ path: pathname, visitorId: visitorId() }),
     });
   }, [pathname, isAdmin]);
 
   useEffect(() => {
-    if (isAdmin) return;
+    if (bare) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     document.documentElement.classList.add("js-reveal");
@@ -85,9 +102,9 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         node.removeAttribute("data-reveal");
       });
     };
-  }, [pathname, isAdmin]);
+  }, [pathname, bare]);
 
-  if (isAdmin) return <>{children}</>;
+  if (bare) return <>{children}</>;
 
   return (
     <SiteNavProvider>

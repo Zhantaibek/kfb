@@ -1,7 +1,7 @@
 export type NewsKind = "exchange" | "company" | "urgent";
 export type PublishStatus = "draft" | "published";
 export type AdminRole = "admin" | "editor";
-export type PublicRole = "investor" | "issuer";
+export type PublicRole = "investor" | "issuer" | "student" | "teacher";
 export type UserRole = AdminRole | PublicRole;
 export type RequestStatus = "new" | "done";
 export type LocaleCode = "ky" | "en";
@@ -77,6 +77,114 @@ export type CmsManagementPerson = {
   bio: string;
   education: string;
   career: CmsCareerRow[];
+  order: number;
+  status: PublishStatus;
+  i18n?: CmsI18n;
+  updatedAt: string;
+};
+
+/** Ценная бумага Сектора устойчивого развития (зелёные, социальные облигации). */
+export type CmsSustainableBond = {
+  id: string;
+  /** Название выпуска: «ЗАО Банк Азии (1-выпуск)». */
+  name: string;
+  /** Эмитент в ЦРИ (issuers.slug) — ссылка «Профиль в ЦРИ КФБ». */
+  issuerSlug: string;
+  regNumber: string;
+  /** Описание: «социальная облигация», «зелёная облигация»… */
+  kind: string;
+  volume: string;
+  nominal: string;
+  currency: string;
+  yieldRate: string;
+  startDate: string;
+  endDate: string;
+  category: string;
+  standard: string;
+  order: number;
+  status: PublishStatus;
+  i18n?: CmsI18n;
+  updatedAt: string;
+};
+
+/** ESG-отчёт компании (PDF загружается с ПК или ссылка на файл). */
+export type CmsEsgReport = {
+  id: string;
+  title: string;
+  file: string;
+  order: number;
+  status: PublishStatus;
+  i18n?: CmsI18n;
+  updatedAt: string;
+};
+
+/** Организация для независимой оценки (верификатор) устойчивых инструментов. */
+export type CmsVerifier = {
+  id: string;
+  name: string;
+  site: string;
+  order: number;
+  status: PublishStatus;
+  i18n?: CmsI18n;
+  updatedAt: string;
+};
+
+export type GcbParticipantType = "broker" | "bank";
+
+/** Участник торгов ГЦБ (брокер или банк) — блок «Как купить ГКВ-12 и ГКО-2?». */
+export type CmsGcbParticipant = {
+  id: string;
+  title: string;
+  type: GcbParticipantType;
+  address: string;
+  /** По одному телефону в строке. */
+  phones: string;
+  /** По одному e-mail в строке. */
+  emails: string;
+  website: string;
+  order: number;
+  status: PublishStatus;
+  i18n?: CmsI18n;
+  updatedAt: string;
+};
+
+export type LandingPage = "sustainable" | "gcb";
+
+/** Текстовый блок лендинга («Сектор устойчивого развития», «Инвестиции в ГЦБ»): вёрстка своя, тексты — из админки. */
+export type CmsLandingSection = {
+  id: string;
+  page: LandingPage;
+  /** Место блока на странице: hero, about, earn… */
+  key: string;
+  /** Надпись над заголовком. */
+  kicker: string;
+  title: string;
+  /** Абзацы — через пустую строку. */
+  text: string;
+  /** Пункты списка — по одному в строке. */
+  items: string;
+  /** Ссылка кнопки (например, PDF руководства). */
+  link: string;
+  photo: string;
+  order: number;
+  i18n?: CmsI18n;
+  updatedAt: string;
+};
+
+/** Партнёр биржи (блок «Наши партнеры» и страницы /about/partners). */
+export type CmsPartner = {
+  id: string;
+  slug: string;
+  mark: string;
+  kind: string;
+  caption: string;
+  name: string;
+  lead: string;
+  /** Абзацы — через пустую строку. */
+  body: string;
+  site: string;
+  logo: string;
+  logoWide: boolean;
   order: number;
   status: PublishStatus;
   i18n?: CmsI18n;
@@ -194,6 +302,9 @@ export type CmsSiteSettings = {
   phones: string;
   emails: string;
   fax: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  telegramUrl: string;
   license: string;
   copyright: string;
   eduUrl: string;
@@ -252,6 +363,12 @@ export type CmsStore = {
   menu: CmsMenuItem[];
   hubs: CmsHomeHub[];
   management: CmsManagementPerson[];
+  partners: CmsPartner[];
+  sustainableBonds: CmsSustainableBond[];
+  esgReports: CmsEsgReport[];
+  verifiers: CmsVerifier[];
+  gcbParticipants: CmsGcbParticipant[];
+  landingSections: CmsLandingSection[];
   issuers: CmsIssuer[];
   listing: CmsListingEntry[];
   settings: CmsSiteSettings[];
@@ -271,5 +388,11 @@ export type PublicContent = {
   menu: CmsMenuItem[];
   hubs: CmsHomeHub[];
   management: CmsManagementPerson[];
+  partners: CmsPartner[];
+  sustainableBonds: CmsSustainableBond[];
+  esgReports: CmsEsgReport[];
+  verifiers: CmsVerifier[];
+  gcbParticipants: CmsGcbParticipant[];
+  landingSections: CmsLandingSection[];
   settings: CmsSiteSettings;
 };

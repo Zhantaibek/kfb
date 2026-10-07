@@ -3,39 +3,10 @@
 import { useAdminStore } from "@/lib/cms/client";
 import css from "@/app/admin/admin.module.css";
 
-export function LogManager({ kind }: { kind: "visits" | "audit" }) {
+/** Журнал аудита. Посещения — отдельная страница со статистикой (VisitsManager). */
+export function LogManager() {
   const { store, error } = useAdminStore();
-  const visits = store?.visits ?? [];
   const audit = store?.audit ?? [];
-
-  if (kind === "visits") {
-    return (
-      <>
-        <p className={css.kicker}>Система</p>
-        <h1>Посещения</h1>
-        <p className={css.lead}>Последние открытия страниц публичного сайта.</p>
-        {error ? <p className={css.error}>{error}</p> : null}
-        <div className={css.table}>
-          <table>
-            <thead>
-              <tr>
-                <th>Путь</th>
-                <th>Время</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visits.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.path}</td>
-                  <td>{item.at.replace("T", " ").slice(0, 19)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>

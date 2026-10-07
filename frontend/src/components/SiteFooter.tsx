@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useApp } from "@/components/AppProviders";
-import { formatChange, formatSom, indexHistory, indexKse, instruments } from "@/data/catalog";
+import { formatChange, formatSom, type Instrument } from "@/data/catalog";
+import { useMarketData } from "@/components/MarketDataProvider";
 import { mailHref, splitLines, telHref } from "@/lib/cms/contacts";
 import { useSiteNav } from "@/lib/cms/use-site-nav";
 import ui from "@/app/ui.module.css";
@@ -38,11 +39,6 @@ const linkIcons = [
   <path key="b" d="M8 13h8M8 17h5" />,
 ];
 
-const screenStocks = instruments
-  .filter((item) => item.type === "stock")
-  .sort((a, b) => b.volume - a.volume)
-  .slice(0, 5);
-
 function sparkPath(values: number[], width: number, height: number) {
   const min = Math.min(...values);
   const span = Math.max(...values) - min || 1;
@@ -65,14 +61,19 @@ function sparkPath(values: number[], width: number, height: number) {
     .join(" ");
 }
 
-function ScreenRows({ count }: { count: number }) {
+function ScreenRows({ items, live }: { items: Instrument[]; live: boolean }) {
   return (
     <ul className={ui.screenRows}>
-      {screenStocks.slice(0, count).map((item) => (
+      {items.map((item) => (
         <li key={item.ticker}>
           <b>{item.ticker}</b>
           <span>{formatSom(item.price)}</span>
-          <em data-tone={item.change < 0 ? "down" : item.change > 0 ? "up" : undefined}>{formatChange(item.change)}</em>
+          {/* У живых котировок kse.kg изменения по бумаге нет — показываем объём. */}
+          {live ? (
+            <em>{item.volume ? formatSom(item.volume) : "—"}</em>
+          ) : (
+            <em data-tone={item.change < 0 ? "down" : item.change > 0 ? "up" : undefined}>{formatChange(item.change)}</em>
+          )}
         </li>
       ))}
     </ul>
@@ -80,6 +81,12 @@ function ScreenRows({ count }: { count: number }) {
 }
 
 function FooterLaptop({ title }: { title: string }) {
+  const { index: indexKse, indexHistory, instruments, live } = useMarketData();
+  // Экран ноутбука: бумаги с наибольшим объёмом (в живых данных — сделки за неделю), затем по цене.
+  const screen = [...instruments]
+    .filter((item) => item.type === "stock" && item.price > 0)
+    .sort((a, b) => b.volume - a.volume || b.price - a.price)
+    .slice(0, 4);
   const line = sparkPath(
     indexHistory.map((item) => item.index),
     120,
@@ -102,7 +109,7 @@ function FooterLaptop({ title }: { title: string }) {
           </div>
           <div className={ui.laptopQuotes}>
             <small>{title}</small>
-            <ScreenRows count={4} />
+            <ScreenRows items={screen} live={live} />
           </div>
         </div>
       </div>
@@ -110,6 +117,39 @@ function FooterLaptop({ title }: { title: string }) {
     </div>
   );
 }
+
+/** Иконки соцсетей — фирменные цвета на белом круге. */
+const socialIcons = {
+  facebook: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="2" y="2" width="20" height="20" rx="4" fill="#3B5998" />
+      <path d="M15.6 8.4h-1.7c-.5 0-.9.4-.9.9v1.6h2.6l-.4 2.6H13V20h-2.7v-6.5H8.4v-2.6h1.9V9c0-2 1.2-3.2 3.1-3.2.9 0 1.8.1 2.2.2v2.4z" fill="#fff" />
+    </svg>
+  ),
+  instagram: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <defs>
+        <radialGradient id="kse-ig" cx="30%" cy="107%" r="150%">
+          <stop offset="0" stopColor="#fdf497" />
+          <stop offset="0.05" stopColor="#fdf497" />
+          <stop offset="0.45" stopColor="#fd5949" />
+          <stop offset="0.6" stopColor="#d6249f" />
+          <stop offset="0.9" stopColor="#285AEB" />
+        </radialGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="5.5" fill="url(#kse-ig)" />
+      <rect x="6.2" y="6.2" width="11.6" height="11.6" rx="3.6" fill="none" stroke="#fff" strokeWidth="1.7" />
+      <circle cx="12" cy="12" r="2.8" fill="none" stroke="#fff" strokeWidth="1.7" />
+      <circle cx="15.6" cy="8.4" r="0.9" fill="#fff" />
+    </svg>
+  ),
+  telegram: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" fill="#2AABEE" />
+      <path d="M6.6 11.7l9.6-3.7c.4-.2.9.1.7.8l-1.6 7.7c-.1.6-.5.7-1 .4l-2.6-1.9-1.3 1.2c-.1.1-.3.2-.5.2l.2-2.7 4.9-4.4c.2-.2 0-.3-.3-.1l-6 3.8-2.6-.8c-.6-.2-.6-.6.1-.9z" fill="#fff" />
+    </svg>
+  ),
+};
 
 function RowIcon({ children }: { children: ReactNode }) {
   return (
@@ -162,6 +202,22 @@ export function SiteFooter() {
               </div>
             ) : null}
           </div>
+
+          {settings.facebookUrl || settings.instagramUrl || settings.telegramUrl ? (
+            <nav className={ui.footerSocial} aria-label={tr("КФБ в соцсетях")}>
+              {[
+                { href: settings.facebookUrl, label: "Facebook", icon: socialIcons.facebook },
+                { href: settings.instagramUrl, label: "Instagram", icon: socialIcons.instagram },
+                { href: settings.telegramUrl, label: "Telegram", icon: socialIcons.telegram },
+              ]
+                .filter((item) => item.href)
+                .map((item) => (
+                  <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.label} title={item.label}>
+                    {item.icon}
+                  </a>
+                ))}
+            </nav>
+          ) : null}
         </div>
 
         <div className={ui.footerMeta}>

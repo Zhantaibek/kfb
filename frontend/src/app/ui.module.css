@@ -143,7 +143,7 @@
   top: calc(100% + 10px);
   right: 0;
   z-index: 30;
-  width: min(380px, calc(100vw - 48px));
+  width: min(440px, calc(100vw - 48px));
   padding: 12px;
   border-radius: 16px;
   background: var(--surface);
@@ -196,12 +196,36 @@
 }
 
 .searchHits a {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  padding: 8px 10px;
+  display: grid;
+  gap: 1px;
+  padding: 7px 10px;
   border-radius: 10px;
   font-size: 14px;
+}
+
+.searchHits a b {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchHits a small {
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchHits a.searchAll {
+  display: block;
+  margin-top: 6px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 10px 10px;
+  color: var(--brand-strong);
+  font-weight: 700;
+  text-align: center;
 }
 
 .searchHits a:hover {
@@ -595,6 +619,12 @@ a.cabinetBtn {
   padding: 28px 0 88px;
 }
 
+/* Шапка внутренней страницы (крошки, заголовок, подзаголовок) — отступ до первого блока.
+   С отступами следующих блоков (.grid, .toolbar, .list) он схлопывается, поэтому зазор везде одинаковый. */
+.pageIntro {
+  margin-bottom: 28px;
+}
+
 .crumb {
   color: var(--ink-muted);
   font-size: 14px;
@@ -607,10 +637,11 @@ a.cabinetBtn {
 
 .title {
   font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: clamp(34px, 5vw, 56px);
-  letter-spacing: -0.05em;
-  line-height: 1.05;
-  max-width: 16ch;
+  /* Заголовок внутренней страницы — чуть крупнее заголовков секций главной (24–34px), но не огромный. */
+  font-size: clamp(28px, 3.2vw, 40px);
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  max-width: 24ch;
   font-weight: 600;
 }
 
@@ -1838,4 +1869,67 @@ a.cabinetBtn {
   .menu[open] .megaBackdrop {
     animation: none;
   }
+}
+
+/* Соцсети в баннере подвала: белые круги с фирменными иконками */
+.footerSocial {
+  position: absolute;
+  top: 50%;
+  right: 32px;
+  z-index: 1;
+  display: flex;
+  gap: 12px;
+  transform: translateY(-50%);
+}
+
+.footerSocial a {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.footerSocial a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+}
+
+.footerSocial svg {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 900px) {
+  .footerSocial {
+    position: static;
+    margin-top: 14px;
+    transform: none;
+  }
+}
+
+/* Страница поиска: заголовок, подпись и фрагмент текста с совпадением */
+.searchRow b {
+  font-size: 16px;
+}
+
+.searchRow span {
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.searchRow:hover b {
+  color: var(--brand-strong);
+}
+
+.list h2 small {
+  color: var(--ink-muted);
+  font-size: 0.6em;
+  font-weight: 600;
 }

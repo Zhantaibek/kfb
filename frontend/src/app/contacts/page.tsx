@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import { ContactsIntro } from "@/components/ContactsIntro";
+import { CmsSection } from "@/components/CmsSection";
 import { FeedbackForm } from "@/components/Forms";
 import { mailHref, splitLines, telHref } from "@/lib/cms/contacts";
-import { loadPublicContent } from "@/lib/cms/public";
+import { findPageByPath, loadPublicContent } from "@/lib/cms/public";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
 
 export const metadata: Metadata = { title: "Контакты" };
 
 export default async function ContactsPage() {
-  const { settings } = await loadPublicContent();
+  const content = await loadPublicContent();
+  const { settings } = content;
+  // Телефоны и почта отделов — страница /contacts в админке (перенесена с kse.kg).
+  const departments = findPageByPath(content, "/contacts");
   const phones = splitLines(settings.phones);
   const emails = splitLines(settings.emails);
 
@@ -42,6 +46,7 @@ export default async function ContactsPage() {
           success="Сообщение принято. В этой версии сайта письмо не отправляется — для срочных вопросов звоните в офис."
         />
       </div>
+      <CmsSection page={departments} title="По подразделениям" />
     </PublicMain>
   );
 }

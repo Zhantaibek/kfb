@@ -1090,10 +1090,15 @@
   white-space: nowrap;
 }
 
-a.docFile {
+button.docFile {
+  border: 0;
+  background: none;
   color: inherit;
+  font: inherit;
+  font-size: 14px;
   font-weight: 600;
   text-decoration: underline;
+  cursor: pointer;
 }
 
 @media (max-width: 900px) {
@@ -1339,4 +1344,352 @@ a.docFile {
   background: color-mix(in srgb, var(--up) 14%, white);
   color: var(--up);
   font-weight: 650;
+}
+
+/* Просмотр отчётов бумаги прямо в админке */
+.viewerBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(4, 16, 18, 0.62);
+  backdrop-filter: blur(4px);
+}
+
+.viewer {
+  width: min(1280px, 100%);
+  height: min(860px, 100%);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid var(--admin-line);
+  border-radius: 20px;
+  background: var(--admin-surface);
+  color: var(--admin-ink);
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+.viewerHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.viewerHead > div {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.viewerHead span {
+  overflow: hidden;
+  color: var(--admin-muted);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viewerHead a {
+  display: inline-flex;
+  align-items: center;
+}
+
+.viewerBody {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.viewerList {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 10px;
+  border-right: 1px solid var(--admin-line);
+  overflow-y: auto;
+}
+
+.viewerList button {
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.viewerList button:hover {
+  background: var(--admin-bg);
+}
+
+.viewerList button[data-on] {
+  background: color-mix(in srgb, var(--admin-brand) 18%, transparent);
+  font-weight: 700;
+}
+
+.viewerFrame {
+  min-height: 0;
+  background: var(--admin-bg);
+}
+
+.viewerFrame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+.viewerFrame > p,
+.viewerFallback {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+}
+
+.viewerFallback a {
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 760px) {
+  .viewerBackdrop {
+    padding: 0;
+  }
+
+  .viewer {
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .viewerBody {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .viewerList {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--admin-line);
+  }
+}
+
+/* Посещения (по образцу cds.kg) */
+button.visitStat {
+  display: grid;
+  gap: 2px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.visitStat span {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+button.visitStat[data-on] {
+  border-color: var(--admin-brand);
+  box-shadow: 0 0 0 1px var(--admin-brand);
+}
+
+.visitsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 0 18px;
+}
+
+/* Блоки ряда одной высоты, а содержимое — сверху, а не растянуто по высоте. */
+.visitsGrid > section {
+  align-content: start;
+}
+
+.visitsGrid h2,
+.visitsList h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.visitsGrid .note {
+  margin-top: -8px;
+}
+
+.chart {
+  width: 100%;
+  height: 280px;
+}
+
+.visitsEmpty {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  padding: 0 16px;
+  color: var(--admin-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.deviceBars {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.deviceBars > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.deviceBars b {
+  font-weight: 700;
+}
+
+.deviceBars i {
+  grid-column: 1 / -1;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--admin-brand);
+}
+
+.periodTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.periodTabs button,
+.pager button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-surface);
+  color: var(--admin-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.periodTabs button[data-on],
+.pager button[data-on] {
+  border-color: var(--admin-brand);
+  background: var(--admin-brand);
+  color: #fff;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.pager button {
+  height: 32px;
+}
+
+.pager span {
+  padding: 0 4px;
+  color: var(--admin-muted);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+@media (max-width: 1100px) {
+  .visitsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Новости: «Куда попадёт новость» — две карточки-переключателя */
+.audience {
+  display: grid;
+  gap: 8px;
+}
+
+.audience > span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.audience > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.audience button {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+  background: var(--admin-surface);
+  color: var(--admin-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.audience button:hover {
+  border-color: var(--admin-brand);
+}
+
+.audience button[data-on="true"] {
+  border-color: var(--admin-brand);
+  background: var(--admin-brand-soft);
+  box-shadow: inset 0 0 0 1px var(--admin-brand);
+}
+
+.audience button b {
+  font-size: 15px;
+}
+
+.audience button small {
+  color: var(--admin-muted);
+  font-size: 13px;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--admin-brand);
+}
+
+@media (max-width: 640px) {
+  .audience > div {
+    grid-template-columns: 1fr;
+  }
 }

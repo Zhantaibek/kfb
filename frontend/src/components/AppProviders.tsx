@@ -16,7 +16,7 @@ function parseWatchlist(raw: string | null): string[] {
   }
 }
 
-type User = { id?: string; name: string; email: string; role: "investor" | "issuer" };
+type User = { id?: string; name: string; email: string; role: "investor" | "issuer" | "student" | "teacher" };
 type AdminUser = { id?: string; name: string; email: string; role: "admin" | "editor" };
 
 type AppState = {
@@ -27,7 +27,7 @@ type AppState = {
   adminUser: AdminUser | null;
   authReady: boolean;
   /** Возвращает текст ошибки или признак того, что вошёл сотрудник CMS. */
-  login: (email: string, password: string) => Promise<{ error: string } | { staff: boolean }>;
+  login: (email: string, password: string) => Promise<{ error: string } | { staff: boolean; role: string }>;
   logout: () => Promise<void>;
   watchlist: string[];
   toggleWatch: (ticker: string) => void;
@@ -100,10 +100,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
         // Бэкенд выдаёт админу/редактору админскую cookie, поэтому и в состоянии он админ.
         if (account?.role === "admin" || account?.role === "editor") {
           setAdminUser(account);
-          return { staff: true };
+          return { staff: true, role: account.role };
         }
         setUser(account as User | null);
-        return { staff: false };
+        return { staff: false, role: account?.role ?? "" };
       },
       async logout() {
         await Promise.all([

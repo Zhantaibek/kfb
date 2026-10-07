@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAdminStore } from "@/lib/cms/client";
 import css from "@/app/admin/admin.module.css";
@@ -9,7 +10,20 @@ export function DashboardView() {
   const news = store?.news.length ?? "…";
   const media = store?.media.length ?? "…";
   const requests = store ? store.requests.filter((item) => item.status === "new").length : "…";
-  const visits = store?.visits.length ?? "…";
+  // Просмотры за сегодня — из сводки посещений (в общем хранилище только последние 300 записей).
+  const [visits, setVisits] = useState<number | string>("…");
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/analytics/summary", { credentials: "include" })
+      .then((response) => (response.ok ? (response.json() as Promise<{ today: number }>) : null))
+      .then((data) => {
+        if (!cancelled && data) setVisits(data.today);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <>
@@ -26,10 +40,10 @@ export function DashboardView() {
           <small>Новые заявки</small>
           <b>{requests}</b>
         </article>
-        <article className={css.card}>
-          <small>Посещения</small>
+        <Link className={css.card} href="/admin/visits">
+          <small>Посещения сегодня</small>
           <b>{visits}</b>
-        </article>
+        </Link>
       </div>
       <div className={css.quick}>
         <Link href="/admin/news">

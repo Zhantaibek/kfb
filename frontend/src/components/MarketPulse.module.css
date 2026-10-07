@@ -542,17 +542,15 @@ a.row:focus-visible,
     align-items: stretch;
   }
 
-  .main {
-    align-content: start;
-  }
-
+  .main,
   .side {
     display: flex;
     flex-direction: column;
   }
 
-  /* Последняя карточка колонки растягивается до высоты центральной части. */
-  .side > .fill {
+  /* Колонки обрываются на одной линии: последняя карточка каждой тянется до низа самой высокой. */
+  .side > .fill,
+  .main > :last-child {
     flex: 1 1 auto;
   }
 }
@@ -627,4 +625,63 @@ a.row:focus-visible,
   .marketsTools input {
     width: 130px;
   }
+}
+
+/* Обзор рынка: ширина рынка и лидеры по объёму */
+.overviewLabel {
+  margin: 14px 0 8px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.breadthBar {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+}
+
+.breadthBar i {
+  min-width: 3px;
+  border-radius: 99px;
+}
+
+.breadthUp {
+  background: var(--up);
+}
+
+.breadthFlat {
+  background: var(--line);
+}
+
+.breadthDown {
+  background: var(--down);
+}
+
+.breadth {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 0 0;
+}
+
+.breadth div {
+  display: grid;
+  /* подпись может переноситься («Без изменений») — числа всё равно на одной линии */
+  align-content: space-between;
+  gap: 2px;
+}
+
+.breadth dt {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.breadth dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
 }

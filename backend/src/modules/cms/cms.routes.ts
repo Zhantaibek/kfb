@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { asyncHandler } from "../../middleware/error";
 import { validateBody } from "../../middleware/validate";
-import { loginSchema, publicRequestSchema, registerSchema, visitSchema } from "../../validation/cms";
+import { loginSchema, publicRequestSchema, registerSchema } from "../../validation/cms";
+import { postVisit } from "../analytics/analytics.routes";
+import { getSearch } from "../search/search.routes";
+import { getMarketSnapshot } from "../kse-sync/kse-sync.routes";
 import {
   postRequest,
-  postVisit,
   readAdminData,
   readIssuerData,
   readPublicContent,
@@ -25,6 +27,12 @@ const collections = [
   "menu",
   "hubs",
   "management",
+  "partners",
+  "sustainableBonds",
+  "esgReports",
+  "verifiers",
+  "gcbParticipants",
+  "landingSections",
   "issuers",
   "listing",
   "settings",
@@ -41,7 +49,10 @@ for (const collection of collections) {
 export const publicCmsRoutes = Router();
 publicCmsRoutes.get("/content", asyncHandler(readPublicContent));
 publicCmsRoutes.get("/issuers", asyncHandler(readIssuerData));
+publicCmsRoutes.get("/search", asyncHandler(getSearch));
+publicCmsRoutes.get("/market/:key", asyncHandler(getMarketSnapshot));
 publicCmsRoutes.post("/request", validateBody(publicRequestSchema), asyncHandler(postRequest));
-publicCmsRoutes.post("/visit", validateBody(visitSchema), asyncHandler(postVisit));
+// Счётчик посещений с id посетителя, IP и устройством — см. modules/analytics.
+publicCmsRoutes.post("/visit", asyncHandler(postVisit));
 
 export { loginSchema, registerSchema };

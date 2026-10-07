@@ -120,12 +120,20 @@ model User {
   @@map("users")
 }
 
+/// Просмотр страницы сайта. Один посетитель — одна запись на страницу за 30 минут (обновления не считаются).
 model Visit {
-  id   String   @id
-  path String
-  at   DateTime @db.Timestamptz(6)
+  id        String   @id
+  path      String
+  at        DateTime @db.Timestamptz(6)
+  /// Случайный id из localStorage браузера — для подсчёта уникальных посетителей.
+  visitorId String?  @map("visitor_id")
+  ip        String?
+  /// pc | phone | tablet — по User-Agent.
+  device    String?
 
   @@index([at(sort: Desc)])
+  @@index([path])
+  @@index([visitorId, path, at])
   @@map("visits")
 }
 
@@ -148,6 +156,9 @@ model SiteSettings {
   phones          String   @default("")
   emails          String   @default("")
   fax             String   @default("")
+  facebookUrl     String   @default("") @map("facebook_url")
+  instagramUrl    String   @default("") @map("instagram_url")
+  telegramUrl     String   @default("") @map("telegram_url")
   license         String   @default("")
   copyright       String   @default("")
   eduUrl          String   @default("")
@@ -172,23 +183,24 @@ model HomeHub {
 }
 
 model Issuer {
-  id        String         @id
-  slug      String         @unique
-  name      String
-  activity  String         @default("")
-  director  String         @default("")
-  position  String         @default("")
-  address   String         @default("")
-  phone     String         @default("")
-  registrar String         @default("")
-  security  String         @default("")
-  count     String         @default("")
-  price     String         @default("")
-  status    String         @default("")
-  sortOrder Int            @map("order")
-  updatedAt DateTime       @map("updated_at") @db.Timestamptz(6)
-  listing   ListingEntry[]
-  news      News[]
+  id               String            @id
+  slug             String            @unique
+  name             String
+  activity         String            @default("")
+  director         String            @default("")
+  position         String            @default("")
+  address          String            @default("")
+  phone            String            @default("")
+  registrar        String            @default("")
+  security         String            @default("")
+  count            String            @default("")
+  price            String            @default("")
+  status           String            @default("")
+  sortOrder        Int               @map("order")
+  updatedAt        DateTime          @map("updated_at") @db.Timestamptz(6)
+  listing          ListingEntry[]
+  news             News[]
+  sustainableBonds SustainableBond[]
 
   @@index([sortOrder])
   @@map("issuers")
@@ -220,4 +232,130 @@ model ListingEntry {
   @@index([category, sortOrder])
   @@index([issuerSlug])
   @@map("listing")
+}
+
+/// Живые данные с kse.kg (итоги торгов, котировки, аукционы ГЦБ…): последний удачный снимок по каждому разделу.
+model KseSnapshot {
+  /// trade-results, quotes, index, auction-results…
+  key       String   @id
+  data      Json
+  sourceUrl String   @map("source_url")
+  fetchedAt DateTime @map("fetched_at") @db.Timestamptz(6)
+  /// Ошибка последней попытки (данные при этом остаются прежними).
+  error     String?
+  checkedAt DateTime @map("checked_at") @db.Timestamptz(6)
+
+  @@map("kse_snapshots")
+}
+
+/// Партнёры биржи: блок «Наши партнеры» на главной и страницы /about/partners.
+model Partner {
+  id        String   @id
+  slug      String   @unique
+  mark      String
+  kind      String   @default("")
+  caption   String
+  name      String   @default("")
+  lead      String   @default("")
+  body      String   @default("")
+  site      String   @default("")
+  logo      String   @default("")
+  logoWide  Boolean  @default(false) @map("logo_wide")
+  sortOrder Int      @map("order")
+  status    String   @default("published")
+  i18n      Json     @default("{}")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([sortOrder])
+  @@map("partners")
+}
+
+/// Ценные бумаги Сектора устойчивого развития (лендинг /sustainable).
+model SustainableBond {
+  id         String   @id
+  name       String
+  issuerSlug String?  @map("issuer_slug")
+  issuer     Issuer?  @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
+  regNumber  String   @default("") @map("reg_number")
+  kind       String   @default("")
+  volume     String   @default("")
+  nominal    String   @default("")
+  currency   String   @default("")
+  yieldRate  String   @default("") @map("yield_rate")
+  startDate  String   @default("") @map("start_date")
+  endDate    String   @default("") @map("end_date")
+  category   String   @default("")
+  standard   String   @default("")
+  sortOrder  Int      @map("order")
+  status     String   @default("published")
+  i18n       Json     @default("{}")
+  updatedAt  DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([sortOrder])
+  @@map("sustainable_bonds")
+}
+
+/// ESG-отчёты компаний (лендинг /sustainable).
+model EsgReport {
+  id        String   @id
+  title     String
+  file      String   @default("")
+  sortOrder Int      @map("order")
+  status    String   @default("published")
+  i18n      Json     @default("{}")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([sortOrder])
+  @@map("esg_reports")
+}
+
+/// Организации для независимой оценки (верификаторы) устойчивых инструментов.
+model Verifier {
+  id        String   @id
+  name      String
+  site      String   @default("")
+  sortOrder Int      @map("order")
+  status    String   @default("published")
+  i18n      Json     @default("{}")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([sortOrder])
+  @@map("verifiers")
+}
+
+/// Участники торгов ГЦБ — брокеры и банки (лендинг /gcb/invest).
+model GcbParticipant {
+  id        String   @id
+  title     String
+  type      String
+  address   String   @default("")
+  phones    String   @default("")
+  emails    String   @default("")
+  website   String   @default("")
+  sortOrder Int      @map("order")
+  status    String   @default("published")
+  i18n      Json     @default("{}")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([type, sortOrder])
+  @@map("gcb_participants")
+}
+
+/// Текстовые блоки лендингов: вёрстка в коде, тексты — в админке.
+model LandingSection {
+  id        String   @id
+  page      String
+  key       String
+  kicker    String   @default("")
+  title     String   @default("")
+  text      String   @default("")
+  items     String   @default("")
+  link      String   @default("")
+  photo     String   @default("")
+  sortOrder Int      @map("order")
+  i18n      Json     @default("{}")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([page, key])
+  @@map("landing_sections")
 }
