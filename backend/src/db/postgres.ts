@@ -38,24 +38,7 @@ async function waitForDb() {
   throw lastError;
 }
 
-function eduDatabaseUrl() {
-  if (process.env.EDU_DATABASE_URL) return process.env.EDU_DATABASE_URL;
-  const url = new URL(config.databaseUrl);
-  url.searchParams.set("schema", "edu");
-  return url.toString();
-}
-
-/** Учебный центр — своя Prisma-схема в схеме `edu` той же базы. */
-function runEduMigrations() {
-  execSync("npx prisma migrate deploy --schema prisma/edu/schema.prisma", {
-    cwd: resolveBackendRoot(),
-    stdio: "pipe",
-    env: { ...process.env, EDU_DATABASE_URL: eduDatabaseUrl() },
-  });
-}
-
 function runMigrations() {
-  runEduMigrations();
   try {
     execSync("npx prisma migrate deploy", {
       cwd: resolveBackendRoot(),
@@ -168,6 +151,12 @@ async function ensureDefaultMenu() {
   await prisma.menuItem.updateMany({
     where: { id: "menu-top-market", href: "/market" },
     data: { href: "/statistics" },
+  });
+
+  // Учебный центр стал отдельным проектом: вместо его разделов на сайте — одна ссылка.
+  await prisma.menuItem.updateMany({
+    where: { id: "menu-edu-info", label: "Общая информация" },
+    data: { label: "Перейти в учебный центр", i18n: { ky: { label: "Окуу борборуна өтүү" }, en: { label: "Go to the training centre" } } },
   });
 
   await fixMenuOrderCollisions(seed);

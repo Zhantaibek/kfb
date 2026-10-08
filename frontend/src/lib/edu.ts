@@ -1,7 +1,10 @@
-/** Учебный центр встроен в сайт; NEXT_PUBLIC_EDU_URL — если нужно увести ссылку на другой адрес. */
-export const EDU_PLATFORM_URL = process.env.NEXT_PUBLIC_EDU_URL ?? "/education/app";
+/**
+ * Учебный центр КФБ — отдельный проект (репозиторий kse-edu) со своим адресом.
+ * На сайте биржи от него осталась только ссылка; адрес задаётся NEXT_PUBLIC_EDU_URL.
+ */
+export const EDU_URL = process.env.NEXT_PUBLIC_EDU_URL ?? "http://localhost:5173/education/app/";
 
-/** Встроенный учебный центр открываем в той же вкладке; новую — только для внешнего адреса из настроек. */
-export function eduLinkProps(url: string) {
-  return /^https?:\/\//i.test(url) ? { target: "_blank", rel: "noopener noreferrer" } : {};
+/** Старые адреса раздела (/education, /education/plan, /education/app/…) — ссылки из меню и карточек в базе. */
+export function eduHref(href: string) {
+  return href === "/education" || href.startsWith("/education/") ? EDU_URL : href;
 }

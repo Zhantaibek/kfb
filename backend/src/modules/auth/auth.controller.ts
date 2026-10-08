@@ -8,7 +8,6 @@ import {
   readSession,
   readUserSession,
 } from "./auth.service";
-import { authenticateEduAccount } from "../../edu/bridge";
 
 export function getSession(req: Request, res: Response) {
   const session = readSession(req);
@@ -47,8 +46,7 @@ export async function loginUser(req: Request, res: Response) {
   const body = req.body as { email?: string; password?: string };
   const email = String(body.email ?? "");
   const password = String(body.password ?? "");
-  // Сначала аккаунты сайта, затем — преподаватели и студенты учебного центра.
-  const session = (await authenticate(email, password)) ?? (await authenticateEduAccount(email, password));
+  const session = await authenticate(email, password);
   if (!session) {
     res.status(401).json({ error: "Неверный логин или пароль. Демо: investor@kse.kg / kse" });
     return;

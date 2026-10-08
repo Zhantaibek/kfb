@@ -1,4 +1,4 @@
-import { EDU_PLATFORM_URL } from "@/lib/edu";
+import { EDU_URL } from "@/lib/edu";
 
 export type SiteLink = {
   href: string;
@@ -21,7 +21,7 @@ export const sitePrimaryNav: SiteLink[] = [
   { href: "/disclosure", label: "Центр раскрытия информации" },
   { href: "/sustainable", label: "Сектор устойчивого развития" },
   { href: "/gcb/invest", label: "Инвестиции в ГЦБ" },
-  { href: "/education", label: "Учебный центр" },
+  { href: EDU_URL, label: "Учебный центр" },
 ];
 
 /** Полная структура меню как на https://www.kse.kg/ru */
@@ -109,12 +109,8 @@ export const siteNav: SiteNavGroup[] = [
   {
     key: "education",
     label: "Учебный центр",
-    href: "/education",
-    items: [
-      { href: "/education", label: "Общая информация" },
-      { href: "/education/plan", label: "План работы на год" },
-      { href: EDU_PLATFORM_URL, label: "Онлайн-платформа" },
-    ],
+    href: EDU_URL,
+    items: [{ href: EDU_URL, label: "Перейти в учебный центр" }],
   },
 ];
 
@@ -320,7 +316,7 @@ export const sectionPages: Record<string, SectionContent> = {
     links: [
       { href: "/market", label: "Статистика торгов" },
       { href: "/disclosure", label: "Центр раскрытия" },
-      { href: "/education", label: "Учебный центр" },
+      { href: EDU_URL, label: "Учебный центр" },
     ],
   },
   "/regulations/exchange": {
@@ -428,18 +424,6 @@ export const sectionPages: Record<string, SectionContent> = {
       "Публикуются результаты аукционов по депозитам в рамках инфраструктуры рынка.",
     ],
     links: [{ href: "/gcb", label: "Раздел ГЦБ" }],
-  },
-  "/education/plan": {
-    title: "План работы на год",
-    lead: "Календарь мероприятий учебного центра КФБ.",
-    crumb: "Учебный центр / План работы на год",
-    body: [
-      "Учебный центр проводит курсы и семинары для инвесторов, эмитентов и участников рынка.",
-      "Годовой план включает программы по основам рынка ценных бумаг, листингу и раскрытию информации.",
-    ],
-    links: [
-      { href: "/education", label: "Общая информация" },
-    ],
   },
 };
 

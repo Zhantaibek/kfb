@@ -3,10 +3,14 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { siteFooterButtons, siteFooterColumns, siteFooterLinks, siteNav, sitePrimaryNav, type SiteLink, type SiteNavGroup } from "@/data/site-nav";
 import { applyLocale } from "@/lib/cms/locale";
+import { EDU_URL, eduHref } from "@/lib/edu";
 import { menuGroupLinks, menuToFooterColumns, menuToFooterNav, menuToPrimaryNav, menuToSiteNav } from "@/lib/cms/menu-tree";
 import type { CmsHomeHub, CmsMenuItem, CmsPartner, CmsSiteSettings } from "@/lib/cms/types";
 import { partnerFields, partnersOrFallback } from "@/lib/cms/partners";
 import { useLang } from "@/lib/use-tr";
+
+/** Бывшие разделы учебного центра на сайте: теперь вели бы на один и тот же адрес, поэтому не показываем. */
+const LEGACY_EDU_ITEMS = new Set(["menu-edu-plan", "menu-edu-online"]);
 
 const emptySettings: CmsSiteSettings = {
   id: "site",
@@ -20,7 +24,7 @@ const emptySettings: CmsSiteSettings = {
   telegramUrl: "https://t.me/kse_publicinfo",
   license: "№37 НКРЦБ от 30.11.2000",
   copyright: "© 2004–2026 ЗАО «Кыргызская фондовая биржа»",
-  eduUrl: "/education/app",
+  eduUrl: EDU_URL,
   disclosurePhone: "(0312) 45-40-53",
   eduPhone: "+996 (772) 63-79-97",
   i18n: {},
@@ -75,7 +79,10 @@ function useSiteNavState(): SiteNavValue {
   }, []);
 
   return useMemo(() => {
-    const localizedMenu = menu.map((item) => applyLocale(item, lang, ["label"]));
+    // Учебный центр — отдельный проект: его старые адреса в меню ведут на его собственный адрес.
+    const localizedMenu = menu
+      .filter((item) => !LEGACY_EDU_ITEMS.has(item.id))
+      .map((item) => ({ ...applyLocale(item, lang, ["label"]), href: eduHref(item.href) }));
     const tree = menuToSiteNav(localizedMenu);
     // Свои колонки футера из админки; пока их нет — первые группы бургер-меню, как раньше.
     const ownFooter = menuToFooterNav(localizedMenu);
@@ -91,7 +98,7 @@ function useSiteNavState(): SiteNavValue {
       footerButtons,
       footerLinks,
       settings: applyLocale(settingsRaw, lang, ["tagline", "address", "license", "copyright"]),
-      hubs: hubsRaw.map((item) => applyLocale(item, lang, ["title", "text"])),
+      hubs: hubsRaw.map((item) => ({ ...applyLocale(item, lang, ["title", "text"]), href: eduHref(item.href) })),
       partners: partnersOrFallback(partnersRaw).map((item) => applyLocale(item, lang, [...partnerFields])),
     };
   }, [lang, menu, settingsRaw, hubsRaw, partnersRaw]);

@@ -20,7 +20,6 @@ const staticPages = [
   "/cabinet",
   "/islamic",
   "/commodity",
-  "/education",
   "/documents",
   "/search",
   "/tariffs",

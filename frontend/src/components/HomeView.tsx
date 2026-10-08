@@ -9,6 +9,7 @@ import { MarketPulse } from "@/components/MarketPulse";
 import { QuoteBoard } from "@/components/QuoteBoard";
 import { ResourceRail } from "@/components/ResourceRail";
 import { applyLocale } from "@/lib/cms/locale";
+import { EDU_URL } from "@/lib/edu";
 import { mediaSrc } from "@/lib/cms/media-src";
 import type { CmsI18n } from "@/lib/cms/types";
 import { useLang, useTr } from "@/lib/use-tr";
@@ -68,7 +69,7 @@ const services = [
   {
     title: "Учебный центр",
     text: "Курсы и семинары по рынку ценных бумаг для специалистов и инвесторов.",
-    href: "/education",
+    href: EDU_URL,
     icon: <path d="M2.5 9 12 4.5 21.5 9 12 13.5zM6.5 11v5c1.5 1.6 3.4 2.5 5.5 2.5s4-.9 5.5-2.5v-5M21.5 9v6" />,
   },
 ];
@@ -83,7 +84,7 @@ const startSteps = [
   {
     title: "Разберитесь в основах",
     text: "Курсы учебного центра объяснят, как устроен рынок ценных бумаг.",
-    href: "/education",
+    href: EDU_URL,
     link: "Учебный центр",
   },
   {

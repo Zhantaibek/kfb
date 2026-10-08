@@ -39,18 +39,6 @@ export function CabinetView() {
           {tr("Выйти")}
         </button>
       </article>
-      {/* Учебный центр встроен в сайт и открывается под тем же входом. */}
-      <article className={ui.card}>
-        <h2>{tr("Учебный центр")}</h2>
-        <p>
-          {user.role === "teacher"
-            ? tr("Ваши курсы, студенты и задания.")
-            : tr("Курсы, уроки, задания и прогресс обучения.")}
-        </p>
-        <Link className={ui.primary} href="/education/app" style={{ marginTop: 16, display: "inline-flex" }}>
-          {tr("Открыть учебный центр")}
-        </Link>
-      </article>
       <article className={ui.card}>
         <h2>{tr("Избранные бумаги")}</h2>
         <div className={ui.list}>

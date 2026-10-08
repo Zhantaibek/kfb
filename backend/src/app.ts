@@ -8,7 +8,6 @@ import { config } from "./config";
 import { openApiSpec } from "./docs/openapi";
 import { errorHandler } from "./middleware/error";
 import { api } from "./routes";
-import { eduApi } from "./edu";
 
 export function createApp() {
   const app = express();
@@ -73,8 +72,6 @@ export function createApp() {
       },
     }),
   );
-  app.use("/api/edu/auth", authLimiter);
-  app.use("/api/edu", eduApi);
   app.use("/api", api);
   app.use(errorHandler);
 

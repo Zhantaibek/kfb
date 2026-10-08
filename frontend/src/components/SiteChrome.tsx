@@ -40,9 +40,7 @@ function collectStaggerItems(root: Element) {
 export function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
-  // Учебный центр, как и админка, рисует свой интерфейс — без шапки, подвала и анимаций сайта.
-  const isEduApp = pathname.startsWith("/education/app");
-  const bare = isAdmin || isEduApp;
+  const bare = isAdmin;
 
   useEffect(() => {
     if (isAdmin) return;

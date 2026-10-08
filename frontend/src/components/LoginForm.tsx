@@ -50,13 +50,7 @@ export function LoginForm() {
       return;
     }
     const next = nextPath();
-    const isEdu = result.role === "student" || result.role === "teacher";
-    const target = next ?? (result.staff ? "/admin" : isEdu ? "/education/app" : "/cabinet");
-    // Учебный центр — отдельное приложение со своими стилями: открываем его полной загрузкой.
-    if (target.startsWith("/education/app")) {
-      window.location.href = target;
-      return;
-    }
+    const target = next ?? (result.staff ? "/admin" : "/cabinet");
     router.push(target);
   }
 

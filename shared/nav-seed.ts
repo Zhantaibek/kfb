@@ -180,11 +180,8 @@ export const defaultHeaderNav: NavSeedNode[] = [
     id: "menu-5",
     label: "Учебный центр",
     href: "/education",
-    children: [
-      { id: "menu-edu-info", label: "Общая информация", href: "/education" },
-      { id: "menu-edu-plan", label: "План работы на год", href: "/education/plan" },
-      { id: "menu-edu-online", label: "Онлайн-платформа", href: "/education/app" },
-    ],
+    // Учебный центр — отдельный проект; /education на сайте ведёт на его адрес.
+    children: [{ id: "menu-edu-info", label: "Перейти в учебный центр", href: "/education" }],
   },
 ];
 

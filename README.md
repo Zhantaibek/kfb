@@ -1,12 +1,12 @@
-Сайт Кыргызской фондовой биржи и Учебный центр КФБ — одно приложение: Next.js (frontend) и Express (backend).
+Сайт Кыргызской фондовой биржи: Next.js (frontend) и Express (backend).
+
+Учебный центр КФБ — отдельный проект ([kse-edu](https://github.com/Zhantaibek/kse-edu)) со своим сервером, базой и входом.
+Сайт только ссылается на него: адрес задаётся `NEXT_PUBLIC_EDU_URL`, старые адреса `/education/…` перенаправляют туда.
 
 ```
 kse-kg/
   frontend/            Next.js 16, UI и страницы
-    src/edu/           Учебный центр (React Router внутри страницы /education/app)
   backend/             Express API, PostgreSQL CMS, загрузки
-    src/edu/           API учебного центра (/api/edu)
-    prisma/edu/        схема и миграции учебного центра (схема `edu` той же базы)
   shared/              общие типы CMS
 ```
 
@@ -21,28 +21,12 @@ npm run db:seed
 npm run dev
 ```
 
-Нужен PostgreSQL (`localhost:5433`, база `kse`). Одна команда `npm run dev` поднимает и сайт, и учебный центр.
+Нужен PostgreSQL (`localhost:5433`, база `kse`). `npm run dev` поднимает сайт и его API.
 
 | Сервис | URL |
 |--------|-----|
 | Сайт КФБ | http://localhost:3000 |
-| Учебный центр | http://localhost:3000/education/app |
 | API КФБ | http://localhost:4000/api |
-| API учебного центра | http://localhost:4000/api/edu |
-
-## Учебный центр
-
-- **Вход общий.** Человек входит на сайте (`/login`), а учебный центр получает токен по cookie сайта
-  (`GET /api/edu/session`). Кто вошёл на сайт впервые — получает аккаунт учебного центра по email:
-  админ/редактор сайта → `ADMIN`, остальные → `STUDENT`.
-- **Преподаватели и студенты учебного центра** входят через тот же `/login` своими паролями.
-- **База.** Таблицы учебного центра — в схеме `edu` базы `kse`; миграции применяются при старте бэкенда
-  (`prisma migrate deploy --schema prisma/edu/schema.prisma`). Prisma-клиент генерируется в
-  `backend/src/edu/prisma-client` (не в git).
-- **Файлы** (видео, картинки уроков) — в `backend/uploads/edu`, раздаются как `/uploads/edu/…`.
-- **Почта** (регистрация студентов, ссылка для входа) — переменные `SMTP_*` в `.env`.
-- **Стили.** Учебный центр на Tailwind (`src/edu/index.css`), сайт — на CSS-модулях; базовые правила
-  сайта лежат в `@layer base`, чтобы не перебивать утилиты Tailwind.
 
 ## Живые данные торгов с kse.kg
 
@@ -74,6 +58,3 @@ docker compose up -d --build
 |-----|-------|--------|
 | Кабинет сайта | `investor@kse.kg` | `kse` |
 | Админка `/admin` | `admin@kse.kg` | `admin` |
-| Учебный центр — преподаватель | `teacher@edu.local` | `Teacher123!` |
-| Учебный центр — студент | `student@edu.local` | `Student123!` |
-| Учебный центр — администратор | `admin@edu.local` | `Admin123!` |

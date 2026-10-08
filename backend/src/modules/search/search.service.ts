@@ -1,5 +1,4 @@
 import { prisma } from "../../db/prisma";
-import { prisma as eduPrisma } from "../../edu/config/prisma.js";
 import { parseListingDocuments } from "../../../../shared/cms";
 
 /**
@@ -8,7 +7,7 @@ import { parseListingDocuments } from "../../../../shared/cms";
  * Данных немного (сотни записей), поэтому индекс собираем в памяти и держим 60 секунд.
  */
 
-export type SearchKind = "pages" | "instruments" | "members" | "partners" | "news" | "issuers" | "listing" | "documents" | "people" | "courses";
+export type SearchKind = "pages" | "instruments" | "members" | "partners" | "news" | "issuers" | "listing" | "documents" | "people";
 
 type Doc = {
   kind: SearchKind;
@@ -36,7 +35,6 @@ export const kindLabels: Record<SearchKind, string> = {
   listing: "Листинг",
   documents: "Документы",
   people: "Руководство",
-  courses: "Курсы учебного центра",
 };
 
 const ENTITIES: Record<string, string> = { nbsp: " ", laquo: "«", raquo: "»", mdash: "—", ndash: "–", quot: '"', amp: "&", lt: "<", gt: ">" };
@@ -103,10 +101,6 @@ async function buildIndex(): Promise<Doc[]> {
     prisma.kseSnapshot.findUnique({ where: { key: "members" } }),
     prisma.partner.findMany({ where: { status: "published" } }),
   ]);
-  // Учебный центр — отдельная схема; если она недоступна, остальной поиск всё равно работает.
-  const courses = await eduPrisma.course
-    .findMany({ where: { status: "PUBLISHED" }, include: { category: true } })
-    .catch(() => []);
 
   const docs: Doc[] = [];
   const seenHref = new Set<string>();
@@ -161,9 +155,6 @@ async function buildIndex(): Promise<Doc[]> {
   for (const row of partners) {
     docs.push(doc("partners", row.name || row.caption, `/about/partners/${row.slug}`, [row.mark, row.caption, row.kind, row.lead, row.body], row.caption, row.i18n));
   }
-  for (const row of courses) {
-    docs.push(doc("courses", row.title, `/education/app/courses/${row.id}`, [row.description, row.category?.name], row.category?.name));
-  }
   return docs;
 }
 
@@ -205,7 +196,7 @@ export async function search(query: string, perKind: number) {
     })
     .sort((a, b) => b.score - a.score || a.item.title.localeCompare(b.item.title, "ru"));
 
-  const order: SearchKind[] = ["pages", "instruments", "members", "partners", "issuers", "listing", "news", "documents", "people", "courses"];
+  const order: SearchKind[] = ["pages", "instruments", "members", "partners", "issuers", "listing", "news", "documents", "people"];
   const groups = order
     .map((kind) => {
       const all = hits.filter((hit) => hit.item.kind === kind);
