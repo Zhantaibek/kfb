@@ -142,16 +142,19 @@ export function SiteHeader() {
       </Link>
 
       <nav className={ui.nav} aria-label={tr("Основная навигация")}>
-        {primary.map((item) => (
-          <AppLink
-            key={item.href + item.label}
-            className={ui.navLink}
-            href={item.href}
-            active={navOn(pathname, item.href)}
-          >
-            {tr(item.label)}
-          </AppLink>
-        ))}
+        {primary.map((item) => {
+          const text = tr(item.label);
+          return (
+            <AppLink
+              key={item.href + item.label}
+              className={ui.navLink}
+              href={item.href}
+              active={navOn(pathname, item.href)}
+            >
+              {text}
+            </AppLink>
+          );
+        })}
       </nav>
 
       <div className={ui.headerActions}>

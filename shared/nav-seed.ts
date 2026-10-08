@@ -31,6 +31,7 @@ export const defaultPrimaryNav: NavSeedNode[] = [
     href: "/gcb/invest",
     i18n: { ky: { label: "МБКга инвестициялар" }, en: { label: "Investing in government securities" } },
   },
+  { id: "menu-top-education", label: "Учебный центр", href: "/education", i18n: { ky: { label: "Окуу борбору" }, en: { label: "Training centre" } } },
 ];
 
 /**

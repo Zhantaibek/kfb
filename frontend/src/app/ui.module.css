@@ -907,7 +907,7 @@ a.cabinetBtn {
   --footer-edge: max(24px, calc((100% - 1480px) / 2));
   width: 100%;
   margin: 8px 0 0;
-  padding: 20px var(--footer-edge) 12px;
+  padding: 12px var(--footer-edge) 8px;
   border-radius: 0;
   background: #d9e1dd;
   color: inherit;
@@ -920,19 +920,19 @@ a.cabinetBtn {
 
 .footerPanel {
   position: relative;
-  padding: 0 0 10px;
+  padding: 0 0 4px;
 }
 
 .footerNav {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px 40px;
+  gap: 12px 40px;
 }
 
 .footerNav b {
   display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
+  margin-bottom: 4px;
+  font-size: 13px;
   font-weight: 650;
   letter-spacing: 0;
   line-height: 1.3;
@@ -957,12 +957,12 @@ a.cabinetBtn {
 }
 
 .footerNav a {
-  display: block;
-  width: fit-content;
+  display: inline-block;
+  margin-right: 14px;
   color: #8d97a3;
-  padding: 2px 0;
-  font-size: 13.5px;
-  line-height: 1.35;
+  padding: 1px 0;
+  font-size: 12.5px;
+  line-height: 1.3;
 }
 
 .footerNav a:hover,
@@ -974,8 +974,8 @@ a.cabinetBtn {
 .footerBanner {
   position: relative;
   min-height: 0;
-  margin-top: 24px;
-  padding: 14px 32px 14px 36%;
+  margin-top: 40px;
+  padding: 34px 32px 34px 36%;
   border-radius: 56px;
   background: var(--hero);
   color: #fff;
@@ -984,7 +984,7 @@ a.cabinetBtn {
 .footerLaptop {
   position: absolute;
   left: 32px;
-  bottom: 10px;
+  bottom: 6px;
   display: grid;
   justify-items: center;
   width: 38em;
@@ -1171,15 +1171,15 @@ a.cabinetBtn {
   z-index: 1;
   display: grid;
   align-content: center;
-  gap: 10px;
+  gap: 8px;
   min-height: 0;
 }
 
 .footerBannerCopy p {
   margin: 0;
-  max-width: 16em;
+  max-width: 34em;
   color: #fff;
-  font-size: clamp(18px, 1.4vw, 22px);
+  font-size: clamp(15px, 1.15vw, 18px);
   font-weight: 750;
   letter-spacing: -0.03em;
   line-height: 1.15;
@@ -1187,7 +1187,7 @@ a.cabinetBtn {
 
 .footerBannerCopy p small {
   display: block;
-  max-width: 26em;
+  max-width: 46em;
   margin-top: 4px;
   color: rgba(255, 255, 255, 0.72);
   font-size: 13px;
@@ -1206,8 +1206,8 @@ a.cabinetBtn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 34px;
-  padding: 4px 12px 4px 10px;
+  min-height: 30px;
+  padding: 3px 10px 3px 8px;
   border-radius: 8px;
   background: #111;
   color: #fff;
@@ -1234,8 +1234,8 @@ a.cabinetBtn {
 .footerMeta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px 40px;
-  margin-top: 12px;
+  gap: 8px 40px;
+  margin-top: 8px;
   align-items: start;
 }
 
@@ -1248,15 +1248,16 @@ a.cabinetBtn {
 
 .footerHotline a {
   color: #1c2430;
-  font-size: clamp(18px, 1.4vw, 22px);
+  font-size: clamp(16px, 1.2vw, 19px);
   font-weight: 750;
   letter-spacing: -0.04em;
   line-height: 1.05;
 }
 
 .footerRows {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
 }
 
 .footerRows > div {
@@ -1269,16 +1270,16 @@ a.cabinetBtn {
   display: grid;
   place-items: center;
   flex: none;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #2b3442;
   color: #fff;
 }
 
 .footerIcon svg {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
@@ -1288,9 +1289,9 @@ a.cabinetBtn {
 
 .footerRows b {
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   color: #1c2430;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 650;
 }
 
@@ -1300,8 +1301,8 @@ a.cabinetBtn {
   margin: 0;
   padding: 0;
   color: #6d7784;
-  font-size: 14px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.35;
   text-decoration: none;
 }
 
@@ -1319,11 +1320,11 @@ a.cabinetBtn {
   align-items: center;
   gap: 8px 16px;
   width: auto;
-  margin: 8px 8px 0;
+  margin: 4px 8px 0;
   padding: 0;
   border-top: 0;
   color: var(--ink-muted);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0;
 }
 
@@ -1569,11 +1570,11 @@ a.cabinetBtn {
 @media (max-width: 640px) {
   .footer {
     --footer-edge: 16px;
-    padding-top: 28px;
+    padding-top: 16px;
   }
 
   .footerPanel {
-    padding-bottom: 18px;
+    padding-bottom: 8px;
   }
 
   .footerNav,
@@ -1704,7 +1705,7 @@ a.cabinetBtn {
   }
 }
 
-@media (min-width: 1280px) and (max-width: 1519px) {
+@media (min-width: 1280px) and (max-width: 1759px) {
   .logoLockup {
     display: none;
   }
@@ -1713,13 +1714,38 @@ a.cabinetBtn {
     display: block;
   }
 
-  .navLink {
-    padding: 0 8px;
-    font-size: 13px;
-  }
-
   .headerActions {
     gap: 4px;
+  }
+}
+
+/*
+ * Семь разделов в одну строку, без переносов: шапка чуть шире основной сетки (до 1640px),
+ * на ноутбуках пункты компактнее.
+ */
+@media (min-width: 1280px) {
+  .header {
+    padding-inline: max(16px, calc((100% - 1640px) / 2));
+  }
+
+  .nav .navLink {
+    flex: none;
+    padding: 0 6px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 1520px) {
+  .nav .navLink {
+    padding: 0 9px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1760px) {
+  .logoLockup {
+    max-width: 210px;
   }
 }
 
@@ -1885,8 +1911,8 @@ a.cabinetBtn {
 .footerSocial a {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
@@ -1901,8 +1927,8 @@ a.cabinetBtn {
 }
 
 .footerSocial svg {
-  width: 24px;
-  height: 24px;
+  width: 19px;
+  height: 19px;
 }
 
 @media (max-width: 900px) {
@@ -1932,4 +1958,84 @@ a.cabinetBtn {
   color: var(--ink-muted);
   font-size: 0.6em;
   font-weight: 600;
+}
+
+/* Каркас публичных страниц: подвал всегда внизу окна, даже если страница короткая. */
+.siteShell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.siteShell > footer {
+  margin-top: auto;
+}
+
+/* Кыргызские и английские названия длиннее: на узких ноутбуках строка не влезает — разделы остаются в бургере. */
+@media (min-width: 1280px) and (max-width: 1339px) {
+  :global(html[lang="ky"]) .nav {
+    display: none;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1409px) {
+  :global(html[lang="en"]) .nav {
+    display: none;
+  }
+}
+
+/* Контакты внутри бирюзового баннера подвала: белый текст, тонкие иконки, в строку с переносом. */
+.footerContacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  max-width: 600px;
+  margin: 4px 0 0;
+  padding: 10px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  list-style: none;
+}
+
+.footerContacts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.footerContacts a {
+  color: inherit;
+  white-space: nowrap;
+}
+
+.footerContacts a:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footerContacts svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 640px) {
+  .footerContacts {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footerContacts li {
+    align-items: flex-start;
+  }
 }

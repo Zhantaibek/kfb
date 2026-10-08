@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { SiteFooter } from "@/components/SiteFooter";
+import ui from "@/app/ui.module.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteSplash } from "@/components/SiteSplash";
 import { TickerTape } from "@/components/TickerTape";
@@ -108,11 +109,14 @@ export function SiteChrome({ children }: { children: ReactNode }) {
 
   return (
     <SiteNavProvider>
-      <SiteSplash />
-      <TickerTape />
-      <SiteHeader />
-      {children}
-      <SiteFooter />
+      {/* Колонка на всю высоту окна: на коротких страницах подвал прижат к низу экрана. */}
+      <div className={ui.siteShell}>
+        <SiteSplash />
+        <TickerTape />
+        <SiteHeader />
+        {children}
+        <SiteFooter />
+      </div>
     </SiteNavProvider>
   );
 }

@@ -21,6 +21,7 @@ export const sitePrimaryNav: SiteLink[] = [
   { href: "/disclosure", label: "Центр раскрытия информации" },
   { href: "/sustainable", label: "Сектор устойчивого развития" },
   { href: "/gcb/invest", label: "Инвестиции в ГЦБ" },
+  { href: "/education", label: "Учебный центр" },
 ];
 
 /** Полная структура меню как на https://www.kse.kg/ru */

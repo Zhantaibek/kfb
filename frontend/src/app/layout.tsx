@@ -3,7 +3,7 @@ import { MarketDataProvider } from "@/components/MarketDataProvider";
 import { loadMarketData } from "@/lib/market-data";
 import { SiteChrome } from "@/components/SiteChrome";
 import type { Metadata } from "next";
-import { Manrope, Unbounded } from "next/font/google";
+import { Manrope, Montserrat, Unbounded } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -16,6 +16,14 @@ const sans = Manrope({
 const display = Unbounded({
   subsets: ["latin", "cyrillic"],
   variable: "--font-display",
+});
+
+// Надпись «Kyrgyz Stock Exchange» на заставке при входе.
+const brand = Montserrat({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-brand",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -64,7 +72,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html
       lang="ru"
-      className={`${sans.variable} ${display.variable}`}
+      className={`${sans.variable} ${display.variable} ${brand.variable}`}
       data-theme="dark"
       data-scroll-behavior="smooth"
       suppressHydrationWarning

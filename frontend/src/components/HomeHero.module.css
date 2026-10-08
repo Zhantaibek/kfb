@@ -45,14 +45,14 @@
 }
 
 .main {
-  min-height: clamp(480px, 66vh, 660px);
+  min-height: clamp(360px, 50vh, 500px);
   display: flex;
   align-items: center;
 }
 
 .copy {
   max-width: calc(620px + var(--edge));
-  padding: 64px 32px 64px var(--edge);
+  padding: 40px 32px 40px var(--edge);
 }
 
 .copy h1 {
@@ -74,7 +74,7 @@
 
 @media (min-width: 1024px) {
   .copy h1 {
-    font-size: 3.25rem;
+    font-size: 2.85rem;
   }
 }
 
@@ -212,19 +212,12 @@
   animation: heroSpin 120s linear infinite;
 }
 
-/* Шарики вращаются по кольцам; сам шарик крутится в обратную сторону, чтобы блик не «уезжал». */
-.orbit {
-  transform-box: view-box;
-  transform-origin: 1220px 380px;
-  animation: heroSpin 36s linear infinite;
-}
-
+/* Шарики мягко покачиваются на месте — без «парада планет». */
 .orb {
   stroke: rgba(255, 255, 255, 0.6);
   stroke-width: 1;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: heroSpin 36s linear infinite reverse;
+  opacity: 0.75;
+  animation: heroFloat 9s ease-in-out infinite alternate;
 }
 
 /* Кольца расходятся из центра при загрузке. */
@@ -315,6 +308,16 @@
   }
 }
 
+@keyframes heroFloat {
+  from {
+    translate: 0 -10px;
+  }
+
+  to {
+    translate: 0 10px;
+  }
+}
+
 @keyframes heroSpin {
   to {
     rotate: 360deg;
@@ -325,7 +328,6 @@
   .blob,
   .rings,
   .rings circle,
-  .orbit,
   .orb,
   .copy > *,
   .stat {
@@ -437,5 +439,191 @@
 
   .stat {
     padding: 16px 14px 18px;
+  }
+}
+
+/* Свечи по кольцу — второстепенная деталь: приглушены и вращаются вместе с кольцами. */
+.hero {
+  --candle-up: #1ccf45;
+  --candle-down: #ff4d5e;
+  --candle-wick: rgba(13, 42, 46, 0.45);
+}
+
+:global([data-theme="dark"]) .hero {
+  --candle-up: #2fe05a;
+  --candle-down: #ff5d6c;
+  --candle-wick: rgba(255, 255, 255, 0.4);
+}
+
+.candleRing {
+  opacity: 0.55;
+  transform-box: view-box;
+  transform-origin: 1220px 380px;
+  animation: heroSpin 120s linear infinite;
+}
+
+.candleUp,
+.candleDown {
+  opacity: 0;
+  animation: heroCandleIn 0.6s ease forwards;
+}
+
+.candleUp rect {
+  fill: var(--candle-up);
+}
+
+.candleDown rect {
+  fill: var(--candle-down);
+}
+
+.candleUp line,
+.candleDown line {
+  stroke: var(--candle-wick);
+  stroke-width: 1.5;
+}
+
+@keyframes heroCandleIn {
+  to {
+    opacity: 1;
+  }
+}
+
+:global(body:has([data-site-splash="show"])) .candleUp,
+:global(body:has([data-site-splash="show"])) .candleDown {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candleRing {
+    animation: none;
+  }
+
+  .candleUp,
+  .candleDown {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* Шарики покачиваются (у «линз» покачивается вся группа вместе с графиком внутри). */
+.orb {
+  animation: none;
+}
+
+.floating,
+.lens {
+  animation: heroFloat 9s ease-in-out infinite alternate;
+}
+
+/* Свечи внутри шариков — мелкие, без колец-подсветки. */
+.lens .candleUp line,
+.lens .candleDown line {
+  stroke-width: 1.2;
+}
+
+/* Полоса свечей вдоль нижнего края баннера, над показателями; плывёт влево бесконечно. */
+.strip {
+  position: absolute;
+  left: 45%;
+  right: 0;
+  bottom: calc(var(--hero-stats-h, 104px) + 14px);
+  width: auto;
+  height: 84px;
+  overflow: hidden;
+  opacity: 0.5;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 92%, transparent 100%);
+}
+
+.stripTrack {
+  animation: heroStrip 90s linear infinite;
+}
+
+@keyframes heroStrip {
+  to {
+    translate: -2000px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating,
+  .lens,
+  .stripTrack {
+    animation: none;
+  }
+}
+
+/* Стеклянные свечи — того же материала, что шарики. */
+.glassCandles {
+  opacity: 0;
+  animation: heroCandleIn 1.2s ease 0.6s forwards;
+}
+
+/* Стекло тонировано: рост — зелёный, падение — красный; блик и белый контур — как у шариков. */
+.hero {
+  --glass-hi: rgba(255, 255, 255, 0.95);
+  --glass-up: rgba(28, 207, 69, 0.55);
+  --glass-down: rgba(255, 77, 94, 0.5);
+}
+
+:global([data-theme="dark"]) .hero {
+  --glass-hi: rgba(220, 255, 230, 0.55);
+  --glass-up: rgba(47, 224, 90, 0.3);
+  --glass-down: rgba(255, 93, 108, 0.3);
+}
+
+.glassUp rect,
+.glassDown rect {
+  stroke: rgba(255, 255, 255, 0.75);
+  stroke-width: 1.2;
+}
+
+.glassUp line {
+  stroke: rgba(20, 150, 60, 0.55);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.glassDown line {
+  stroke: rgba(210, 60, 75, 0.55);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+:global([data-theme="dark"]) .glassUp line {
+  stroke: rgba(120, 240, 150, 0.5);
+}
+
+:global([data-theme="dark"]) .glassDown line {
+  stroke: rgba(255, 150, 160, 0.5);
+}
+
+:global(body:has([data-site-splash="show"])) .glassCandles {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glassCandles {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* Слой стеклянных свечей: справа, над показателями, не кадрируется вместе с кольцами. */
+.glassLayer {
+  position: absolute;
+  top: 5%;
+  left: 40%;
+  right: 2%;
+  width: 58%;
+  height: calc(95% - var(--hero-stats-h, 104px) - 24px);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 12%);
+  overflow: visible;
+  translate: 0 var(--hero-shift, 0px);
+}
+
+@media (max-width: 980px) {
+  .glassLayer {
+    opacity: 0.35;
+    width: 70%;
   }
 }

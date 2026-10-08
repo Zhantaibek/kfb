@@ -39,7 +39,7 @@
 
 /* Логотип: проявляется с поворотом. */
 .mark {
-  width: clamp(48px, 6vw, 72px);
+  width: clamp(40px, 4.5vw, 56px);
   height: auto;
   filter: brightness(0) invert(1) drop-shadow(0 6px 18px rgba(8, 40, 45, 0.35));
   opacity: 0;
@@ -111,10 +111,10 @@
 
 .word {
   margin: 0;
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-size: clamp(34px, 6vw, 76px);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--font-brand), var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(24px, 3.4vw, 44px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
   line-height: 1;
   position: relative;
 }
@@ -148,7 +148,7 @@
   margin: 0;
   font-family: var(--font-sans), system-ui, sans-serif;
   color: rgba(255, 255, 255, 0.92);
-  font-size: clamp(16px, 1.8vw, 22px);
+  font-size: clamp(13px, 1.2vw, 16px);
   font-weight: 700;
   letter-spacing: 0.02em;
 }

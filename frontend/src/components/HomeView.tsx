@@ -14,6 +14,7 @@ import type { CmsI18n } from "@/lib/cms/types";
 import { useLang, useTr } from "@/lib/use-tr";
 import styles from "@/app/page.module.css";
 import { AdminEditButton } from "@/components/AdminEditButton";
+import { UrgentNotices, type UrgentNotice } from "@/components/UrgentNotices";
 
 const months: Record<string, string[]> = {
   ru: ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
@@ -121,9 +122,11 @@ type Props = {
   listing: { total: number; stocks: number; gcb: number; metals: number };
   gold?: { price: number; change: number };
   companyNews?: HomeNews[];
+  /** Срочные объявления: отдельный блок внизу, перед подвалом; пусто — блока нет. */
+  urgent?: UrgentNotice[];
 };
 
-export function HomeView({ news, companyNews = [], index, volume, listing }: Props) {
+export function HomeView({ news, companyNews = [], urgent = [], index, volume, listing }: Props) {
   const tr = useTr();
   const lang = useLang();
   const localizedNews = news.map((item) => applyLocale(item, lang, ["title", "excerpt", "tag"]));
@@ -266,6 +269,7 @@ export function HomeView({ news, companyNews = [], index, volume, listing }: Pro
         </section>
 
         <ResourceRail />
+        <UrgentNotices items={urgent} />
       </main>
     </div>
   );

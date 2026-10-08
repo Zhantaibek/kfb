@@ -1,0 +1,136 @@
+/* Срочные объявления на главной: отдельный блок перед подвалом в фирменном цвете. */
+
+.urgent {
+  --urgent: var(--brand-strong);
+  width: min(1480px, calc(100% - 48px));
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--urgent) 35%, transparent);
+  border-left: 5px solid var(--urgent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 22px 10px;
+}
+
+.head h2 {
+  flex: 1;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(18px, 1.6vw, 22px);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.list {
+  margin: 0;
+  padding: 0 10px 10px;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 12px;
+  border-radius: 10px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.list li + li .item {
+  border-top: 1px solid color-mix(in srgb, var(--urgent) 18%, transparent);
+  border-radius: 0;
+}
+
+.item:hover {
+  background: color-mix(in srgb, var(--urgent) 8%, transparent);
+}
+
+.item time {
+  color: var(--urgent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.body {
+  display: grid;
+  gap: 4px;
+}
+
+.body b {
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.body span {
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.more {
+  color: var(--urgent);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .urgent {
+    width: calc(100% - 32px);
+  }
+
+  .item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .more {
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+  }
+}
+
+/* В тёмной теме --brand-strong почти белый — акцент берём основным бирюзовым. */
+:global(html[data-theme="dark"]) .urgent {
+  --urgent: var(--brand);
+}

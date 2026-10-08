@@ -5,6 +5,12 @@ import { loadMarketData } from "@/lib/market-data";
 
 export const dynamic = "force-dynamic";
 
+/** «ДД.ММ.ГГГГ» → «ГГГГ-ММ-ДД» для сортировки по дате. */
+function dateKey(value: string) {
+  const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : value;
+}
+
 function bishkekSession() {
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat("en-GB", {
@@ -52,7 +58,12 @@ export default async function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <HomeView
         slides={content.slides}
-        news={content.news.filter(isGeneralNews).slice(0, 4).map((item) => ({
+        urgent={content.news
+          .filter((item) => item.kind === "urgent" && item.status === "published")
+          .sort((a, b) => dateKey(b.date).localeCompare(dateKey(a.date)))
+          .map((item) => ({ slug: item.slug, date: item.date, title: item.title, excerpt: item.excerpt, i18n: item.i18n }))}
+        // Срочные — в своём блоке выше, в ленте «Будьте в курсе» их не повторяем.
+        news={content.news.filter((item) => isGeneralNews(item) && item.kind !== "urgent").slice(0, 4).map((item) => ({
           slug: item.slug,
           tag: item.tag,
           date: item.date,
