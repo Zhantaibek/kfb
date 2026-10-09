@@ -1,8 +1,6 @@
-import { SliderManager } from "@/components/admin/SliderManager";
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Слайдер" };
-
-export default function AdminSliderPage() {
-  return <SliderManager />;
+// Раздел «Слайдер» убран из админ-панели — старый адрес ведёт на панель управления.
+export default function Page() {
+  redirect("/admin/dashboard");
 }

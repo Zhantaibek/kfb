@@ -21,7 +21,7 @@ export default async function StatisticsPage() {
         }
         title="Статистика торгов"
       />
-      <HubCards items={menu} group="hub-statistics" />
+      <HubCards items={menu} page="/statistics" />
     </PublicMain>
   );
 }

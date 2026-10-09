@@ -6,32 +6,6 @@ import type { Cell, Snapshot, Table } from "@/lib/kse-live";
 import ui from "@/app/ui.module.css";
 import css from "./live.module.css";
 
-/** Откуда и когда данные. Красная точка — последняя попытка обновления не удалась, показаны прежние. */
-export function LiveSource({ snapshot }: { snapshot: Snapshot<unknown> }) {
-  const when = new Date(snapshot.fetchedAt).toLocaleString("ru-RU", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    // Рендерится на сервере — без явного пояса время зависело бы от часового пояса сервера.
-    timeZone: "Asia/Bishkek",
-  });
-  return (
-    <p className={css.source}>
-      <i data-stale={snapshot.stale || undefined} aria-hidden="true" />
-      <span>
-        {snapshot.stale ? "Не удалось обновить, показаны данные на " : "Обновлено "}
-        {when}
-      </span>
-      <span>·</span>
-      <a href={snapshot.sourceUrl} target="_blank" rel="noopener noreferrer">
-        Источник: kse.kg
-      </a>
-    </p>
-  );
-}
-
 /** Страница с живыми данными: шапка, источник и содержимое; без данных — понятное сообщение. */
 export function LivePage({
   title,
@@ -61,7 +35,6 @@ export function LivePage({
       />
       {snapshot ? (
         <>
-          <LiveSource snapshot={snapshot} />
           {children}
         </>
       ) : (

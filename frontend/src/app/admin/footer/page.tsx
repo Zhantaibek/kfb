@@ -1,8 +1,6 @@
-import { FooterNavManager } from "@/components/admin/FooterNavManager";
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Ссылки подвала" };
-
-export default function AdminFooterPage() {
-  return <FooterNavManager />;
+// «Ссылки подвала» объединены с контактами в раздел «Подвал и контакты».
+export default function Page() {
+  redirect("/admin/settings");
 }

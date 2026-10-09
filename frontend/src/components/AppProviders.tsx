@@ -16,7 +16,7 @@ function parseWatchlist(raw: string | null): string[] {
   }
 }
 
-type User = { id?: string; name: string; email: string; role: "investor" | "issuer" | "student" | "teacher" };
+type User = { id?: string; name: string; email: string; role: "issuer" | "student" | "teacher" };
 type AdminUser = { id?: string; name: string; email: string; role: "admin" | "editor" };
 
 type AppState = {

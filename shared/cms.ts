@@ -2,7 +2,7 @@ export type NewsKind = "exchange" | "company" | "urgent";
 export type PublishStatus = "draft" | "published";
 export type AdminRole = "admin" | "editor";
 /** student / teacher — аккаунты учебного центра (схема edu), входят через общий /login. */
-export type PublicRole = "investor" | "issuer" | "student" | "teacher";
+export type PublicRole = "issuer" | "student" | "teacher";
 export type UserRole = AdminRole | PublicRole;
 export type RequestStatus = "new" | "done";
 export type LocaleCode = "ky" | "en";
@@ -29,7 +29,7 @@ export function isStaffRole(role: string): role is AdminRole {
 }
 
 export function isPublicRole(role: string): role is PublicRole {
-  return role === "investor" || role === "issuer" || role === "student" || role === "teacher";
+  return role === "issuer" || role === "student" || role === "teacher";
 }
 
 export type CmsNews = {

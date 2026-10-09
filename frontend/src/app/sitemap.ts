@@ -16,8 +16,6 @@ const staticPages = [
   "/news",
   "/about",
   "/contacts",
-  "/login",
-  "/cabinet",
   "/islamic",
   "/commodity",
   "/documents",

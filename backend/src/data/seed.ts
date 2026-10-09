@@ -125,7 +125,6 @@ export function createSeedStore(): CmsStore {
     users: [
       { id: "user-admin", name: "Администратор", email: "admin@kse.kg", role: "admin", password: "admin" },
       { id: "user-editor", name: "Редактор", email: "editor@kse.kg", role: "editor", password: "editor" },
-      { id: "user-investor", name: "Инвестор", email: "investor@kse.kg", role: "investor", password: "kse" },
       { id: "user-issuer", name: "Эмитент", email: "issuer@kse.kg", role: "issuer", password: "kse" },
     ],
     visits: [],

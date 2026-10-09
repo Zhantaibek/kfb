@@ -147,7 +147,8 @@ export async function loadMarketData(): Promise<MarketData> {
     instruments,
     auctions,
     lastTrades: toTradeRows(last?.trades ?? []),
-    weekLeaders: toTradeRows(week?.trades ?? []).sort((a, b) => b.volume - a.volume).slice(0, 5),
+    // С запасом: карточка на главной тянется до низа колонки и показывает столько строк, сколько влезает.
+    weekLeaders: toTradeRows(week?.trades ?? []).sort((a, b) => b.volume - a.volume).slice(0, 16),
   };
 }
 

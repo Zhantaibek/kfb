@@ -1,8 +1,6 @@
-import { IssuersManager } from "@/components/admin/IssuersManager";
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Эмитенты и листинг" };
-
-export default function AdminIssuersPage() {
-  return <IssuersManager />;
+// Раздел «Эмитенты и листинг» убран из админ-панели — старый адрес ведёт на панель управления.
+export default function Page() {
+  redirect("/admin/dashboard");
 }

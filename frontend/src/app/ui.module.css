@@ -69,7 +69,7 @@
   width: 100%;
   min-height: 72px;
   margin: 0;
-  padding: 8px max(24px, calc((100% - 1480px) / 2));
+  padding: 8px max(24px, calc((100% - 1640px) / 2));
   border-radius: 0;
   overflow: visible;
   background: var(--header-bg);
@@ -515,7 +515,7 @@ a.cabinetBtn {
   height: 40px;
   padding: 0;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .menu > summary::after {
@@ -524,18 +524,82 @@ a.cabinetBtn {
 
 .menu > summary i {
   display: block;
-  width: 16px;
-  height: 1.8px;
+  width: 18px;
+  height: 2px;
+  flex: none;
   background: var(--ink);
   border-radius: 2px;
+  transition:
+    transform 0.32s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.2s ease,
+    width 0.32s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
+/* Три одинаковые линии: при открытии верх и низ сходятся в крестик, средняя исчезает. */
+
 .menu[open] > summary i:first-child {
-  transform: translateY(3.4px) rotate(45deg);
+  transform: translateY(6px) rotate(45deg);
+}
+
+.menu[open] > summary i:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
 }
 
 .menu[open] > summary i:last-child {
-  transform: translateY(-3.4px) rotate(-45deg);
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.menu[open] .menuPanel {
+  transform-origin: top right;
+  animation: menuPop 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.menu[open] .menuPanel > * {
+  animation: menuItemIn 0.36s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.menu[open] .menuPanel > :nth-child(2) { animation-delay: 0.04s; }
+.menu[open] .menuPanel > :nth-child(3) { animation-delay: 0.07s; }
+.menu[open] .menuPanel > :nth-child(4) { animation-delay: 0.1s; }
+.menu[open] .menuPanel > :nth-child(5) { animation-delay: 0.13s; }
+.menu[open] .menuPanel > :nth-child(6) { animation-delay: 0.16s; }
+.menu[open] .menuPanel > :nth-child(7) { animation-delay: 0.19s; }
+.menu[open] .menuPanel > :nth-child(n + 8) { animation-delay: 0.22s; }
+
+.menu[open] .megaCol {
+  animation: menuItemIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.menu[open] .megaCol:nth-child(2) { animation-delay: 0.04s; }
+.menu[open] .megaCol:nth-child(3) { animation-delay: 0.08s; }
+.menu[open] .megaCol:nth-child(4) { animation-delay: 0.12s; }
+.menu[open] .megaCol:nth-child(5) { animation-delay: 0.16s; }
+.menu[open] .megaCol:nth-child(6) { animation-delay: 0.2s; }
+.menu[open] .megaCol:nth-child(n + 7) { animation-delay: 0.24s; }
+
+@keyframes menuPop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+}
+
+@keyframes menuItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu > summary i,
+  .menu[open] .menuPanel,
+  .menu[open] .menuPanel > *,
+  .menu[open] .megaCol {
+    transition: none;
+    animation: none;
+  }
 }
 
 .menuPanel {
@@ -614,7 +678,7 @@ a.cabinetBtn {
 }
 
 .wrap {
-  width: min(1480px, calc(100% - 20px));
+  width: min(1640px, calc(100% - 20px));
   margin: 0 auto;
   padding: 28px 0 88px;
 }
@@ -904,7 +968,7 @@ a.cabinetBtn {
 }
 
 .footer {
-  --footer-edge: max(24px, calc((100% - 1480px) / 2));
+  --footer-edge: max(24px, calc((100% - 1640px) / 2));
   width: 100%;
   margin: 8px 0 0;
   padding: 12px var(--footer-edge) 8px;
@@ -974,7 +1038,8 @@ a.cabinetBtn {
 .footerBanner {
   position: relative;
   min-height: 0;
-  margin-top: 40px;
+  /* Ноутбук выступает над баннером — сверху оставляем под него место. */
+  margin-top: 130px;
   padding: 34px 32px 34px 36%;
   border-radius: 56px;
   background: var(--hero);
@@ -983,12 +1048,13 @@ a.cabinetBtn {
 
 .footerLaptop {
   position: absolute;
-  left: 32px;
-  bottom: 6px;
+  left: 40px;
+  bottom: 10px;
+  z-index: 1;
   display: grid;
   justify-items: center;
   width: 38em;
-  font-size: 6px;
+  font-size: clamp(7px, 0.68vw, 10px);
   pointer-events: none;
   filter: drop-shadow(0 2.4em 3em rgba(0, 0, 0, 0.35));
 }
@@ -1498,7 +1564,7 @@ a.cabinetBtn {
   }
 }
 
-/* Контент шапки ограничен 1480px, поэтому компактные размеры нужны и на широких экранах. */
+/* Контент шапки ограничен 1640px, поэтому компактные размеры нужны и на широких экранах. */
 @media (min-width: 1280px) {
   .logoLockup {
     max-width: min(250px, 20vw);
@@ -1712,6 +1778,8 @@ a.cabinetBtn {
 
   .header .logoMarkMobile {
     display: block;
+    width: 48px;
+    height: 48px;
   }
 
   .headerActions {
@@ -1725,7 +1793,7 @@ a.cabinetBtn {
  */
 @media (min-width: 1280px) {
   .header {
-    padding-inline: max(16px, calc((100% - 1640px) / 2));
+    padding-inline: max(24px, calc((100% - 1640px) / 2));
   }
 
   .nav .navLink {
@@ -1736,16 +1804,27 @@ a.cabinetBtn {
   }
 }
 
+@media (min-width: 1366px) {
+  .nav .navLink {
+    font-size: 13.5px;
+  }
+}
+
 @media (min-width: 1520px) {
   .nav .navLink {
     padding: 0 9px;
-    font-size: 13px;
+    font-size: 14.5px;
   }
 }
 
 @media (min-width: 1760px) {
   .logoLockup {
-    max-width: 210px;
+    height: 56px;
+    max-width: 250px;
+  }
+
+  .nav .navLink {
+    font-size: 14.5px;
   }
 }
 
@@ -1774,11 +1853,12 @@ a.cabinetBtn {
     max-height: calc(100dvh - 120px);
     overflow: auto;
     overscroll-behavior: contain;
-    padding: 28px max(24px, calc((100% - 1480px) / 2)) 36px;
+    padding: 28px max(24px, calc((100% - 1640px) / 2)) 36px;
     border-bottom: 1px solid var(--card-border);
     background: var(--surface);
     box-shadow: 0 24px 48px -24px rgba(18, 24, 32, 0.25);
-    animation: megaIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: top center;
+    animation: megaIn 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .menu[open] .megaBackdrop {
@@ -1792,7 +1872,7 @@ a.cabinetBtn {
     border: 0;
     background: rgba(8, 18, 22, 0.42);
     cursor: default;
-    animation: megaFade 0.22s ease;
+    animation: megaFade 0.35s ease;
   }
 }
 
@@ -1877,10 +1957,17 @@ a.cabinetBtn {
   font-size: 14px;
 }
 
+/* Панель «раскатывается» вниз из-под шапки. */
 @keyframes megaIn {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: none;
   }
 }
 
@@ -1972,16 +2059,45 @@ a.cabinetBtn {
   margin-top: auto;
 }
 
-/* Кыргызские и английские названия длиннее: на узких ноутбуках строка не влезает — разделы остаются в бургере. */
-@media (min-width: 1280px) and (max-width: 1339px) {
-  :global(html[lang="ky"]) .nav {
+/*
+ * Шапка сама проверяет, влезают ли разделы (useNavFit в SiteHeader), и ужимается по шагам —
+ * так логотип, разделы и кнопки не перекрываются ни на какой ширине и ни на каком языке.
+ */
+@media (min-width: 1280px) {
+  .nav {
+    justify-self: stretch;
+  }
+
+  .header[data-nav-fit="1"] .nav .navLink {
+    padding: 0 6px;
+    font-size: 13.5px;
+  }
+
+  .header[data-nav-fit="2"] .nav .navLink {
+    padding: 0 5px;
+    font-size: 12.5px;
+  }
+
+  .header[data-nav-fit="3"] .nav .navLink,
+  .header[data-nav-fit="4"] .nav .navLink {
+    padding: 0 4px;
+    font-size: 12px;
+  }
+
+  .header[data-nav-fit="3"] .logoLockup,
+  .header[data-nav-fit="4"] .logoLockup {
     display: none;
   }
-}
 
-@media (min-width: 1280px) and (max-width: 1409px) {
-  :global(html[lang="en"]) .nav {
-    display: none;
+  .header[data-nav-fit="3"] .logoMarkMobile,
+  .header[data-nav-fit="4"] .logoMarkMobile {
+    display: block;
+    width: 44px;
+    height: 44px;
+  }
+
+  .header[data-nav-fit="4"] .nav {
+    visibility: hidden;
   }
 }
 
@@ -2038,4 +2154,60 @@ a.cabinetBtn {
   .footerContacts li {
     align-items: flex-start;
   }
+}
+
+/*
+ * Закрытие меню: SiteHeader ставит data-closing на 280ms, затем снимает open.
+ * Панель сворачивается вверх, фон гаснет, крестик возвращается в три линии.
+ */
+.menu[data-closing][open] > summary i:nth-child(n) {
+  opacity: 1;
+  transform: none;
+}
+
+.menu[data-closing][open] .menuPanel {
+  animation: menuOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.menu[data-closing][open] .megaPanel {
+  animation: megaOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.menu[data-closing][open] .megaBackdrop {
+  animation: megaFadeOut 0.28s ease forwards;
+}
+
+@keyframes menuOut {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+}
+
+@keyframes megaOut {
+  from {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes megaFadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Разделы в строке шапки и пункты раскрытого меню — одним начертанием: средняя толщина, без сжатия. */
+.nav .navLink,
+.megaCol > a:not(.megaHead),
+.megaSub > a,
+.megaSub > summary {
+  font-weight: 500;
+  letter-spacing: 0;
 }

@@ -1,8 +1,6 @@
-import { HubCardsManager } from "@/components/admin/LandingsManager";
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Карточки разделов" };
-
+// Плитки страниц «О Бирже» и «Статистика торгов» теперь — пункты разделов в «Меню и страницы».
 export default function Page() {
-  return <HubCardsManager />;
+  redirect("/admin/menu");
 }

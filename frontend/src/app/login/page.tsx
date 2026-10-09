@@ -1,13 +1,6 @@
-import type { Metadata } from "next";
-import { CabinetEntry } from "@/components/CabinetEntry";
-import { PublicMain } from "@/components/PublicMain";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Вход в кабинет" };
-
-export default function LoginPage() {
-  return (
-    <PublicMain>
-      <CabinetEntry />
-    </PublicMain>
-  );
+// Вход в личный кабинет убран: посетители сайта не входят, вход только в админ-панель (/admin).
+export default function Page() {
+  redirect("/");
 }

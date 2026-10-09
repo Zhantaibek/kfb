@@ -1,24 +1,6 @@
-import Link from "next/link";
-import type { Metadata } from "next";
-import { CabinetView } from "@/components/CabinetView";
-import { PageIntro } from "@/components/Forms";
-import { PublicMain } from "@/components/PublicMain";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Кабинет" };
-
-export default function CabinetPage() {
-  return (
-    <PublicMain>
-      <PageIntro
-        crumb={
-          <>
-            <Link href="/">Главная</Link> / Кабинет
-          </>
-        }
-        title="Личный кабинет"
-        lead="Избранные бумаги, роль пользователя и заявки эмитента."
-      />
-      <CabinetView />
-    </PublicMain>
-  );
+// Личный кабинет убран: посетители сайта не входят, вход только в админ-панель (/admin).
+export default function Page() {
+  redirect("/");
 }

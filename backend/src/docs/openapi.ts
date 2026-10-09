@@ -4,7 +4,7 @@ export const openApiSpec = {
     title: "KSE CMS API",
     version: "0.1.0",
     description:
-      "API Кыргызской фондовой биржи: публичный контент, кабинет и админ-CMS.\n\nКабинет: `investor@kse.kg` / `kse` (`POST /api/auth/session`). CMS: `admin@kse.kg` / `admin` (`POST /api/admin/session`).",
+      "API Кыргызской фондовой биржи: публичный контент, кабинет и админ-CMS.\n\nКабинет эмитента: `issuer@kse.kg` / `kse` (`POST /api/auth/session`). CMS: `admin@kse.kg` / `admin` (`POST /api/admin/session`).",
   },
   servers: [
     { url: "http://localhost:4000", description: "Локальный backend" },
@@ -50,9 +50,9 @@ export const openApiSpec = {
         type: "object",
         properties: {
           id: { type: "string" },
-          email: { type: "string", example: "investor@kse.kg" },
-          name: { type: "string", example: "Инвестор" },
-          role: { type: "string", enum: ["investor", "issuer"] },
+          email: { type: "string", example: "issuer@kse.kg" },
+          name: { type: "string", example: "Эмитент" },
+          role: { type: "string", enum: ["issuer"] },
         },
       },
       CmsNews: {
@@ -160,7 +160,7 @@ export const openApiSpec = {
           id: { type: "string" },
           name: { type: "string" },
           email: { type: "string" },
-          role: { type: "string", enum: ["admin", "editor", "investor", "issuer"] },
+          role: { type: "string", enum: ["admin", "editor", "issuer"] },
         },
       },
       CmsVisit: {
@@ -480,7 +480,7 @@ export const openApiSpec = {
                 type: "object",
                 required: ["email", "password"],
                 properties: {
-                  email: { type: "string", example: "investor@kse.kg" },
+                  email: { type: "string", example: "issuer@kse.kg" },
                   password: { type: "string", example: "kse" },
                 },
               },

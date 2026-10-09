@@ -55,8 +55,8 @@ export function DashboardView() {
           <small>Загрузить изображения</small>
         </Link>
         <Link href="/admin/settings">
-          <b>Контакты</b>
-          <small>Телефоны и подвал</small>
+          <b>Подвал и контакты</b>
+          <small>Телефоны, адрес, соцсети</small>
         </Link>
         <Link href="/admin/hubs">
           <b>Главная</b>

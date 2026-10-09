@@ -10,7 +10,7 @@ export const registerSchema = z.object({
   name: z.string().trim().min(1, "Укажите имя").max(120),
   email: z.string().trim().email("Укажите корректный e-mail"),
   password: z.string().min(4, "Пароль должен быть не короче 4 символов").max(200),
-  role: z.enum(["investor", "issuer"], { message: "Выберите роль: инвестор или эмитент" }),
+  role: z.enum(["issuer"], { message: "Выберите роль: эмитент" }),
 });
 
 export const publicRequestSchema = z.object({
@@ -161,7 +161,7 @@ export const requestItemSchema = z.object({
 export const userItemSchema = z.object({
   name: z.string().trim().min(1).max(120),
   email: z.string().trim().email(),
-  role: z.enum(["admin", "editor", "investor", "issuer"]),
+  role: z.enum(["admin", "editor", "issuer"]),
   password: z.string().max(200).optional(),
 });
 

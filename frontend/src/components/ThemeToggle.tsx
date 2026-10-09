@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
@@ -16,13 +16,46 @@ function subscribeTheme(onChange: () => void) {
   return () => observer.disconnect();
 }
 
+const SYSTEM_DARK = "(prefers-color-scheme: dark)";
+
+function systemTheme(): Theme {
+  return window.matchMedia(SYSTEM_DARK).matches ? "dark" : "light";
+}
+
+function storedTheme() {
+  try {
+    return localStorage.getItem("kse-theme");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * По умолчанию сайт следует теме системы. Ручной выбор запоминается;
+ * если пользователь вернул тему, совпадающую с системной, — снова следуем системе.
+ */
 function applyTheme(next: Theme) {
   document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("kse-theme", next);
+  try {
+    if (next === systemTheme()) localStorage.removeItem("kse-theme");
+    else localStorage.setItem("kse-theme", next);
+  } catch {
+    // Хранилище недоступно (приватный режим) — тема просто не запомнится.
+  }
 }
 
 export function ThemeToggle() {
   const theme = useSyncExternalStore<Theme>(subscribeTheme, currentTheme, () => "dark");
+
+  // Пока пользователь не выбрал тему сам, сайт меняет её вместе с системой.
+  useEffect(() => {
+    const media = window.matchMedia(SYSTEM_DARK);
+    const onChange = () => {
+      if (!storedTheme()) document.documentElement.setAttribute("data-theme", systemTheme());
+    };
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
 
   function toggle() {
     const next: Theme = theme === "dark" ? "light" : "dark";

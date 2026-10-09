@@ -42,7 +42,7 @@ export function AdminLoginForm() {
       <form className={css.loginCard} onSubmit={submit}>
         <Logo />
         <h1>{tr("Портал администратора")}</h1>
-        <p className={css.lead}>{tr("CMS Кыргызской фондовой биржи — новости, фото, слайдер и заявки.")}</p>
+        <p className={css.lead}>{tr("CMS Кыргызской фондовой биржи — новости, фото, страницы и заявки.")}</p>
         <label className={css.field}>
           <span>E-mail</span>
           <input name="email" type="email" defaultValue="admin@kse.kg" required />

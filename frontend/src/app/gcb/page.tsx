@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FeedbackForm, PageIntro } from "@/components/Forms";
-import { DataTable, LiveSource } from "@/components/live/LiveParts";
+import { DataTable } from "@/components/live/LiveParts";
 import { MarketLinks } from "@/components/live/LiveViews";
 import { loadSnapshot, type TablesPage } from "@/lib/kse-live";
 import ui from "@/app/ui.module.css";
@@ -28,7 +28,6 @@ export default async function GcbPage() {
         <h2 style={{ margin: "0 0 10px", fontSize: 22 }}>{schedule?.data.title || "Расписание аукционов по ГЦБ"}</h2>
         {schedule ? (
           <>
-            <LiveSource snapshot={schedule} />
             {schedule.data.tables.map((table, i) => (
               <DataTable key={i} table={table} />
             ))}

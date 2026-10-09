@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { formatChange, formatSom, type Instrument, type InstrumentType } from "@/data/catalog";
 import { useMarketData } from "@/components/MarketDataProvider";
@@ -330,6 +330,7 @@ function Arrow() {
 function SessionCard() {
   const tr = useTr();
   const { sessionDate, sessionHours, tradingRows } = useMarketData();
+  const top = Math.max(...tradingRows.map((item) => item.value), 0) || 1;
   return (
     <article className={`${styles.card} ${styles.fill}`}>
       <header className={styles.cardHead}>
@@ -351,6 +352,8 @@ function SessionCard() {
                 {formatChange(item.change)}
               </em>
             </dd>
+            {/* Доля сегмента от самого крупного — полоска заполняет карточку и сравнивает объёмы на глаз. */}
+            <i className={styles.sessionBar} style={{ "--share": `${Math.round((item.value / top) * 100)}%` } as CSSProperties} />
           </div>
         ))}
       </dl>

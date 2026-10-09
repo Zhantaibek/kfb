@@ -1,33 +1,5 @@
 /* Живые данные с kse.kg: подпись источника, карточки чисел, вкладки, графики. Таблицы — ui.tableWrap. */
 
-.source {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 12px;
-  margin: -12px 0 22px;
-  color: var(--ink-muted);
-  font-size: 13px;
-}
-
-.source a {
-  color: var(--brand-strong);
-  font-weight: 600;
-}
-
-.source i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--up);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--up) 18%, transparent);
-}
-
-.source i[data-stale] {
-  background: var(--down);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--down) 18%, transparent);
-}
-
 .stack {
   display: grid;
   gap: 22px;

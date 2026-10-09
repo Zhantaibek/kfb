@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HeaderSearch } from "@/components/HeaderSearch";
@@ -10,6 +10,7 @@ import { useApp } from "@/components/AppProviders";
 import { languages } from "@/lib/i18n";
 import { type SiteLink } from "@/data/site-nav";
 import { useSiteNav } from "@/lib/cms/use-site-nav";
+import { EDU_URL } from "@/lib/edu";
 import ui from "@/app/ui.module.css";
 
 /** Внешние ссылки (в т.ч. отдельная учебная платформа) — полный переход. */
@@ -34,8 +35,18 @@ function AppLink({
 }) {
   const on = active ? "true" : undefined;
   if (isExternalHref(href)) {
+    // Учебный центр — часть сайта КФБ для посетителя, открываем в той же вкладке; прочие внешние — в новой.
+    const sameTab = href.startsWith(EDU_URL);
     return (
-      <a href={href} className={className} onClick={onClick} role={role} data-on={on} target="_blank" rel="noopener noreferrer">
+      <a
+        href={href}
+        className={className}
+        onClick={onClick}
+        role={role}
+        data-on={on}
+        target={sameTab ? undefined : "_blank"}
+        rel={sameTab ? undefined : "noopener noreferrer"}
+      >
         {children}
       </a>
     );
@@ -82,8 +93,24 @@ function lockPageScroll(lock: boolean) {
   }
 }
 
-function closeDetails(ref: React.RefObject<HTMLDetailsElement | null>) {
-  ref.current?.removeAttribute("open");
+/** Длительность анимации закрытия меню — совпадает с menuOut/megaOut в ui.module.css. */
+const MENU_CLOSE_MS = 280;
+
+/**
+ * <details> закрывается мгновенно, поэтому сначала проигрываем анимацию (data-closing),
+ * и только потом снимаем open.
+ */
+function closeMenuAnimated(menu: HTMLDetailsElement | null) {
+  if (!menu?.open || menu.dataset.closing) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    menu.removeAttribute("open");
+    return;
+  }
+  menu.dataset.closing = "true";
+  window.setTimeout(() => {
+    delete menu.dataset.closing;
+    menu.removeAttribute("open");
+  }, MENU_CLOSE_MS);
 }
 
 function blurFocus() {
@@ -94,6 +121,65 @@ function blurFocus() {
 
 /** Разделы-«хабы»: пункт меню горит и на страницах, куда ведут их карточки. */
 const hubSections: Record<string, string[]> = { "/statistics": ["/market", "/gcb"] };
+
+/** Шаги ужатия шапки: 0 — как есть, 1–3 — мельче шрифт, на 3 значок вместо логотипа, 4 — разделы только в бургере. */
+const NAV_FIT_MAX = 4;
+
+/**
+ * Разделы, логотип и кнопки не должны перекрываться ни на какой ширине и ни на каком языке
+ * (кыргызские и английские названия длиннее). Меряем, влезает ли строка, и ужимаем по шагам.
+ */
+function useNavFit(lang: string) {
+  const headerRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    const nav = navRef.current;
+    if (!header || !nav) return;
+
+    const overflows = () => {
+      if (getComputedStyle(nav).display === "none") return false;
+      const links = [...nav.children] as HTMLElement[];
+      const gap = parseFloat(getComputedStyle(nav).columnGap) || 0;
+      const need = links.reduce((sum, el) => sum + el.getBoundingClientRect().width, 0) + gap * Math.max(links.length - 1, 0);
+      return need > nav.clientWidth + 0.5;
+    };
+
+    const fit = () => {
+      let level = 0;
+      header.dataset.navFit = "0";
+      while (level < NAV_FIT_MAX && overflows()) {
+        level += 1;
+        header.dataset.navFit = String(level);
+      }
+    };
+
+    // Замер — не чаще раза за кадр: ResizeObserver срабатывает и от наших же изменений шага.
+    let frame = 0;
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(fit);
+    };
+    fit();
+    // Ширина шапки (окно) и текст пунктов (перевод из БД, подгрузка шрифтов) меняются независимо.
+    const resize = new ResizeObserver(schedule);
+    resize.observe(header);
+    // Место под разделы меняется и без изменения окна: после входа появляется широкая кнопка «Админ-панель»,
+    // подгружается логотип. Колонка меню при этом сжимается — следим и за ней.
+    resize.observe(nav);
+    const mutation = new MutationObserver(schedule);
+    mutation.observe(nav, { childList: true, subtree: true, characterData: true });
+    document.fonts?.ready.then(schedule).catch(() => {});
+    return () => {
+      cancelAnimationFrame(frame);
+      resize.disconnect();
+      mutation.disconnect();
+    };
+  }, [lang]);
+
+  return { headerRef, navRef };
+}
 
 function navOn(pathname: string, href: string) {
   if (hubSections[href]?.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return pathname !== "/gcb/invest";
@@ -110,7 +196,7 @@ function translateNav(items: SiteLink[], translate: (text: string) => string): S
 }
 
 export function SiteHeader() {
-  const { label, lang, setLang, user, adminUser, logout, tr } = useApp();
+  const { label, lang, setLang, adminUser, logout, tr } = useApp();
   const pathname = usePathname();
   // primary — строка навигации шапки (как на kse.kg), nav — полное меню в бургере. Оба из БД.
   const { nav, primary } = useSiteNav();
@@ -121,10 +207,11 @@ export function SiteHeader() {
   }));
   const menuRef = useRef<HTMLDetailsElement>(null);
   const hoverClose = useHoverClose();
+  const { headerRef, navRef } = useNavFit(lang);
 
   function closeMenus() {
     blurFocus();
-    closeDetails(menuRef);
+    closeMenuAnimated(menuRef.current);
   }
 
   // Переход на другую страницу пересоздаёт меню без события toggle — снимаем блокировку прокрутки сами.
@@ -135,13 +222,13 @@ export function SiteHeader() {
   }, [pathname]);
 
   return (
-    <header className={ui.header}>
+    <header className={ui.header} ref={headerRef}>
       <Link className={ui.brand} href="/" aria-label={tr("Кыргызская фондовая биржа — главная")}>
         <Logo variant="lockup" className={ui.logoLockup} priority />
         <Logo className={ui.logoMarkMobile} priority />
       </Link>
 
-      <nav className={ui.nav} aria-label={tr("Основная навигация")}>
+      <nav className={ui.nav} ref={navRef} aria-label={tr("Основная навигация")}>
         {primary.map((item) => {
           const text = tr(item.label);
           return (
@@ -181,21 +268,20 @@ export function SiteHeader() {
 
         <ThemeToggle />
 
-        {/* Войти / Кабинет */}
-        {user || adminUser ? (
+        {/* «Личный кабинет» — вход только для администраторов: ведёт в админ-панель (без сессии — на её страницу входа). */}
+        {adminUser ? (
           <details className={ui.drop} name="kse-header" key={pathname + "-cab"} {...hoverClose}>
-            <summary className={ui.cabinetBtn}>{user ? label("cabinet") : tr("Админ-панель")}</summary>
+            <summary className={ui.cabinetBtn}>{tr("Личный кабинет")}</summary>
             <div className={ui.dropPanel}>
-              {user ? <Link href="/cabinet">{user.name}</Link> : null}
-              {adminUser ? <Link href="/admin">{tr("Админ-панель")}</Link> : null}
+              <Link href="/admin">{tr("Админ-панель")}</Link>
               <button type="button" onClick={() => void logout()}>
                 {label("logout")}
               </button>
             </div>
           </details>
         ) : (
-          <Link className={ui.cabinetBtn} href="/login">
-            {label("login")}
+          <Link className={ui.cabinetBtn} href="/admin">
+            {tr("Личный кабинет")}
           </Link>
         )}
 
@@ -207,7 +293,15 @@ export function SiteHeader() {
           key={pathname + "-menu"}
           onToggle={(event) => lockPageScroll(event.currentTarget.open)}
         >
-          <summary aria-label={label("menu")}>
+          <summary
+            aria-label={label("menu")}
+            onClick={(event) => {
+              if (!menuRef.current?.open) return;
+              event.preventDefault();
+              closeMenuAnimated(menuRef.current);
+            }}
+          >
+            <i />
             <i />
             <i />
           </summary>

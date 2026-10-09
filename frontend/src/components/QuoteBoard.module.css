@@ -1,7 +1,7 @@
 .desk {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.7fr);
-  width: min(1480px, calc(100% - 48px));
+  width: min(1640px, calc(100% - 48px));
   margin: 28px auto 0;
   overflow: hidden;
   border: 1px solid var(--card-border);
@@ -19,18 +19,23 @@
 
 .head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 20px 14px;
+  box-sizing: border-box;
+  height: 62px;
+  padding: 6px 20px 0;
 }
 
 .head h2 {
   margin: 0;
   font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: 22px;
+  overflow: hidden;
+  font-size: clamp(17px, 1.5vw, 22px);
   font-weight: 600;
   letter-spacing: -0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .head a {
@@ -47,13 +52,19 @@
 .columns,
 .rows a {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1.4fr) 72px 88px 96px;
+  grid-template-columns: 72px minmax(0, 1.4fr) 72px 124px 96px;
   gap: 8px;
   align-items: center;
 }
 
+/* Строки обеих таблиц одной высоты — разделители котировок и аукционов на одном уровне. */
+.desk {
+  --row-h: 58px;
+}
+
 .columns {
-  padding: 0 20px 8px;
+  height: 28px;
+  padding: 0 20px;
   color: var(--ink-muted);
   font-size: 11px;
   font-weight: 700;
@@ -69,7 +80,10 @@
 }
 
 .rows a {
-  padding: 13px 20px;
+  box-sizing: border-box;
+  height: var(--row-h);
+  padding: 0 20px;
+  white-space: nowrap;
   border-top: 1px solid var(--line);
   color: inherit;
   font-size: 14px;
@@ -113,10 +127,21 @@
 .auctions a {
   display: grid;
   grid-template-columns: 1fr auto;
+  align-content: center;
   gap: 2px 12px;
-  padding: 14px 20px;
+  box-sizing: border-box;
+  height: var(--row-h);
+  padding: 0 20px;
   border-top: 1px solid var(--line);
   color: inherit;
+}
+
+.auctionColumns {
+  grid-template-columns: 1fr auto;
+}
+
+.auctionColumns span:last-child {
+  text-align: right;
 }
 
 .auctions a:hover {

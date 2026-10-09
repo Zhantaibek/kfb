@@ -81,7 +81,6 @@ export async function ensureAuthAccounts() {
   }
   const emails = new Set(rows.map((row: { email: string }) => row.email.toLowerCase()));
   const extras = [
-    { id: "user-investor", name: "Инвестор", email: "investor@kse.kg", role: "investor" as const, password: "kse" },
     { id: "user-issuer", name: "Эмитент", email: "issuer@kse.kg", role: "issuer" as const, password: "kse" },
   ];
   for (const user of extras) {

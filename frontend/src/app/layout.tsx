@@ -64,7 +64,8 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `try{var t=localStorage.getItem("kse-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}else{document.documentElement.setAttribute("data-theme","dark")}}catch(e){}`;
+// Тема по умолчанию — системная; выбор пользователя (kse-theme) важнее.
+const themeScript = `try{var t=localStorage.getItem("kse-theme");if(t!=="dark"&&t!=="light"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Живые данные kse.kg для бегущей строки, подвала и главной (или демо, если их ещё нет).

@@ -34,11 +34,6 @@ export default function InvestorsPage() {
           <h3>Инвестиции в ГЦБ</h3>
           <p>Казначейские векселя и облигации Минфина КР.</p>
         </Link>
-        <Link className={ui.card} href="/login">
-          <small>04</small>
-          <h3>Кабинет</h3>
-          <p>Избранные бумаги и статус заявок. Демо-вход investor@kse.kg / kse.</p>
-        </Link>
       </div>
     </PublicMain>
   );

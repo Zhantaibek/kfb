@@ -1,0 +1,231 @@
+/* «Горизонт рынка» — слой баннера над полосой показателей. Цвета наследуются от .hero. */
+.horizon {
+  --hz-up: #3f9aa4;
+  --hz-up-hi: #6cc3cc;
+  --hz-down: #d0697a;
+  --hz-down-hi: #e6919d;
+  --hz-ink: var(--hero-ink, #0d2a2e);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - var(--hero-stats-h, 104px));
+  overflow: visible;
+}
+
+:global([data-theme="dark"]) .horizon {
+  --hz-up: #3f9aa4;
+  --hz-up-hi: #7fd6de;
+  --hz-down: #b45666;
+  --hz-down-hi: #f0909c;
+}
+
+.grid {
+  stroke: var(--hz-ink);
+  stroke-opacity: 0.07;
+  stroke-width: 1;
+}
+
+.vols rect {
+  fill: var(--hz-up);
+  opacity: 0;
+  animation: hzRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+.vols rect:not([data-up]) {
+  fill: var(--hz-down);
+}
+
+.candle {
+  opacity: 0;
+  animation: hzIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition: opacity 0.2s ease;
+}
+
+.candle line {
+  stroke: var(--hz-up);
+  stroke-width: 1.2;
+}
+
+.candle:not([data-up]) line {
+  stroke: var(--hz-down);
+}
+
+/* При наведении — выбранный день ярче, остальные тише. */
+.horizon[data-hover] .candle {
+  opacity: 0.45 !important;
+}
+
+.horizon[data-hover] .candle[data-pick] {
+  opacity: 1 !important;
+}
+
+.ma {
+  fill: none;
+  stroke: var(--hz-ink);
+  stroke-opacity: 0.55;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hzDraw 1.6s 0.9s cubic-bezier(0.6, 0, 0.2, 1) forwards;
+}
+
+.last {
+  stroke: var(--hz-up);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+}
+
+.dot {
+  fill: var(--hz-up);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.pulse {
+  fill: var(--hz-up);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hzPulse 2.4s 1.6s ease-out infinite;
+  opacity: 0;
+}
+
+.tick {
+  fill: var(--hero-muted, #4a6468);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tag rect {
+  fill: var(--hz-up);
+}
+
+.tag text {
+  fill: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.cross line {
+  stroke: var(--hz-ink);
+  stroke-opacity: 0.3;
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.cross > g:not(.label) rect {
+  fill: var(--hz-ink);
+}
+
+.cross > g:not(.label) text {
+  fill: var(--hero-bg-a, #fff);
+  font-size: 11px;
+  font-weight: 800;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.label rect {
+  fill: color-mix(in srgb, var(--hero-bg-a, #fff) 88%, transparent);
+  stroke: color-mix(in srgb, var(--hz-ink) 12%, transparent);
+  filter: drop-shadow(0 8px 18px rgba(13, 42, 46, 0.12));
+}
+
+.labelDate {
+  fill: var(--hero-muted, #4a6468);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.labelValue {
+  fill: var(--hz-ink);
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.hit {
+  fill: transparent;
+  cursor: crosshair;
+  pointer-events: all;
+  touch-action: pan-y;
+}
+
+@keyframes hzIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hzRise {
+  from {
+    opacity: 0;
+    scale: 1 0;
+  }
+  to {
+    opacity: 0.22;
+    scale: 1 1;
+  }
+}
+
+@keyframes hzDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes hzPulse {
+  from {
+    opacity: 0.35;
+    scale: 0.5;
+  }
+  to {
+    opacity: 0;
+    scale: 2.2;
+  }
+}
+
+:global(body:has([data-site-splash="show"])) .horizon * {
+  animation-play-state: paused;
+}
+
+@media (max-width: 980px) {
+  .horizon {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .hit {
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .horizon * {
+    animation: none !important;
+  }
+
+  .candle {
+    opacity: 1;
+  }
+
+  .vols rect {
+    opacity: 0.22;
+  }
+
+  .ma {
+    stroke-dashoffset: 0;
+  }
+}

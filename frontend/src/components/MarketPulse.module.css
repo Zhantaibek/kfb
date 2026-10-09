@@ -3,7 +3,7 @@
   grid-template-columns: 210px minmax(0, 1fr) 270px;
   gap: 14px;
   align-items: start;
-  width: min(1480px, calc(100% - 48px));
+  width: min(1640px, calc(100% - 48px));
   margin: 22px auto 0;
 }
 
@@ -433,16 +433,52 @@ a.row:hover {
   font-size: 12px;
 }
 
+.fill {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * Список в растянутой карточке («Лидеры недели») заполняет её до низа:
+ * строк ровно столько, сколько целиком помещается, лишние не показываются.
+ */
+.fill > .movers {
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-rows: repeat(auto-fill, 38px);
+  grid-auto-rows: 0;
+  overflow: hidden;
+}
+
+.fill > .movers > li {
+  overflow: hidden;
+}
+
 .session {
   display: grid;
+  flex: 1 1 auto;
+  grid-auto-rows: 1fr;
   margin: 10px 0 6px;
 }
 
 .session div {
   display: grid;
-  gap: 2px;
-  padding: 8px 0;
+  align-content: center;
+  gap: 4px;
+  padding: 10px 0;
   border-top: 1px solid var(--line);
+}
+
+.session b {
+  font-size: 17px !important;
+}
+
+.sessionBar {
+  display: block;
+  height: 4px;
+  margin-top: 4px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--brand) var(--share), color-mix(in srgb, var(--brand) 12%, transparent) var(--share));
 }
 
 .session dt {

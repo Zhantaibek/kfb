@@ -24,7 +24,7 @@ export default async function AboutPage() {
         }
         title="Общая информация"
       />
-      <HubCards items={content.menu} group="hub-about" />
+      <HubCards items={content.menu} page="/about" />
       <CmsSection page={page} title="О бирже" />
     </PublicMain>
   );

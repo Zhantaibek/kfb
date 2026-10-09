@@ -1,0 +1,41 @@
+/* «Шёлковая лента» — слой баннера над полосой показателей. */
+.ribbon {
+  --ribbon-a: #1d4f55;
+  --ribbon-b: #57b6c0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - var(--hero-stats-h, 104px));
+  pointer-events: none;
+  /* Слева лента растворяется под текстом баннера. */
+  mask-image: linear-gradient(90deg, transparent 22%, #000 48%);
+  opacity: 0;
+  animation: ribbonIn 1.6s 0.2s ease forwards;
+}
+
+:global([data-theme="dark"]) .ribbon {
+  --ribbon-a: #9fe0e8;
+  --ribbon-b: #57b6c0;
+}
+
+@keyframes ribbonIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 980px) {
+  .ribbon {
+    mask-image: linear-gradient(180deg, transparent 30%, #000 70%);
+    opacity: 0.6;
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ribbon {
+    animation: none;
+    opacity: 1;
+  }
+}

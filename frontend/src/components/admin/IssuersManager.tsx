@@ -265,14 +265,8 @@ export function IssuersManager() {
 
       {tab === "issuers" ? (
         <>
+          {/* Эмитенты добавляются из внешнего источника по API (ISSUERS_API_URL), здесь — только правка и поиск. */}
           <div className={css.toolbar}>
-            <button
-              className={css.primary}
-              type="button"
-              onClick={() => setIssuer({ ...emptyIssuer, order: issuers.length + 1 })}
-            >
-              + Добавить эмитента
-            </button>
             <label className={css.field} style={{ minWidth: 280 }}>
               <input
                 type="search"
@@ -411,12 +405,7 @@ export function IssuersManager() {
         </>
       ) : (
         <>
-          <div className={css.toolbar}>
-            <button className={css.primary} type="button" onClick={() => setEntry({ ...emptyListing })}>
-              + Добавить бумагу
-            </button>
-          </div>
-
+          {/* Бумаги добавляются из внешнего источника по API (SECURITIES_API_URL), здесь — только правка. */}
           {entry ? (
             <form
               ref={formRef}

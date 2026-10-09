@@ -1,5 +1,5 @@
 .wrap {
-  width: min(1480px, calc(100% - 48px));
+  width: min(1640px, calc(100% - 48px));
   margin: 0 auto;
 }
 

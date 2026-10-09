@@ -55,6 +55,10 @@ export function QuoteBoard() {
           <h2>{tr("Аукционы ГЦБ")}</h2>
           <Link href="/gcb">{tr("Календарь")}</Link>
         </header>
+        <div className={`${styles.columns} ${styles.auctionColumns}`} aria-hidden="true">
+          <span>{tr("Выпуск")}</span>
+          <span>{tr("Дата и статус")}</span>
+        </div>
         <div className={styles.auctions}>
           {market.auctions.map((item) => (
             <Link href="/gcb" key={`${item.date}-${item.type}`}>

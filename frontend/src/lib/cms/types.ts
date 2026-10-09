@@ -1,7 +1,7 @@
 export type NewsKind = "exchange" | "company" | "urgent";
 export type PublishStatus = "draft" | "published";
 export type AdminRole = "admin" | "editor";
-export type PublicRole = "investor" | "issuer" | "student" | "teacher";
+export type PublicRole = "issuer" | "student" | "teacher";
 export type UserRole = AdminRole | PublicRole;
 export type RequestStatus = "new" | "done";
 export type LocaleCode = "ky" | "en";

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { hubCards, type HubPage } from "@/lib/cms/hub-pages";
 import { applyLocale } from "@/lib/cms/locale";
 import type { CmsMenuItem } from "@/lib/cms/types";
 import { useLang } from "@/lib/use-tr";
@@ -36,14 +37,11 @@ function iconFor(href: string) {
 
 /**
  * Раздел-«хаб» как на kse.kg: карточки-ссылки на подразделы.
- * Карточки — пункты меню группы (hub-about, hub-statistics) из админки «Карточки разделов».
+ * Карточки — все пункты соответствующего раздела шапки (правятся в «Меню и страницы»).
  */
-export function HubCards({ items, group }: { items: CmsMenuItem[]; group: string }) {
+export function HubCards({ items, page }: { items: CmsMenuItem[]; page: HubPage }) {
   const lang = useLang();
-  const cards = items
-    .filter((item) => item.group === group)
-    .sort((a, b) => a.order - b.order)
-    .map((item) => applyLocale(item, lang, ["label"]));
+  const cards = hubCards(items, page).map((item) => applyLocale(item, lang, ["label"]));
   return (
     <div className={css.hubGrid}>
       {cards.map((item) => (

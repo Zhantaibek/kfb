@@ -1,5 +1,5 @@
 .board {
-  width: min(1480px, calc(100% - 20px));
+  width: min(1640px, calc(100% - 20px));
   margin: 28px auto 8px;
   display: grid;
   grid-template-columns: minmax(280px, 0.92fr) minmax(320px, 1.18fr);

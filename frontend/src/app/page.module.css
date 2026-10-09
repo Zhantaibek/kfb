@@ -1044,7 +1044,7 @@
 .marketSplit,
 .feeds,
 .calendar {
-  width: min(1480px, calc(100% - 20px));
+  width: min(1640px, calc(100% - 20px));
   margin: 0 auto;
 }
 
@@ -1052,7 +1052,7 @@
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0;
-  width: min(1480px, calc(100% - 20px));
+  width: min(1640px, calc(100% - 20px));
   margin: 0 auto;
   position: relative;
   z-index: 5;
@@ -1579,7 +1579,7 @@
   display: grid;
   grid-template-columns: minmax(168px, 1.28fr) repeat(5, minmax(0, 1fr));
   gap: 0;
-  width: min(1480px, calc(100% - 48px));
+  width: min(1640px, calc(100% - 48px));
   margin: 12px auto 0;
   position: relative;
   z-index: 5;
@@ -1832,7 +1832,7 @@
 
 .newsHome,
 .hub {
-  width: min(1480px, calc(100% - 48px));
+  width: min(1640px, calc(100% - 48px));
   margin: 0 auto;
   padding: 40px 0 8px;
 }
@@ -2650,7 +2650,7 @@
 }
 
 .start {
-  width: min(1480px, calc(100% - 48px));
+  width: min(1640px, calc(100% - 48px));
   margin: 40px auto 48px;
   padding: 52px 48px 48px;
   border-radius: 24px;
@@ -2890,7 +2890,7 @@
 }
 
 .services {
-  width: min(1480px, calc(100% - 48px));
+  width: min(1640px, calc(100% - 48px));
   margin: 12px auto 0;
   overflow: hidden;
   border: 1px solid var(--card-border);

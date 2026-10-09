@@ -48,7 +48,7 @@ export async function loginUser(req: Request, res: Response) {
   const password = String(body.password ?? "");
   const session = await authenticate(email, password);
   if (!session) {
-    res.status(401).json({ error: "Неверный логин или пароль. Демо: investor@kse.kg / kse" });
+    res.status(401).json({ error: "Неверный логин или пароль" });
     return;
   }
 

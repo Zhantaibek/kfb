@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useAdminStore } from "@/lib/cms/client";
 import { incompleteTranslation, readLocaleField, writeLocaleField, type ContentLang } from "@/lib/cms/locale";
 import type { CmsSiteSettings } from "@/lib/cms/types";
@@ -26,8 +26,26 @@ const blank: CmsSiteSettings = {
   updatedAt: "",
 };
 
-const settingsFields = ["tagline", "address", "license", "copyright"];
+/** Поля, которые переводятся на кыргызский и английский. */
+const settingsFields = ["tagline", "address", "copyright"];
 
+/** Блок формы: заголовок, где это видно на сайте, и поля. */
+function Group({ title, where, children }: { title: string; where: string; children: ReactNode }) {
+  return (
+    <section className={css.settingsGroup}>
+      <header>
+        <h2>{title}</h2>
+        <p>{where}</p>
+      </header>
+      <div className={css.fields}>{children}</div>
+    </section>
+  );
+}
+
+/**
+ * «Подвал и контакты» — всё, что видно в подвале сайта и на странице «Контакты», в одном месте.
+ * Раньше было два раздела («Контакты и подвал», «Ссылки подвала»); ссылки в подвале больше не выводятся.
+ */
 export function SettingsManager() {
   const { store, error, busy, mutate, setError } = useAdminStore();
   const saved = store?.settings?.[0];
@@ -59,8 +77,11 @@ export function SettingsManager() {
   return (
     <>
       <p className={css.kicker}>CMS · КФБ</p>
-      <h1>Настройки сайта</h1>
-      <p className={css.lead}>Тексты подвала обязательны на русском, кыргызском и английском. Телефоны и почта — общие.</p>
+      <h1>Подвал и контакты</h1>
+      <p className={css.lead}>
+        Всё, что видно в подвале сайта и на странице «Контакты». Тексты — на русском, кыргызском и английском (вкладки ниже), телефоны,
+        почта и ссылки — общие для всех языков.
+      </p>
       {error ? <p className={css.error}>{error}</p> : null}
       <form
         className={css.form}
@@ -69,77 +90,69 @@ export function SettingsManager() {
           void save();
         }}
       >
-        <div className={css.fields}>
-          <LocaleTabs lang={lang} onChange={setLang} i18n={editing.i18n} fields={settingsFields} item={editing} />
+        <LocaleTabs lang={lang} onChange={setLang} i18n={editing.i18n} fields={settingsFields} item={editing} />
+
+        <Group title="Баннер подвала" where="Бирюзовый баннер внизу каждой страницы. Первое предложение — крупный заголовок, остальное — подпись мельче.">
           <label className={`${css.field} ${css.wide}`}>
-            <span>Короткий текст в подвале</span>
-            <input value={readLocaleField(editing, lang, "tagline")} onChange={(event) => setField("tagline", event.target.value)} />
+            <span>Текст баннера</span>
+            <textarea rows={3} value={readLocaleField(editing, lang, "tagline")} onChange={(event) => setField("tagline", event.target.value)} />
+          </label>
+        </Group>
+
+        <Group title="Контакты" where="Телефоны, почта и адрес — в баннере подвала и на странице «Контакты». Факс и телефон раскрытия — только на «Контактах».">
+          <label className={css.field}>
+            <span>Телефоны — каждый с новой строки</span>
+            <textarea value={editing.phones} onChange={(event) => patch({ phones: event.target.value })} />
+          </label>
+          <label className={css.field}>
+            <span>Почта — каждая с новой строки</span>
+            <textarea value={editing.emails} onChange={(event) => patch({ emails: event.target.value })} />
           </label>
           <label className={`${css.field} ${css.wide}`}>
             <span>Адрес</span>
             <input value={readLocaleField(editing, lang, "address")} onChange={(event) => setField("address", event.target.value)} />
           </label>
           <label className={css.field}>
-            <span>Телефоны (каждый с новой строки)</span>
-            <textarea value={editing.phones} onChange={(event) => patch({ phones: event.target.value })} />
-          </label>
-          <label className={css.field}>
-            <span>Почта (каждая с новой строки)</span>
-            <textarea value={editing.emails} onChange={(event) => patch({ emails: event.target.value })} />
-          </label>
-          <label className={css.field}>
-            <span>Facebook (иконка в подвале; пусто — скрыта)</span>
-            <input
-              value={editing.facebookUrl}
-              placeholder="https://facebook.com/…"
-              onChange={(event) => patch({ facebookUrl: event.target.value })}
-            />
-          </label>
-          <label className={css.field}>
-            <span>Instagram</span>
-            <input
-              value={editing.instagramUrl}
-              placeholder="https://instagram.com/…"
-              onChange={(event) => patch({ instagramUrl: event.target.value })}
-            />
-          </label>
-          <label className={css.field}>
-            <span>Telegram</span>
-            <input
-              value={editing.telegramUrl}
-              placeholder="https://t.me/…"
-              onChange={(event) => patch({ telegramUrl: event.target.value })}
-            />
-          </label>
-          <label className={css.field}>
             <span>Факс</span>
             <input value={editing.fax} onChange={(event) => patch({ fax: event.target.value })} />
           </label>
           <label className={css.field}>
-            <span>Лицензия</span>
-            <input value={readLocaleField(editing, lang, "license")} onChange={(event) => setField("license", event.target.value)} />
-          </label>
-          <label className={css.field}>
-            <span>Телефон раскрытия</span>
+            <span>Телефон отдела раскрытия информации</span>
             <input value={editing.disclosurePhone} onChange={(event) => patch({ disclosurePhone: event.target.value })} />
           </label>
+        </Group>
+
+        <Group title="Соцсети" where="Круглые иконки справа в баннере подвала. Оставьте поле пустым — иконка не показывается.">
           <label className={css.field}>
-            <span>Телефон учебного центра</span>
-            <input value={editing.eduPhone} onChange={(event) => patch({ eduPhone: event.target.value })} />
+            <span>Facebook</span>
+            <input value={editing.facebookUrl} placeholder="https://facebook.com/…" onChange={(event) => patch({ facebookUrl: event.target.value })} />
           </label>
-          <label className={`${css.field} ${css.wide}`}>
-            <span>Учебная платформа (ссылка)</span>
-            <input value={editing.eduUrl} onChange={(event) => patch({ eduUrl: event.target.value })} />
+          <label className={css.field}>
+            <span>Instagram</span>
+            <input value={editing.instagramUrl} placeholder="https://instagram.com/…" onChange={(event) => patch({ instagramUrl: event.target.value })} />
           </label>
+          <label className={css.field}>
+            <span>Telegram</span>
+            <input value={editing.telegramUrl} placeholder="https://t.me/…" onChange={(event) => patch({ telegramUrl: event.target.value })} />
+          </label>
+        </Group>
+
+        <Group title="Нижняя строка" where="Мелкая строка под баннером подвала, слева.">
           <label className={`${css.field} ${css.wide}`}>
-            <span>Копирайт внизу сайта</span>
+            <span>Копирайт</span>
             <input value={readLocaleField(editing, lang, "copyright")} onChange={(event) => setField("copyright", event.target.value)} />
           </label>
-        </div>
+        </Group>
+
         <div className={css.rowActions}>
           <button className={css.primary} disabled={busy} type="submit">
             Сохранить
           </button>
+          {form ? (
+            <button className={css.ghost} type="button" onClick={() => setSetting(null)}>
+              Отменить изменения
+            </button>
+          ) : null}
         </div>
       </form>
     </>
