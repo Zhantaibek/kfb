@@ -17,13 +17,31 @@ const documentTypes: Record<string, Buffer> = {
   pdf: Buffer.from("%PDF"),
   docx: zipMagic,
   xlsx: zipMagic,
+  pptx: zipMagic,
+  odt: zipMagic,
+  ods: zipMagic,
   zip: zipMagic,
   doc: oleMagic,
   xls: oleMagic,
+  ppt: oleMagic,
+  rtf: Buffer.from("{\\rtf"),
 };
+/** Текстовые форматы без сигнатуры: проверяем, что внутри нет нулевых байтов (то есть это не бинарный файл). */
+const textTypes = new Set(["txt", "csv"]);
+
+/** Сигнатура картинки: под видом image/png не должен приехать HTML или другой файл. */
+function isImageBytes(buffer: Buffer, mimetype: string) {
+  const starts = (hex: string, at = 0) => buffer.subarray(at, at + hex.length / 2).equals(Buffer.from(hex, "hex"));
+  if (mimetype === "image/png") return starts("89504e470d0a1a0a");
+  if (mimetype === "image/jpeg") return starts("ffd8ff");
+  if (mimetype === "image/gif") return starts("474946383761") || starts("474946383961");
+  if (mimetype === "image/webp") return starts("52494646") && starts("57454250", 8);
+  return false;
+}
 
 function documentExt(file: { buffer: Buffer; originalname: string }) {
   const ext = path.extname(file.originalname).slice(1).toLowerCase();
+  if (textTypes.has(ext)) return file.buffer.subarray(0, 4096).includes(0) ? null : ext;
   const magic = documentTypes[ext];
   return magic && file.buffer.subarray(0, magic.length).equals(magic) ? ext : null;
 }
@@ -35,10 +53,11 @@ export async function saveUpload(
   let ext: string;
   if (allowed.has(file.mimetype)) {
     if (file.buffer.length > imageMaxBytes) throw new Error("Картинка больше 4 МБ");
+    if (!isImageBytes(file.buffer, file.mimetype)) throw new Error("Файл не похож на картинку — загрузите настоящий JPG, PNG, WEBP или GIF");
     ext = file.mimetype.split("/")[1] === "jpeg" ? "jpg" : file.mimetype.split("/")[1];
   } else {
     const doc = documentExt(file);
-    if (!doc) throw new Error("Можно загрузить JPG, PNG, WEBP, GIF или документ PDF, DOC, DOCX, XLS, XLSX, ZIP");
+    if (!doc) throw new Error("Можно загрузить JPG, PNG, WEBP, GIF или документ PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ODT, ODS, RTF, TXT, CSV, ZIP");
     ext = doc;
   }
 

@@ -2,6 +2,8 @@ export type CheckLang = "ru" | "ky" | "en";
 
 function plainText(value: string) {
   return value
+    // Прикреплённые файлы: имя файла часто латиницей, на язык текста оно не влияет.
+    .replace(/<p class="rte-file"[\s\S]*?<\/p>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/https?:\/\/\S+/gi, " ")

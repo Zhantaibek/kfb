@@ -60,6 +60,7 @@ export function QuoteBoard() {
           <span>{tr("Дата и статус")}</span>
         </div>
         <div className={styles.auctions}>
+          {/* Сначала ближайшие аукционы, ниже — состоявшиеся: столько, чтобы блок сравнялся с котировками. */}
           {market.auctions.map((item) => (
             <Link href="/gcb" key={`${item.date}-${item.type}`}>
               <b>{item.type}</b>
@@ -68,7 +69,20 @@ export function QuoteBoard() {
               <small data-state={item.status === "Состоялся" ? "done" : "plan"}>{tr(item.status)}</small>
             </Link>
           ))}
-          {!market.auctions.length ? <p>{tr("Ближайших аукционов нет")}</p> : null}
+          {market.auctionResults.slice(0, Math.max(0, quotes.length - market.auctions.length)).map((item, index) => (
+            <Link href="/gcb/results" key={`${item.date}-${item.code}-${index}`}>
+              <b>{item.code}</b>
+              <time>{item.date}</time>
+              <span>
+                {tr("Продано")} {formatSom(item.soldMln)} {tr("млн сом")}
+              </span>
+              <small data-state="done">
+                {item.avgYield !== null ? `${item.avgYield.toLocaleString("ru-KG")}% · ` : ""}
+                {tr("Состоялся")}
+              </small>
+            </Link>
+          ))}
+          {!market.auctions.length && !market.auctionResults.length ? <p>{tr("Ближайших аукционов нет")}</p> : null}
         </div>
       </div>
     </section>

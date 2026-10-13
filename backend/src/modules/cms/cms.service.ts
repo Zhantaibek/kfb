@@ -72,14 +72,12 @@ function assertMenuTranslations(item: Record<string, unknown>, existing?: Record
   const ru = String(item.label ?? "");
   const ky = String(i18n.ky?.label ?? "");
   const en = String(i18n.en?.label ?? "");
-  if (!ky.trim() || !en.trim()) {
-    throw new AppError("Нужны все три языка. Заполните название на вкладках KY и EN.", 400);
-  }
+  // KY и EN — по желанию; если перевод вписан, проверяем, что он на своём языке.
   const ruErr = languageError(ru, "ru");
   if (ruErr) throw new AppError(ruErr, 400);
-  const kyErr = languageError(ky, "ky", ru);
+  const kyErr = ky.trim() ? languageError(ky, "ky", ru) : null;
   if (kyErr) throw new AppError(kyErr, 400);
-  const enErr = languageError(en, "en", ru);
+  const enErr = en.trim() ? languageError(en, "en", ru) : null;
   if (enErr) throw new AppError(enErr, 400);
 }
 

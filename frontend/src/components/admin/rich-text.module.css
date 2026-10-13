@@ -563,3 +563,112 @@
 .hiddenInput {
   display: none;
 }
+
+/* «Прикрепить файл» — второстепенная кнопка рядом с «Вставить фото в текст». */
+.insertFile {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--brand);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--brand-strong, #3f9aa4);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.insertFile:hover {
+  background: color-mix(in srgb, var(--brand) 10%, transparent);
+}
+
+/* Картинку не видно за рамкой, даже если старый сдвиг был больше. */
+.surface {
+  overflow: hidden;
+}
+
+/* Вложение в тексте — так же, как на сайте. */
+.surface :global(p.rte-file) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line, #d0e3e2);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand) 6%, transparent);
+}
+
+.surface :global(a:not(.rte-file-link)) {
+  color: var(--brand-strong, #3f9aa4);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: text;
+}
+
+.surface :global(a.rte-file-link) {
+  color: var(--brand-strong, #3f9aa4);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.surface :global(a.rte-file-link)::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 18px;
+  margin-right: 8px;
+  vertical-align: -3px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 18'%3E%3Cpath d='M2 0h8l6 6v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2Zm7 1.5V7h5.5L9 1.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 18'%3E%3Cpath d='M2 0h8l6 6v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2Zm7 1.5V7h5.5L9 1.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.surface :global(span.rte-file-meta) {
+  color: var(--ink-muted, #56706e);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Удаление картинки: на панели над текстом и в панели у самой картинки. */
+.removeBtn {
+  height: 28px;
+  margin-left: auto;
+  padding: 0 12px;
+  border: 1px solid #f3b4bb;
+  border-radius: 8px;
+  background: #fff5f6;
+  color: #c4454e;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.removeBtn:hover:not(:disabled) {
+  background: #c4454e;
+  border-color: #c4454e;
+  color: #fff;
+}
+
+.removeBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.layoutRemove {
+  width: 100%;
+  height: 28px;
+  margin-top: 8px;
+  border: 1px solid #f3b4bb;
+  border-radius: 4px;
+  background: #fff5f6;
+  color: #c4454e;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.layoutRemove:hover {
+  background: #c4454e;
+  color: #fff;
+}

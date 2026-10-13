@@ -1,0 +1,60 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en,en-GB",
+  "ignorePaths": [
+    "node_modules",
+    ".next",
+    "dist",
+    "coverage",
+    "**/*.min.*",
+    "**/package-lock.json",
+    "**/prisma/migrations/**",
+    "project-words.txt"
+  ],
+  "ignoreRegExpList": [
+    "/[\\u0400-\\u04FF\\u0490-\\u04FF\\u04A2-\\u04F9]+/gu",
+    "/\\b[A-Z][A-Z0-9]{2,}[a-z]?\\d*\\b/g"
+  ],
+  "words": [
+    "kse",
+    "kfb",
+    "kgs",
+    "kyrgyz",
+    "kyrgyzstan",
+    "bishkek",
+    "ala",
+    "watchlist",
+    "gkv",
+    "gko",
+    "gcb",
+    "sukuk",
+    "unbounded",
+    "manrope",
+    "dashdate",
+    "edu",
+    "ky",
+    "upsert",
+    "prisma",
+    "openapi",
+    "swagger",
+    "noopener",
+    "noreferrer",
+    "pathconv",
+    "tabler",
+    "hydrate",
+    "issuer",
+    "issuers",
+    "sparkline"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "./project-words.txt",
+      "addWords": true
+    }
+  ],
+  "dictionaries": [
+    "project-words"
+  ]
+}

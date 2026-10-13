@@ -1,4 +1,5 @@
 import sanitizeHtml from "sanitize-html";
+import { figureLayoutStyle } from "./figure-layout";
 
 const options: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -38,7 +39,7 @@ const options: sanitizeHtml.IOptions = {
   ],
   allowedAttributes: {
     "*": ["style", "class"],
-    a: ["href", "target", "rel"],
+    a: ["href", "target", "rel", "download", "class"],
     td: ["colspan", "rowspan", "style", "class"],
     th: ["colspan", "rowspan", "style", "class"],
     img: ["src", "alt", "width", "height", "style"],
@@ -61,14 +62,24 @@ const options: sanitizeHtml.IOptions = {
       "text-align": [/^left$/, /^right$/, /^center$/, /^justify$/],
       width: [/^\d+(?:px|em|rem|%)$/],
       height: [/^\d+(?:px|em|rem|%)$/, /^auto$/],
-      transform: [/^translate\(\s*-?\d+(?:\.\d+)?px\s*,\s*-?\d+(?:\.\d+)?px\s*\)$/],
+      transform: [/^translateX\(-?\d+px\)$/, /^translate\(\s*-?\d+(?:\.\d+)?px\s*,\s*-?\d+(?:\.\d+)?px\s*\)$/],
+      "margin-top": [/^\d+px$/],
+      "margin-left": [/^\d+px$/],
+      "margin-right": [/^\d+px$/],
     },
   },
-  allowedSchemes: ["http", "https", "mailto", "data"],
+  allowedSchemes: ["http", "https", "mailto", "tel", "data"],
   allowedSchemesByTag: {
     img: ["http", "https", "data"],
+    // data: — только для картинок; ссылка на data:text/html в тексте не нужна.
+    a: ["http", "https", "mailto", "tel"],
   },
   transformTags: {
+    a: (_tagName, attribs) => {
+      // Ссылка в новой вкладке всегда без доступа к нашей странице.
+      if (attribs.target) attribs.rel = "noopener noreferrer";
+      return { tagName: "a", attribs };
+    },
     figure: (_tagName, attribs) => {
       const align = attribs["data-align"] ?? "inline";
       const width = align === "full" ? "100" : (attribs["data-width"] ?? "100");
@@ -82,7 +93,7 @@ const options: sanitizeHtml.IOptions = {
           "data-width": width,
           "data-ox": ox,
           "data-oy": oy,
-          style: `width:${width}%;transform:translate(${ox}px, ${oy}px)`,
+          style: figureLayoutStyle(align, width, Number(ox), Number(oy)),
         },
       };
     },

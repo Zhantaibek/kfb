@@ -1,6 +1,7 @@
 "use client";
 
 import { translateHtml } from "@/lib/i18n";
+import { figureLayoutStyle } from "@/lib/cms/figure-layout";
 import { useLang } from "@/lib/use-tr";
 import styles from "./rich-html.module.css";
 
@@ -31,12 +32,13 @@ function applyFigureLayout(html: string) {
     const width = align === "full" ? "100" : rawWidth;
     const ox = /data-ox="(-?\d+)"/.exec(attrs)?.[1] ?? "0";
     const oy = /data-oy="(-?\d+)"/.exec(attrs)?.[1] ?? "0";
-    const layout = `width:${width}%;transform:translate(${ox}px, ${oy}px)`;
+    const layout = figureLayoutStyle(align, width, Number(ox), Number(oy));
     if (/\bstyle=/.test(attrs)) {
       return full.replace(/style="([^"]*)"/i, (_m, style: string) => {
         const cleaned = style
           .replace(/width\s*:\s*[^;]+;?/gi, "")
           .replace(/transform\s*:\s*[^;]+;?/gi, "")
+          .replace(/margin(?:-\w+)?\s*:\s*[^;]+;?/gi, "")
           .replace(/;+$/g, "")
           .trim();
         const next = [cleaned, layout].filter(Boolean).join(";");

@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { clampFigureOffset, figureLayoutStyle } from "@/lib/cms/figure-layout";
 import css from "./rich-text.module.css";
 
 const TEXT_COLORS = ["#1e293b", "#334155", "#475569", "#0f766e", "#15803d", "#b91c1c", "#c2410c"];
 const BG_COLORS = ["#fef9c3", "#ecfeff", "#dcfce7", "#ffe4e6", "#ffedd5", "#ede9fe"];
 const SIZES = [12, 14, 16, 18, 20, 24];
+/** Документы, которые можно прикрепить к тексту (сервер сверяет и сигнатуру файла). */
+const FILE_ACCEPT = ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.rtf,.txt,.csv,.zip";
 
 type Align = "inline" | "left" | "right" | "below" | "center" | "full" | "block-right";
 type Wrap = "inline" | "square" | "top";
@@ -79,10 +82,11 @@ function clampOffset(value: number) {
 }
 
 function figureOffset(figure: HTMLElement) {
-  return {
-    x: clampOffset(Number(figure.dataset.ox ?? "0")),
-    y: clampOffset(Number(figure.dataset.oy ?? "0")),
-  };
+  return clampFigureOffset(
+    asAlign(figure.dataset.align),
+    clampOffset(Number(figure.dataset.ox ?? "0")),
+    clampOffset(Number(figure.dataset.oy ?? "0")),
+  );
 }
 
 function syncFigureWidth(figure: HTMLElement) {
@@ -93,17 +97,98 @@ function syncFigureWidth(figure: HTMLElement) {
   figure.dataset.width = String(width);
   figure.dataset.ox = String(x);
   figure.dataset.oy = String(y);
-  figure.style.width = `${width}%`;
-  figure.style.transform = `translate(${x}px, ${y}px)`;
+  // Сдвиг — отступами, а не transform: текст обтекает фото на новом месте и не прячется под ним.
+  figure.style.cssText = figureLayoutStyle(asAlign(figure.dataset.align), width, x, y);
   img.style.width = "100%";
   img.style.height = "auto";
   img.draggable = false;
 }
 
+/** Ограничение сдвига рамкой редактора: картинка не уходит за край текста. */
+function fitOffsetToSurface(figure: HTMLElement, x: number, y: number) {
+  const surface = figure.closest("[data-rte-surface]");
+  if (!surface) return { x, y };
+  const current = figureOffset(figure);
+  const box = figure.getBoundingClientRect();
+  const frame = surface.getBoundingClientRect();
+  if (!box.width || !frame.width) return { x, y };
+  // Положение картинки без сдвига — от него и считаем допустимый диапазон.
+  const left = box.left - current.x;
+  const range = (value: number, min: number, max: number) => (max < min ? min : Math.max(min, Math.min(max, value)));
+  // По вертикали не ограничиваем: сдвиг вниз — это отступ, рамка растёт вместе с фото, а вверх нельзя (clampFigureOffset).
+  return {
+    x: range(x, frame.left - left, frame.right - (left + box.width)),
+    y: Math.max(0, y),
+  };
+}
+
 function applyFigureOffset(figure: HTMLElement, x: number, y: number) {
-  figure.dataset.ox = String(clampOffset(x));
-  figure.dataset.oy = String(clampOffset(y));
+  const fitted = fitOffsetToSurface(figure, x, y);
+  figure.dataset.ox = String(clampOffset(fitted.x));
+  figure.dataset.oy = String(clampOffset(fitted.y));
   syncFigureWidth(figure);
+}
+
+/** Тип и размер файла для подписи вложения: «PDF · 1,2 МБ». */
+function fileMeta(name: string, bytes?: number) {
+  const ext = name.includes(".") ? (name.split(".").pop() ?? "").toUpperCase() : "";
+  if (!bytes) return ext;
+  const size = bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toLocaleString("ru-RU", { maximumFractionDigits: 1 })} МБ` : `${Math.max(1, Math.round(bytes / 1024))} КБ`;
+  return ext ? `${ext} · ${size}` : size;
+}
+
+function isImageUrl(url: string) {
+  return /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(url);
+}
+
+/** Вложение в тексте: ссылка на файл со значком, именем, типом и размером. */
+function createAttachment(url: string, name: string, bytes?: number) {
+  const block = document.createElement("p");
+  block.className = "rte-file";
+  const link = document.createElement("a");
+  link.className = "rte-file-link";
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.setAttribute("download", name);
+  link.textContent = name;
+  const meta = document.createElement("span");
+  meta.className = "rte-file-meta";
+  meta.textContent = fileMeta(name, bytes);
+  block.append(link, " ", meta);
+  return block;
+}
+
+/** «kse.kg» → https://kse.kg, «info@kse.kg» → mailto:, «/about» остаётся ссылкой на страницу сайта. */
+function normalizeLink(input: string) {
+  const value = input.trim();
+  if (!value || value === "https://" || value === "http://") return "";
+  if (/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(value)) return value;
+  if (/^[^\s@/]+@[^\s@/]+\.[^\s@/]+$/.test(value)) return `mailto:${value}`;
+  return `https://${value}`;
+}
+
+/** Выделение годится для ссылки: внутри одного абзаца, без фото, вложений, подписей и других ссылок. */
+function linkableRange(range: Range, surface: HTMLElement) {
+  const elementOf = (node: Node) => (node instanceof HTMLElement ? node : node.parentElement);
+  const block = (node: Node) => elementOf(node)?.closest("p, h2, h3, h4, li, td, th, blockquote, figcaption");
+  const start = block(range.startContainer);
+  if (!start || start !== block(range.endContainer) || !surface.contains(start)) return false;
+  if (start.closest("figure, .rte-file, .rte-ui, a")) return false;
+  if (elementOf(range.commonAncestorContainer)?.closest("a")) return false;
+  return !range.cloneContents().querySelector("a, figure, img, .rte-ui, p, h2, h3, h4, li");
+}
+
+/** Внешние сайты открываются в новой вкладке, страницы сайта и почта — как обычно. */
+function setLinkTarget(link: HTMLAnchorElement, href: string) {
+  link.setAttribute("href", href);
+  if (/^https?:\/\//i.test(href)) {
+    link.target = "_blank";
+    link.rel = "noopener";
+  } else {
+    link.removeAttribute("target");
+    link.removeAttribute("rel");
+  }
 }
 
 function stripEditorUi(root: HTMLElement) {
@@ -145,7 +230,6 @@ function createFigure(src: string, caption = "") {
   figure.dataset.oy = "0";
   figure.contentEditable = "false";
   figure.style.width = "50%";
-  figure.style.transform = "translate(0px, 0px)";
 
   const img = document.createElement("img");
   img.src = src;
@@ -243,6 +327,7 @@ function wrapSvg(kind: Wrap) {
 export function RichTextEditor({ label = "Текст страницы", hint, value, onChange, onUpload, media }: Props) {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const docRef = useRef<HTMLInputElement>(null);
   const selectedRef = useRef<HTMLElement | null>(null);
   const [picked, setPicked] = useState<{ width: number; align: Align; x: number; y: number } | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -258,19 +343,27 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
   } | null>(null);
   const dragRef = useRef<{ figure: HTMLElement; startX: number; startY: number; startOx: number; startOy: number; active: boolean } | null>(null);
 
+  // Кнопки панели фото создаются вручную и живут дольше одного рендера — берём свежий onChange из ref,
+  // иначе удаление фото могло вернуть старые значения других полей формы.
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  });
+
   const emit = useCallback(() => {
     const node = surfaceRef.current;
     if (!node) return;
     stripEditorUi(node);
-    onChange(node.innerHTML);
+    onChangeRef.current(node.innerHTML);
     if (selectedRef.current && node.contains(selectedRef.current)) mountFigureUi(selectedRef.current);
-  }, [onChange]);
+  }, []);
 
   useEffect(() => {
     const node = surfaceRef.current;
     if (!node) return;
     if (resizeRef.current || dragRef.current?.active) return;
     const next = plainToHtml(value);
+    let frame = 0;
     if (snapshotHtml(node) !== next) {
       const selectedSrc = selectedRef.current?.querySelector("img")?.src;
       stripEditorUi(node);
@@ -280,8 +373,19 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
         const match = [...node.querySelectorAll("figure.rte-figure")].find((item) => item.querySelector("img")?.src === selectedSrc) as HTMLElement | undefined;
         if (match) mountFigureUi(match);
       }
+      // Только когда текст пришёл извне (загрузка записи): старые сдвиги вписываем в рамку.
+      // Во время набора не трогаем — иначе сдвиги менялись бы с каждой буквой.
+      frame = requestAnimationFrame(() => {
+        node.querySelectorAll("figure.rte-figure").forEach((item) => {
+          const figure = item as HTMLElement;
+          if (!figure.querySelector("img")?.complete) return;
+          const { x, y } = figureOffset(figure);
+          applyFigureOffset(figure, x, y);
+        });
+      });
     }
     node.querySelectorAll("figure.rte-figure").forEach((figure) => syncFigureWidth(figure as HTMLElement));
+    return () => cancelAnimationFrame(frame);
   }, [value]);
 
   function rememberPick(figure: HTMLElement) {
@@ -296,6 +400,12 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
 
   function nudgeFigure(figure: HTMLElement, dx: number, dy: number) {
     const { x, y } = figureOffset(figure);
+    // Выше своего места фото не сдвигается (иначе закроет текст) — вместо этого переносим его над предыдущим абзацем.
+    if (dy < 0 && y === 0) {
+      moveFigure(figure, -1);
+      rememberPick(figure);
+      return;
+    }
     applyFigureOffset(figure, x + dx, y + dy);
     rememberPick(figure);
   }
@@ -559,6 +669,13 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
       posRow.append(btn);
     });
     panel.append(posRow);
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = css.layoutRemove;
+    remove.textContent = "Удалить фото";
+    remove.onclick = () => removeFigure(figure);
+    panel.append(remove);
     return panel;
   }
 
@@ -587,9 +704,62 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
     emit();
   }
 
+  /** Ссылка в выделенном тексте (или правка/снятие ссылки под курсором). */
+  function editLink() {
+    const surface = surfaceRef.current;
+    const sel = window.getSelection();
+    if (!surface || !sel || sel.rangeCount === 0 || !surface.contains(sel.anchorNode)) {
+      window.alert("Сначала выделите в тексте слова, которые должны стать ссылкой.");
+      return;
+    }
+    const node = sel.anchorNode instanceof HTMLElement ? sel.anchorNode : sel.anchorNode?.parentElement;
+    const existing = node?.closest("a:not(.rte-file-link)") as HTMLAnchorElement | null;
+    const current = existing && surface.contains(existing) ? existing : null;
+    if (!current && sel.isCollapsed) {
+      window.alert("Сначала выделите в тексте слова, которые должны стать ссылкой.");
+      return;
+    }
+    const range = sel.getRangeAt(0).cloneRange();
+    if (!current && !linkableRange(range, surface)) {
+      window.alert("Ссылку можно сделать из слов внутри одного абзаца — без фото, вложений и других ссылок в выделении.");
+      return;
+    }
+    const input = window.prompt(
+      current ? "Адрес ссылки (очистите поле, чтобы убрать ссылку):" : "Адрес ссылки — сайт, страница или почта:",
+      current?.getAttribute("href") ?? "https://",
+    );
+    if (input === null) return;
+    const href = normalizeLink(input);
+    if (current) {
+      if (!href) current.replaceWith(...current.childNodes);
+      else setLinkTarget(current, href);
+      emit();
+      return;
+    }
+    if (!href) return;
+    const link = document.createElement("a");
+    setLinkTarget(link, href);
+    link.append(range.extractContents());
+    range.insertNode(link);
+    sel.removeAllRanges();
+    emit();
+  }
+
   function clearFormat() {
     document.execCommand("removeFormat");
     document.execCommand("formatBlock", false, "p");
+    emit();
+  }
+
+  /** Убрать картинку из текста (сам файл остаётся в «Медиа»). */
+  function removeFigure(figure: HTMLElement) {
+    if (!window.confirm("Удалить фото из текста? Файл останется в разделе «Медиа / фото».")) return;
+    const gap = figure.nextElementSibling;
+    figure.remove();
+    // Пустой абзац, который добавлялся вместе с картинкой, тоже убираем.
+    if (gap instanceof HTMLParagraphElement && !gap.textContent?.trim() && gap.querySelectorAll("img, a").length === 0) gap.remove();
+    selectedRef.current = null;
+    setPicked(null);
     emit();
   }
 
@@ -627,10 +797,54 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
     placeFigure(createFigure(url));
   }
 
+  function placeBlock(block: HTMLElement) {
+    const surface = surfaceRef.current;
+    if (!surface) return;
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && surface.contains(sel.anchorNode)) {
+      // Вложение — отдельный абзац после того, где стоит курсор.
+      const anchor = sel.anchorNode instanceof HTMLElement ? sel.anchorNode : sel.anchorNode?.parentElement;
+      // Из пункта списка вставляем после всего списка — абзац не может стоять прямо внутри <ul>.
+      const host = anchor?.closest("ul, ol") ?? anchor?.closest("p, h2, h3, h4, figure, div");
+      if (host && host !== surface && surface.contains(host)) host.after(block);
+      else surface.append(block);
+    } else {
+      surface.append(block);
+    }
+    emit();
+  }
+
+  /** Из «загруженных»: картинка — вставляется картинкой, остальное — вложением-ссылкой. */
+  function insertFromMedia(url: string) {
+    if (isImageUrl(url)) {
+      insertImageFromUrl(url);
+      return;
+    }
+    const name = media?.find((item) => item.url === url)?.name ?? url.split("/").pop() ?? "Файл";
+    placeBlock(createAttachment(url, name));
+  }
+
+  /** Загрузка файла с понятным сообщением, если сервер его не принял. */
+  async function upload(file: File) {
+    if (!onUpload || !surfaceRef.current) return null;
+    try {
+      return await onUpload(file);
+    } catch (error) {
+      window.alert(error instanceof Error && error.message ? error.message : "Не удалось загрузить файл. Попробуйте ещё раз.");
+      return null;
+    }
+  }
+
+  async function attachFile(file: File) {
+    const url = await upload(file);
+    if (!url) return;
+    if (file.type.startsWith("image/") && isImageUrl(url)) insertImageFromUrl(url);
+    else placeBlock(createAttachment(url, file.name, file.size));
+  }
+
   async function insertImage(file: File) {
-    if (!onUpload || !surfaceRef.current) return;
-    const url = await onUpload(file);
-    insertImageFromUrl(url);
+    const url = await upload(file);
+    if (url) insertImageFromUrl(url);
   }
 
   function onSurfaceClick(event: ReactMouseEvent<HTMLDivElement>) {
@@ -727,6 +941,15 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
               {label}
             </button>
           ))}
+          <button
+            className={css.btn}
+            type="button"
+            title="Выделите слова и нажмите — появится поле для адреса. Чтобы изменить или убрать ссылку, поставьте курсор на неё и нажмите снова."
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={editLink}
+          >
+            Ссылка
+          </button>
         </div>
         <div className={css.group}>
           <span className={css.groupLabel}>PX</span>
@@ -781,6 +1004,20 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
                 event.target.value = "";
               }}
             />
+            <button className={css.insertFile} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => docRef.current?.click()}>
+              Прикрепить файл
+            </button>
+            <input
+              ref={docRef}
+              className={css.hiddenInput}
+              type="file"
+              accept={FILE_ACCEPT}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void attachFile(file);
+                event.target.value = "";
+              }}
+            />
           </>
         ) : null}
         {media?.length ? (
@@ -789,7 +1026,7 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
             defaultValue=""
             onChange={(event) => {
               const url = event.target.value;
-              if (url) insertImageFromUrl(url);
+              if (url) insertFromMedia(url);
               event.target.value = "";
             }}
           >
@@ -923,6 +1160,19 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
             onBlur={() => emit()}
           />
         </label>
+        <button
+          className={css.removeBtn}
+          type="button"
+          disabled={!picked}
+          title="Или выделите фото и нажмите Delete"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => {
+            const figure = activeFigure();
+            if (figure) removeFigure(figure);
+          }}
+        >
+          Удалить фото
+        </button>
       </div>
       <div
         className={css.editorFrame}
@@ -943,6 +1193,7 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
       <div
         ref={surfaceRef}
         className={css.surface}
+        data-rte-surface="true"
         contentEditable
         suppressContentEditableWarning
         onInput={() => {
@@ -975,10 +1226,7 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
           if (!figure) return;
           if (event.key === "Backspace" || event.key === "Delete") {
             event.preventDefault();
-            figure.remove();
-            selectedRef.current = null;
-            setPicked(null);
-            emit();
+            removeFigure(figure);
             return;
           }
           if (event.key === "ArrowLeft") {

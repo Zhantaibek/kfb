@@ -38,10 +38,10 @@ export function LocaleTabs({
       </div>
       <p className={css.localeHint}>
         {lang === "ru"
-          ? "Русский — кириллица, кыргызский — кыргызская кириллица, английский — латиница. Копировать один текст на все вкладки нельзя."
+          ? "Русский текст обязателен. Кыргызский и английский — по желанию: если вкладка пустая, на сайте покажется русский текст."
           : lang === "ky"
-            ? "Пишите по-кыргызски кириллицей. Русский текст сюда не подходит."
-            : "Write in English using the Latin alphabet. Cyrillic is not allowed here."}
+            ? "Необязательно. Если заполняете — пишите по-кыргызски кириллицей. Пусто — на сайте будет русский текст."
+            : "Optional. If you fill it in, write in English (Latin alphabet). Left empty — the site shows the Russian text."}
       </p>
     </div>
   );

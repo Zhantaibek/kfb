@@ -1,6 +1,6 @@
 import * as demo from "@/data/catalog";
 import type { Instrument, InstrumentType } from "@/data/catalog";
-import { loadSnapshot, type IndexData, type Quotes, type TablesPage, type TradeResults } from "@/lib/kse-live";
+import { loadSnapshot, type AuctionResults, type IndexData, type Quotes, type TablesPage, type TradeResults } from "@/lib/kse-live";
 
 /**
  * Данные рынка для главной, бегущей строки и подвала. Собираются на сервере из снимков kse.kg
@@ -10,6 +10,8 @@ import { loadSnapshot, type IndexData, type Quotes, type TablesPage, type TradeR
 
 export type TradeRow = { ticker: string; name: string; price: number; volume: number; deals: number };
 export type Auction = { date: string; type: string; volume: string; status: string };
+/** Состоявшийся аукцион ГЦБ: продано и средняя доходность (kse.kg/ru/AuctionResult). */
+export type AuctionResult = { date: string; code: string; soldMln: number; offerMln: number; avgYield: number | null };
 
 export type MarketData = {
   /** true — настоящие данные kse.kg, false — демо. */
@@ -24,6 +26,7 @@ export type MarketData = {
   stats: { volumeMln: number; volumeChange: number; trades: number };
   instruments: Instrument[];
   auctions: Auction[];
+  auctionResults: AuctionResult[];
   /** Сделки последней сессии и лидеры недели по объёму (только в живых данных). */
   lastTrades: TradeRow[];
   weekLeaders: TradeRow[];
@@ -39,6 +42,7 @@ export const demoMarket: MarketData = {
   stats: { volumeMln: demo.stats.volumeMln, volumeChange: demo.stats.volumeChange, trades: demo.stats.trades },
   instruments: demo.instruments,
   auctions: demo.auctions,
+  auctionResults: [],
   lastTrades: [],
   weekLeaders: [],
 };
@@ -82,6 +86,7 @@ export async function loadMarketData(): Promise<MarketData> {
     loadSnapshot<Quotes>("quotes"),
     loadSnapshot<TablesPage>("auction-schedule"),
   ]);
+  const results = await loadSnapshot<AuctionResults>("auction-results");
   if (!trades || !index || !quotes) return demoMarket;
 
   const last = trades.data.periods.find((period) => period.id === "last") ?? trades.data.periods[0];
@@ -146,6 +151,18 @@ export async function loadMarketData(): Promise<MarketData> {
     },
     instruments,
     auctions,
+    // Последние состоявшиеся аукционы — свежие сверху. Объёмы у kse.kg в тысячах сомов.
+    auctionResults: (results?.data.rows ?? [])
+      .filter((row) => row.date && row.code)
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 8)
+      .map((row) => ({
+        date: row.date.split("-").reverse().join("."),
+        code: row.code,
+        soldMln: (row.sold ?? 0) / 1000,
+        offerMln: (row.offer ?? 0) / 1000,
+        avgYield: row.avgYield,
+      })),
     lastTrades: toTradeRows(last?.trades ?? []),
     // С запасом: карточка на главной тянется до низа колонки и показывает столько строк, сколько влезает.
     weekLeaders: toTradeRows(week?.trades ?? []).sort((a, b) => b.volume - a.volume).slice(0, 16),

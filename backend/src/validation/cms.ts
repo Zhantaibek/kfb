@@ -42,13 +42,12 @@ function isLocaleValueFilled(value: unknown, field: string) {
   return text.trim().length > 0;
 }
 
-/** properNames — поля с именами собственными: перевод обязателен, но эвристика языка к ним не применяется. */
+/** Русский обязателен, KY и EN — по желанию. properNames — имена собственные: эвристика языка к ним не применяется. */
 function requireI18n(fields: string[], properNames: string[] = []) {
   return (
     data: { i18n?: { ky?: Record<string, string>; en?: Record<string, string> } } & Record<string, unknown>,
     ctx: z.RefinementCtx,
   ) => {
-    const missing: string[] = [];
     for (const field of fields) {
       if (!isLocaleValueFilled(data[field], field)) continue;
       const skipLangCheck = properNames.includes(field);
@@ -58,28 +57,16 @@ function requireI18n(fields: string[], properNames: string[] = []) {
         ctx.addIssue({ code: "custom", message: ruErr });
         return;
       }
-      for (const [id, label] of [
-        ["ky", "кыргызский"],
-        ["en", "английский"],
-      ] as const) {
+      for (const id of ["ky", "en"] as const) {
         const translated = data.i18n?.[id]?.[field] ?? "";
-        if (!isLocaleValueFilled(translated, field)) {
-          missing.push(label);
-          continue;
-        }
+        // KY и EN — по желанию: пустой перевод на сайте заменяется русским текстом.
+        if (!isLocaleValueFilled(translated, field)) continue;
         const langErr = skipLangCheck ? null : languageError(translated, id, ru);
         if (langErr) {
           ctx.addIssue({ code: "custom", message: langErr });
           return;
         }
       }
-    }
-    const unique = [...new Set(missing)];
-    if (unique.length) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Нужны все три языка. Заполните ${unique.join(" и ")} текст на вкладках KY и EN.`,
-      });
     }
   };
 }

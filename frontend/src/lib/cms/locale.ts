@@ -60,15 +60,16 @@ export function hasLocale(
   });
 }
 
-const langNames: Record<LocaleCode, string> = { ky: "кыргызский", en: "английский" };
-
-/** properNames — поля с именами собственными: перевод обязателен, но эвристика языка к ним не применяется. */
+/**
+ * Русский обязателен, KY и EN — по желанию; заполненный перевод проверяется на язык.
+ * properNames — поля с именами собственными: эвристика языка к ним не применяется.
+ */
 export function incompleteTranslation(
   item: { i18n?: CmsI18n } | null | undefined,
   fields: string[],
   properNames: string[] = [],
 ): { lang: ContentLang; message: string } | null {
-  if (!item) return { lang: "ky", message: "Заполните русский, кыргызский и английский текст." };
+  if (!item) return { lang: "ru", message: "Заполните текст на русском." };
   for (const field of fields) {
     if (!isLocaleValueFilled((item as Record<string, unknown>)[field], field)) continue;
     const skipLangCheck = properNames.includes(field);
@@ -77,12 +78,8 @@ export function incompleteTranslation(
     if (ruErr) return { lang: "ru", message: ruErr };
     for (const lang of ["ky", "en"] as const) {
       const translated = item.i18n?.[lang]?.[field] ?? "";
-      if (!isLocaleValueFilled(translated, field)) {
-        return {
-          lang,
-          message: `Нужны все три языка. Заполните ${langNames[lang]} текст на вкладке ${lang.toUpperCase()}.`,
-        };
-      }
+      // Кыргызский и английский — по желанию: пустая вкладка на сайте показывает русский текст.
+      if (!isLocaleValueFilled(translated, field)) continue;
       const langErr = skipLangCheck ? null : languageError(translated, lang, ru);
       if (langErr) return { lang, message: langErr };
     }

@@ -82,9 +82,9 @@ function useHeroCanvas(draw: Draw) {
       ctx.globalAlpha = 1;
     };
     const loop = (now: number) => {
-      pointer.s += ((target.on ? 1 : 0) - pointer.s) * 0.08;
-      pointer.x += (target.x - pointer.x) * 0.18;
-      pointer.y += (target.y - pointer.y) * 0.18;
+      pointer.s += ((target.on ? 1 : 0) - pointer.s) * 0.06;
+      pointer.x += (target.x - pointer.x) * 0.1;
+      pointer.y += (target.y - pointer.y) * 0.1;
       if (visible && !document.body.querySelector('[data-site-splash="show"]')) paint(now - start + 6000);
       frame = requestAnimationFrame(loop);
     };
@@ -273,7 +273,7 @@ export function HeroCandleFeed() {
  * Строго по вертикальным дорожкам, как столбцы графика: ближний слой — на основных дорожках,
  * средний — между ними, дальний — в промежутках. Без покачивания и размытия.
  */
-const RISE_LANES = 16;
+const RISE_LANES = 22;
 const RISE_LAYERS = [
   { d: 0.45, shift: 0.25, alpha: 0.42, width: 5.5 },
   { d: 0.7, shift: 0.5, alpha: 0.74, width: 8 },
@@ -281,6 +281,8 @@ const RISE_LAYERS = [
 ];
 
 const RISE_REACH = 170;
+/** Сглаженная реакция каждой свечи на курсор: свеча догоняет цель с инерцией, без рывков. */
+const riseEase = new Map<number, { push: number; glow: number }>();
 
 const drawRise: Draw = (ctx, w, h, t, c, p) => {
   const narrow = w < 900;
@@ -331,10 +333,18 @@ const drawRise: Draw = (ctx, w, h, t, c, p) => {
       const edge = Math.max(0, Math.min(1, Math.min(y, h - y) / (h * 0.25)));
       if (!edge) continue;
       // Рядом с курсором свеча расступается в сторону, становится шире и ярче.
-      const dist = Math.hypot(laneX - p.x, y - p.y);
+      // Сдвиг пропорционален расстоянию по горизонтали — под самым курсором он плавно сходит к нулю,
+      // а не перескакивает с одной стороны на другую.
+      const dx = laneX - p.x;
+      const dist = Math.hypot(dx, y - p.y);
       const near = Math.max(0, 1 - dist / RISE_REACH);
-      const f = p.s * near * near * (3 - 2 * near);
-      const x = laneX + Math.sign(laneX - p.x || 1) * 34 * f * layer.d;
+      const target = p.s * near * near * (3 - 2 * near);
+      const ease = riseEase.get(k) ?? { push: 0, glow: 0 };
+      ease.glow += (target - ease.glow) * 0.08;
+      ease.push += ((dx / RISE_REACH) * 70 * target * layer.d - ease.push) * 0.08;
+      riseEase.set(k, ease);
+      const f = ease.glow;
+      const x = laneX + ease.push;
       ctx.globalAlpha = Math.min(1, edge * (layer.alpha + 0.5 * f));
       candle(
         ctx,

@@ -33,7 +33,15 @@ export function createApp() {
   );
   app.use(cookieParser());
   app.use(express.json({ limit: "2mb" }));
-  app.use("/uploads", express.static(config.uploadsDir));
+  app.use(
+    "/uploads",
+    express.static(config.uploadsDir, {
+      setHeaders(res) {
+        // Браузер не угадывает тип файла сам: загрузка отдаётся строго как картинка или документ.
+        res.setHeader("X-Content-Type-Options", "nosniff");
+      },
+    }),
+  );
 
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,

@@ -159,3 +159,44 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Вложение в тексте: ссылка на файл со значком, именем, типом и размером. */
+.prose :global(p.rte-file) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface));
+}
+
+.prose :global(a.rte-file-link) {
+  color: var(--brand-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.prose :global(a.rte-file-link:hover) {
+  text-decoration: underline;
+}
+
+.prose :global(a.rte-file-link)::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 18px;
+  margin-right: 8px;
+  vertical-align: -3px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 18'%3E%3Cpath d='M2 0h8l6 6v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2Zm7 1.5V7h5.5L9 1.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 18'%3E%3Cpath d='M2 0h8l6 6v10a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2Zm7 1.5V7h5.5L9 1.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.prose :global(span.rte-file-meta) {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
