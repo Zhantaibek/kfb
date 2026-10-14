@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ResourceDetail } from "@/components/ResourcePages";
 import { partnersOrFallback } from "@/lib/cms/partners";
 import { loadPublicContent } from "@/lib/cms/public";
+import { contentMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,11 @@ async function load(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const { item } = await load(slug);
-  return { title: item?.caption ?? "Наши партнеры" };
+  if (!item) return { title: "Наши партнеры", robots: { index: false } };
+  return contentMetadata({
+    title: item.caption,
+    description: `${item.caption} — партнёр Кыргызской фондовой биржи.`,
+  });
 }
 
 /** Партнёр из админки (раздел «Партнёры»). */

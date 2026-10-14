@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { ContactsIntro } from "@/components/ContactsIntro";
 import { CmsSection } from "@/components/CmsSection";
 import { FeedbackForm } from "@/components/Forms";
@@ -6,8 +5,9 @@ import { mailHref, splitLines, telHref } from "@/lib/cms/contacts";
 import { findPageByPath, loadPublicContent } from "@/lib/cms/public";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
+import { pageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = { title: "Контакты" };
+export const generateMetadata = pageMetadata("Контакты");
 
 export default async function ContactsPage() {
   const content = await loadPublicContent();

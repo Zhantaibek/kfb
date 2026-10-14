@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { t, tr, htmlLang, type Lang } from "@/lib/i18n";
 import { useStoredString, writeStored } from "@/lib/local-store";
+import { localizedPath, splitLangPath } from "@/lib/seo";
 
 const defaultWatchlist = ["KTEL", "KAKB"];
 
@@ -37,10 +38,16 @@ type AppState = {
 
 const AppContext = createContext<AppState | null>(null);
 
-export function AppProviders({ children }: { children: ReactNode }) {
-  // Язык и избранное живут в localStorage; до гидратации — значения по умолчанию.
-  const storedLang = useStoredString("kse-lang");
-  const lang: Lang = storedLang === "ky" || storedLang === "en" ? storedLang : "ru";
+export function AppProviders({ children, initialLang = "ru" }: { children: ReactNode; initialLang?: Lang }) {
+  // Язык определяет сервер (адрес /ky, /en или cookie) — страница сразу приходит на нужном языке,
+  // без мигания русского текста. При переключении меняем его сразу, а сервер перерисовывает страницу.
+  const [lang, setLangState] = useState<Lang>(initialLang);
+  // Сервер прислал страницу на другом языке (переход по /ky, /en) — следуем ему.
+  const [serverLang, setServerLang] = useState<Lang>(initialLang);
+  if (serverLang !== initialLang) {
+    setServerLang(initialLang);
+    setLangState(initialLang);
+  }
   const storedWatch = useStoredString("kse-watch");
   const watchlist = useMemo(() => parseWatchlist(storedWatch), [storedWatch]);
   const [user, setUser] = useState<User | null>(null);
@@ -82,7 +89,13 @@ export function AppProviders({ children }: { children: ReactNode }) {
       lang,
       setLang(next) {
         writeStored("kse-lang", next);
-        document.cookie = `kse-lang=${next};path=/;max-age=31536000`;
+        document.cookie = `kse-lang=${next};path=/;max-age=31536000;samesite=lax`;
+        setLangState(next);
+        // Переходим на ту же страницу нужного языка (/ky/..., /en/..., русский — без префикса).
+        // Полная загрузка: язык меняют редко, зато сразу обновляются заголовок вкладки, тексты и меню.
+        const { path } = splitLangPath(window.location.pathname);
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- нужна полная загрузка, см. выше
+        window.location.assign(`${localizedPath(path, next)}${window.location.search}${window.location.hash}`);
       },
       user,
       adminUser,

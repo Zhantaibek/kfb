@@ -9,7 +9,8 @@ export type Snapshot<T> = { key: string; data: T; fetchedAt: string; sourceUrl: 
 
 export async function loadSnapshot<T>(key: string): Promise<Snapshot<T> | null> {
   try {
-    const response = await fetch(`${apiUrl}/api/public/market/${key}`, { cache: "no-store" });
+    // Тайм-аут: если бэкенд завис, страница показывает демо-данные, а не висит.
+    const response = await fetch(`${apiUrl}/api/public/market/${key}`, { cache: "no-store", signal: AbortSignal.timeout(4000) });
     return response.ok ? ((await response.json()) as Snapshot<T>) : null;
   } catch {
     return null;

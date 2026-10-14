@@ -8,6 +8,8 @@ export const metadata: Metadata = {
     default: "Портал администратора",
     template: "%s | КФБ Админ",
   },
+  // Админка не должна попадать в поиск, даже если на неё где-то есть ссылка.
+  robots: { index: false, follow: false },
 };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

@@ -17,21 +17,31 @@ export function FeedbackForm({
   const tr = useTr();
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     const form = new FormData(event.currentTarget);
     const payload = Object.fromEntries([...form.entries()].map(([key, value]) => [key, String(value)]));
-    const response = await fetch("/api/public/request", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ source: title, payload }),
-    });
-    if (!response.ok) {
-      setError("Не удалось отправить. Попробуйте ещё раз.");
-      return;
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/public/request", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source: title, payload }),
+      });
+      if (!response.ok) {
+        setError("Не удалось отправить. Попробуйте ещё раз.");
+        return;
+      }
+      setDone(true);
+    } catch {
+      setError("Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.");
+    } finally {
+      setBusy(false);
     }
-    setDone(true);
   }
 
   if (done) return <p className={ui.ok}>{tr(success)}</p>;
@@ -50,7 +60,7 @@ export function FeedbackForm({
         </label>
       ))}
       {error ? <p className={ui.down}>{tr(error)}</p> : null}
-      <button className={ui.primary} type="submit">
+      <button className={ui.primary} type="submit" disabled={busy}>
         {tr("Отправить")}
       </button>
     </form>

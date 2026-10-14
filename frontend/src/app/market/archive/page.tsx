@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import { LivePage } from "@/components/live/LiveParts";
 import { loadSnapshot, type TradeArchive } from "@/lib/kse-live";
 import { DataTable } from "@/components/live/LiveParts";
 import { MarketLinks } from "@/components/live/LiveViews";
 import css from "@/components/live/live.module.css";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Архив торгов" };
+export const generateMetadata = pageMetadata("Архив торгов");
 
 /** Живые данные с kse.kg/ru/TradeArchive (обновляются раз в 15 минут). */
 export default async function Page() {

@@ -1,14 +1,16 @@
-import type { Metadata } from "next";
 import { LivePage } from "@/components/live/LiveParts";
 import { loadSnapshot, type Quotes } from "@/lib/kse-live";
 import { QuotesView, MarketLinks } from "@/components/live/LiveViews";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Котировки по ценным бумагам" };
+export const generateMetadata = pageMetadata("Котировки по ценным бумагам");
 
 /** Живые данные с kse.kg/ru/Quotes (обновляются раз в 15 минут). */
-export default async function Page({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q = "" } = await searchParams;
+export default async function Page({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
+  const params = await searchParams;
+  // ?q=a&q=b приходит массивом — берём первое значение.
+  const q = (Array.isArray(params.q) ? params.q[0] : params.q) ?? "";
   const snapshot = await loadSnapshot<Quotes>("quotes");
   return (
     <LivePage

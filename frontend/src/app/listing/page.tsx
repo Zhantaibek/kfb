@@ -1,15 +1,15 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { CmsPageView } from "@/components/CmsPageView";
 import { PageIntro } from "@/components/Forms";
 import { ListingTable, type ListingTableRow } from "@/components/ListingTable";
 import { PublicMain } from "@/components/PublicMain";
 import { findPageByPath, loadIssuerData, loadPublicContent } from "@/lib/cms/public";
+import { pageMetadata } from "@/lib/seo-server";
 
 const path = "/listing";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Листинг" };
+export const generateMetadata = pageMetadata("Листинг");
 
 export default async function ListingPage() {
   const page = findPageByPath(await loadPublicContent(), path);

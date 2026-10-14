@@ -22,7 +22,7 @@ export async function login(req: Request, res: Response) {
   const body = req.body as { email?: string; password?: string };
   const session = await authenticate(String(body.email ?? ""), String(body.password ?? ""));
   if (!session) {
-    res.status(401).json({ error: "Неверный логин или пароль. Демо: admin@kse.kg / admin" });
+    res.status(401).json({ error: "Неверный логин или пароль" });
     return;
   }
   if (!isStaffRole(session.role)) {

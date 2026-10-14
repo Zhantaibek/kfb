@@ -11,6 +11,7 @@ import { partnersSeed } from "../../../shared/partners-seed";
 import { ensureDefaultLandings } from "./landing";
 import { issuerSeedRows } from "../../../shared/issuers-seed";
 import { listingSeedRows } from "../../../shared/listing-seed";
+import { issuerDisclosuresSeed } from "../../../shared/issuer-disclosures-seed";
 import { ksePageSeed } from "../../../shared/kse-pages-seed";
 import { sanitizeRichHtml } from "../utils/sanitize-html";
 import type { CmsStore } from "../../../shared/cms";
@@ -293,6 +294,14 @@ async function ensureDefaultIssuers() {
   if ((await prisma.listingEntry.count()) === 0) {
     await prisma.listingEntry.createMany({ data: listingSeedRows(now).map(listingCreateData), skipDuplicates: true });
   }
+  // Существенные факты эмитентов — только для эмитентов, которые есть в базе (внешний ключ).
+  if ((await prisma.issuerDisclosure.count()) === 0) {
+    const known = new Set((await prisma.issuer.findMany({ select: { slug: true } })).map((row) => row.slug));
+    const data = Object.entries(issuerDisclosuresSeed)
+      .filter(([slug]) => known.has(slug))
+      .flatMap(([issuerSlug, events]) => events.map((event) => ({ id: crypto.randomUUID(), issuerSlug, ...event })));
+    await prisma.issuerDisclosure.createMany({ data, skipDuplicates: true });
+  }
 }
 
 // Тексты разделов, перенесённые с kse.kg (backend/scripts/import-kse-pages.mjs).
@@ -301,7 +310,8 @@ async function ensureKsePages() {
   const existing = new Set((await prisma.page.findMany({ select: { path: true } })).map((row) => row.path));
   const now = new Date();
   for (const item of ksePageSeed) {
-    if (existing.has(item.path)) continue;
+    // Учебный центр — отдельный проект (kse-edu), адреса /education* ведут туда; страницы сайта для них не нужны.
+    if (existing.has(item.path) || item.path === "/education" || item.path.startsWith("/education/")) continue;
     const i18n = Object.fromEntries(
       Object.entries(item.i18n).map(([lang, pack]) => [lang, { ...pack, body: sanitizeRichHtml(pack?.body ?? "") }]),
     );

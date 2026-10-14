@@ -8,20 +8,20 @@ import styles from "./HeroCandleWave.module.css";
  * Общий цикл отрисовки — useHeroCanvas; цвета и раскладка слоя — из HeroCandleWave.module.css.
  */
 
-type Colors = { up: string; down: string; wick: string };
+export type Colors = { up: string; down: string; wick: string };
 /** Курсор над сценой: координаты в пикселях слоя и сила влияния 0…1 (плавно нарастает и гаснет). */
-type Pointer = { x: number; y: number; s: number };
-type Draw = (ctx: CanvasRenderingContext2D, w: number, h: number, t: number, c: Colors, p: Pointer) => void;
+export type Pointer = { x: number; y: number; s: number };
+export type Draw = (ctx: CanvasRenderingContext2D, w: number, h: number, t: number, c: Colors, p: Pointer) => void;
 
 /** Целочисленный хеш вместо Math.random — сцена одинакова при каждой отрисовке. */
-function noise(n: number) {
+export function noise(n: number) {
   let h = Math.imul(n + 31, 2654435761) >>> 0;
   h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0;
   h = Math.imul(h ^ (h >>> 13), 3266489917) >>> 0;
   return (h % 10000) / 10000;
 }
 
-function candle(ctx: CanvasRenderingContext2D, x: number, top: number, bottom: number, wickTop: number, wickBottom: number, w: number, color: string, wick: string) {
+export function candle(ctx: CanvasRenderingContext2D, x: number, top: number, bottom: number, wickTop: number, wickBottom: number, w: number, color: string, wick: string) {
   ctx.strokeStyle = wick;
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -35,7 +35,7 @@ function candle(ctx: CanvasRenderingContext2D, x: number, top: number, bottom: n
 }
 
 /** Цикл canvas: DPR, размер, тема; пауза на заставке, вне экрана и при «меньше движения». */
-function useHeroCanvas(draw: Draw) {
+export function useHeroCanvas(draw: Draw) {
   const ref = useRef<HTMLCanvasElement>(null);
   const drawRef = useRef(draw);
 

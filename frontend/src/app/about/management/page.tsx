@@ -1,17 +1,17 @@
-﻿import Link from "next/link";
-import type { Metadata } from "next";
+import Link from "next/link";
 import { CmsPageView } from "@/components/CmsPageView";
 import { PageIntro } from "@/components/Forms";
 import { ManagementList } from "@/components/ManagementList";
 import { PublicMain } from "@/components/PublicMain";
 import { sectionPages } from "@/data/site-nav";
 import { findPageByPath, loadPublicContent } from "@/lib/cms/public";
+import { pageMetadata } from "@/lib/seo-server";
 
 const path = "/about/management";
 const section = sectionPages[path];
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: section.title };
+export const generateMetadata = pageMetadata(section.title, section.lead);
 
 export default async function ManagementPage() {
   const content = await loadPublicContent();

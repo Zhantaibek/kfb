@@ -1,10 +1,10 @@
-﻿import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo-server";
 import { SectionPageByPath } from "@/components/SectionPage";
 import { sectionPages } from "@/data/site-nav";
 
 const path = "/about/committees";
 
-export const metadata: Metadata = { title: sectionPages[path].title };
+export const generateMetadata = pageMetadata(sectionPages[path].title, sectionPages[path].lead);
 
 export default function Page() {
   return <SectionPageByPath path={path} />;

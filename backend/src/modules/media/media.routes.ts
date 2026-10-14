@@ -9,7 +9,8 @@ mediaRoutes.post(
   (req, res, next) => {
     upload.single("file")(req, res, (err) => {
       if (err) {
-        res.status(400).json({ error: "Файл больше 20 МБ" });
+        const tooBig = (err as { code?: string }).code === "LIMIT_FILE_SIZE";
+        res.status(400).json({ error: tooBig ? "Файл больше 20 МБ" : "Не удалось принять файл. Загрузите один файл ещё раз." });
         return;
       }
       next();

@@ -47,7 +47,9 @@ export function RequestsManager() {
                         Закрыть
                       </button>
                     ) : null}
-                    <button className={css.danger} type="button" onClick={() => void mutate("delete", "requests", undefined, item.id)}>
+                    <button className={css.danger} type="button" onClick={() => {
+                        if (window.confirm("Удалить заявку? Восстановить её будет нельзя.")) void mutate("delete", "requests", undefined, item.id).catch(() => undefined);
+                      }}>
                       Удалить
                     </button>
                   </div>

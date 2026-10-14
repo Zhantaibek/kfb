@@ -8,7 +8,7 @@ export default function AdminProfilePage() {
     <>
       <p className={css.kicker}>Система</p>
       <h1>Профиль</h1>
-      <p className={css.lead}>Демо-вход: admin@kse.kg / admin. Редактор: editor@kse.kg / editor.</p>
+      <p className={css.lead}>Пароль и роли сотрудников меняются в разделе «Пользователи».</p>
     </>
   );
 }

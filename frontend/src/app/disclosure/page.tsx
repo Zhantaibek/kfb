@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { PageIntro } from "@/components/Forms";
 import { PublicMain } from "@/components/PublicMain";
 import { loadIssuerData } from "@/lib/cms/public";
 import ui from "@/app/ui.module.css";
 import css from "./disclosure.module.css";
+import { pageMetadata } from "@/lib/seo-server";
 
 function Pager({ page, pages, q }: { page: number; pages: number; q: string }) {
   const href = (n: number) => {
@@ -30,19 +30,21 @@ function Pager({ page, pages, q }: { page: number; pages: number; q: string }) {
 const perPage = 15;
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Центр раскрытия информации" };
+export const generateMetadata = pageMetadata("Центр раскрытия информации");
 
-type Props = { searchParams: Promise<{ page?: string; q?: string }> };
+type Props = { searchParams: Promise<{ page?: string | string[]; q?: string | string[] }> };
 
 export default async function DisclosurePage({ searchParams }: Props) {
   const { issuers: all } = await loadIssuerData();
   const params = await searchParams;
-  const q = (params.q ?? "").trim();
+  // Повторяющийся параметр (?q=a&q=b) приходит массивом — берём первое значение.
+  const first = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value) ?? "";
+  const q = first(params.q).trim();
   // Поиск по эмитенту, как на kse.kg: без учёта регистра, кавычек и формы собственности в любом месте названия.
   const plain = (text: string) => text.toLowerCase().replace(/[«»"“”]/g, "");
   const issuers = q ? all.filter((item) => plain(item.name).includes(plain(q))) : all;
   const pages = Math.max(1, Math.ceil(issuers.length / perPage));
-  const page = Math.min(Math.max(1, Number(params.page || "1") || 1), pages);
+  const page = Math.min(Math.max(1, Number(first(params.page) || "1") || 1), pages);
   const rows = issuers.slice((page - 1) * perPage, page * perPage);
 
   return (

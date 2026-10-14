@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { requireSession } from "../auth/auth.service";
 import { createRequest, getAdminData, getIssuerData, getPublicContent, mutateCollection } from "./cms.service";
 import type { MutableCollection } from "../../validation/cms";
+import { readIssuerDisclosures } from "../../db/repositories/cms.repository";
 
 export async function readAdminData(req: Request, res: Response) {
   requireSession(req);
@@ -59,6 +60,12 @@ export async function readPublicContent(_req: Request, res: Response) {
 
 export async function readIssuerData(_req: Request, res: Response) {
   res.json(await getIssuerData());
+}
+
+/** Существенные факты эмитента для страницы /disclosure/<slug>. */
+export async function readIssuerDisclosureList(req: Request, res: Response) {
+  const slug = String(req.params.slug ?? "").slice(0, 160);
+  res.json({ items: await readIssuerDisclosures(slug) });
 }
 
 export async function postRequest(req: Request, res: Response) {

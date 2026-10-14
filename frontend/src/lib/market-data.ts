@@ -80,13 +80,13 @@ function toTradeRows(trades: TradeResults["periods"][number]["trades"]): TradeRo
 }
 
 export async function loadMarketData(): Promise<MarketData> {
-  const [trades, index, quotes, schedule] = await Promise.all([
+  const [trades, index, quotes, schedule, results] = await Promise.all([
     loadSnapshot<TradeResults>("trade-results"),
     loadSnapshot<IndexData>("index"),
     loadSnapshot<Quotes>("quotes"),
     loadSnapshot<TablesPage>("auction-schedule"),
+    loadSnapshot<AuctionResults>("auction-results"),
   ]);
-  const results = await loadSnapshot<AuctionResults>("auction-results");
   if (!trades || !index || !quotes) return demoMarket;
 
   const last = trades.data.periods.find((period) => period.id === "last") ?? trades.data.periods[0];

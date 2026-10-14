@@ -1,12 +1,12 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { LivePage } from "@/components/live/LiveParts";
 import { MembersView } from "@/components/live/LiveViews";
 import { loadSnapshot, type Members } from "@/lib/kse-live";
 import ui from "@/app/ui.module.css";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Участники торгов" };
+export const generateMetadata = pageMetadata("Участники торгов");
 
 /** Брокеры и дилеры — живой список с kse.kg/ru/Members (обновляется раз в 15 минут). */
 export default async function MembersPage() {

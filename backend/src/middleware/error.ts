@@ -33,6 +33,16 @@ export function errorHandler(error: Error, _req: Request, res: Response, _next: 
     res.status(error.status).json({ error: error.message });
     return;
   }
+  // Prisma: нарушение уникальности — адрес страницы, slug или e-mail уже заняты.
+  if ((error as { code?: string }).code === "P2002") {
+    res.status(409).json({ error: "Такая запись уже есть: адрес (slug), путь страницы или e-mail заняты. Укажите другой." });
+    return;
+  }
+  // Ссылка на несуществующую запись (например, родительский пункт меню удалён).
+  if ((error as { code?: string }).code === "P2003") {
+    res.status(400).json({ error: "Связанная запись не найдена — обновите страницу и попробуйте снова." });
+    return;
+  }
   if (
     error.message === "Некорректная коллекция" ||
     error.message === "Некорректный запрос" ||

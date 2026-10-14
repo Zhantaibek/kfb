@@ -1,10 +1,10 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
+import { pageMetadata } from "@/lib/seo-server";
 
-export const metadata: Metadata = { title: "Инвесторам" };
+export const generateMetadata = pageMetadata("Инвесторам");
 
 export default function InvestorsPage() {
   return (

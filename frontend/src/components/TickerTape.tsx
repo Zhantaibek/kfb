@@ -41,7 +41,8 @@ export function TickerTape() {
         <div className={ui.tickerLane}>
           <TapeRow items={items} />
         </div>
-        <div className={ui.tickerLane} aria-hidden="true">
+        {/* Копия ленты только для бесшовной прокрутки: inert убирает её ссылки из Tab и экранных дикторов. */}
+        <div className={ui.tickerLane} aria-hidden="true" inert>
           <TapeRow items={items} />
         </div>
       </div>

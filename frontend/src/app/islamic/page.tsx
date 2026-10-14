@@ -1,10 +1,10 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
 
-export const metadata: Metadata = { title: "Исламские финансы" };
+import { pageMetadata } from "@/lib/seo-server";
+export const generateMetadata = pageMetadata("Исламские финансы");
 
 export default function IslamicPage() {
   return (

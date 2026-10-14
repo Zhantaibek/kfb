@@ -200,6 +200,16 @@ export async function detachMediaUrl(url: string) {
   }
 }
 
+/** Существенные факты эмитента, новые сверху. Адрес /disclosure/<slug> может прийти в другом регистре. */
+export async function readIssuerDisclosures(slug: string) {
+  const rows = await prisma.issuerDisclosure.findMany({
+    where: { issuerSlug: { equals: slug, mode: "insensitive" } },
+    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+    select: { date: true, title: true, url: true },
+  });
+  return rows;
+}
+
 export async function readIssuerData() {
   const [issuers, listing] = await Promise.all([
     prisma.issuer.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
@@ -680,8 +690,11 @@ export async function updateItem(collection: MutableCollection, id: string, item
       break;
     }
     }
-  } catch {
-    throw new Error("not-found");
+  } catch (error) {
+    // «Не найдено» — только когда записи действительно нет; дубликаты и сбои базы уходят дальше как есть.
+    const code = typeof error === "object" && error && "code" in error ? String((error as { code?: string }).code) : "";
+    if (code === "P2025") throw new Error("not-found");
+    throw error;
   }
 }
 

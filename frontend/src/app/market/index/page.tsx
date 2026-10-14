@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import { LivePage } from "@/components/live/LiveParts";
 import { loadSnapshot, type IndexData } from "@/lib/kse-live";
 import { IndexView, MarketLinks } from "@/components/live/LiveViews";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Индекс и капитализация" };
+export const generateMetadata = pageMetadata("Индекс и капитализация");
 
 /** Живые данные с kse.kg/ru/IndexAndCapitalization (обновляются раз в 15 минут). */
 export default async function Page() {

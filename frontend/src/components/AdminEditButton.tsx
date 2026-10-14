@@ -6,14 +6,13 @@ import { useApp } from "@/components/AppProviders";
 import ui from "@/app/ui.module.css";
 
 /** Раздел админки, в котором редактируется публичная страница. */
-export function adminEditHref(pathname: string): string {
+export function adminEditHref(pathname: string): string | null {
   if (pathname === "/") return "/admin/hubs";
   if (pathname === "/about/management") return "/admin/management";
   if (pathname === "/news" || pathname.startsWith("/news/")) return "/admin/news";
   if (pathname === "/contacts") return "/admin/settings";
-  if (pathname === "/listing") return "/admin/issuers?tab=listing";
-  if (pathname === "/disclosure") return "/admin/issuers";
-  if (pathname.startsWith("/disclosure/")) return `/admin/issuers?edit=${encodeURIComponent(pathname.slice("/disclosure/".length))}`;
+  // Эмитенты и листинг приходят из внешнего API — в админке их не редактируют.
+  if (pathname === "/listing" || pathname === "/disclosure" || pathname.startsWith("/disclosure/")) return null;
   return `/admin/menu?edit=${encodeURIComponent(pathname)}`;
 }
 
@@ -24,9 +23,10 @@ export function adminEditHref(pathname: string): string {
 export function AdminEditButton({ href, className }: { href?: string; className?: string }) {
   const { adminUser } = useApp();
   const pathname = usePathname();
-  if (!adminUser) return null;
+  const target = href ?? adminEditHref(pathname);
+  if (!adminUser || !target) return null;
   return (
-    <Link className={`${ui.ghost} ${ui.editBtn} ${className ?? ""}`} href={href ?? adminEditHref(pathname)}>
+    <Link className={`${ui.ghost} ${ui.editBtn} ${className ?? ""}`} href={target}>
       Редактировать
     </Link>
   );

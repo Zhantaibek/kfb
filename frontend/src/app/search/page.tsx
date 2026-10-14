@@ -1,12 +1,12 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
 import { PublicMain } from "@/components/PublicMain";
 import { isExternal, mergeResults, searchStatic, type SearchResult } from "@/lib/site-search";
 import ui from "@/app/ui.module.css";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Поиск" };
+export const generateMetadata = pageMetadata("Поиск", undefined, { noindex: true }); // результаты поиска не индексируем
 
 const apiUrl = process.env.API_URL ?? "http://localhost:4000";
 /** На странице поиска — до 50 результатов в каждой группе. */
@@ -23,9 +23,10 @@ async function searchDatabase(query: string): Promise<SearchResult | null> {
   }
 }
 
-export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q = "" } = await searchParams;
-  const query = q.trim();
+export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
+  const { q } = await searchParams;
+  // ?q=a&q=b приходит массивом — берём первое значение.
+  const query = (Array.isArray(q) ? q[0] : q ?? "").trim();
   const result = query ? mergeResults(await searchDatabase(query), searchStatic(query, PER_GROUP), PER_GROUP) : null;
 
   return (

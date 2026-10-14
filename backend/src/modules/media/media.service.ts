@@ -4,6 +4,7 @@ import { config } from "../../config";
 import { detachMediaUrl, insertAudit, insertMedia } from "../../db/repositories/cms.repository";
 import type { AdminSession } from "../../../../shared/cms";
 import { decodeUploadName } from "../../utils/upload-name";
+import { AppError } from "../../middleware/error";
 
 const allowed = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const imageMaxBytes = 4 * 1024 * 1024;
@@ -52,12 +53,12 @@ export async function saveUpload(
 ) {
   let ext: string;
   if (allowed.has(file.mimetype)) {
-    if (file.buffer.length > imageMaxBytes) throw new Error("Картинка больше 4 МБ");
-    if (!isImageBytes(file.buffer, file.mimetype)) throw new Error("Файл не похож на картинку — загрузите настоящий JPG, PNG, WEBP или GIF");
+    if (file.buffer.length > imageMaxBytes) throw new AppError("Картинка больше 4 МБ");
+    if (!isImageBytes(file.buffer, file.mimetype)) throw new AppError("Файл не похож на картинку — загрузите настоящий JPG, PNG, WEBP или GIF");
     ext = file.mimetype.split("/")[1] === "jpeg" ? "jpg" : file.mimetype.split("/")[1];
   } else {
     const doc = documentExt(file);
-    if (!doc) throw new Error("Можно загрузить JPG, PNG, WEBP, GIF или документ PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ODT, ODS, RTF, TXT, CSV, ZIP");
+    if (!doc) throw new AppError("Можно загрузить JPG, PNG, WEBP, GIF или документ PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ODT, ODS, RTF, TXT, CSV, ZIP");
     ext = doc;
   }
 

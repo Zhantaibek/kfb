@@ -1,4 +1,7 @@
-/** Новости (существенные факты) эмитентов — как на https://www.kse.kg/ru/PublicInfo/<slug> */
+/**
+ * Начальное наполнение таблицы issuer_disclosures: существенные факты эмитентов, как на https://www.kse.kg/ru/PublicInfo/<slug>.
+ * Сайт читает их из БД; здесь — только данные для первого запуска (раньше они жили в коде фронтенда).
+ */
 
 export type DisclosureEvent = {
   /** Дата раскрытия, ГГГГ-ММ-ДД */
@@ -9,7 +12,7 @@ export type DisclosureEvent = {
   url: string;
 };
 
-const events: Record<string, DisclosureEvent[]> = {
+export const issuerDisclosuresSeed: Record<string, DisclosureEvent[]> = {
   "AIF_Elesinvest": [
     { date: "2026-04-30", title: "Решения, принятые общим собранием акционеров", url: "https://oi.kse.kg/report/22/19/5468" },
     { date: "2026-04-06", title: "Проведение общего собрания акционеров", url: "https://oi.kse.kg/report/28/24/5048" },
@@ -2134,8 +2137,3 @@ const events: Record<string, DisclosureEvent[]> = {
   ],
 };
 
-const bySlug = new Map(Object.entries(events).map(([slug, list]) => [slug.toLowerCase(), list]));
-
-export function getDisclosureNews(slug: string): DisclosureEvent[] {
-  return bySlug.get(slug.toLowerCase()) ?? [];
-}

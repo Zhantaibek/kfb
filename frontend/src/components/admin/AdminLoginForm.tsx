@@ -18,19 +18,25 @@ export function AdminLoginForm() {
     setBusy(true);
     setError(null);
     const data = new FormData(event.currentTarget);
-    const response = await fetch("/api/admin/session", {
-      method: "POST",
-      credentials: "include",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: data.get("email"), password: data.get("password") }),
-    });
-    const payload = (await response.json()) as { error?: string };
-    setBusy(false);
-    if (!response.ok) {
-      setError(payload.error ?? "Ошибка входа");
-      return;
+    try {
+      const response = await fetch("/api/admin/session", {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: data.get("email"), password: data.get("password") }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        setError(payload.error ?? "Ошибка входа");
+        return;
+      }
+      router.replace("/admin/dashboard");
+    } catch {
+      // Нет сети или сервер не ответил — кнопка не должна остаться заблокированной.
+      setError("Сервер не отвечает. Проверьте подключение и попробуйте ещё раз.");
+    } finally {
+      setBusy(false);
     }
-    router.replace("/admin/dashboard");
   }
 
   return (
@@ -45,13 +51,13 @@ export function AdminLoginForm() {
         <p className={css.lead}>{tr("CMS Кыргызской фондовой биржи — новости, фото, страницы и заявки.")}</p>
         <label className={css.field}>
           <span>E-mail</span>
-          <input name="email" type="email" defaultValue="admin@kse.kg" required />
+          <input name="email" type="email" autoComplete="username" required />
         </label>
         <label className={css.field}>
           <span>{tr("Пароль")}</span>
-          <input name="password" type="password" defaultValue="admin" required />
+          <input name="password" type="password" autoComplete="current-password" required />
         </label>
-        {error ? <p className={css.error}>{error}</p> : <p className={css.lead}>{tr("Демо: admin@kse.kg / admin")}</p>}
+        {error ? <p className={css.error}>{error}</p> : null}
         <button className={css.primary} disabled={busy} type="submit">
           {tr("Войти")}
         </button>

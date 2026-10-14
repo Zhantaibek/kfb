@@ -48,7 +48,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ path: pathname, visitorId: visitorId() }),
-    });
+    }).catch(() => undefined); // счётчик посещений не должен ронять страницу без интернета
   }, [pathname, isAdmin]);
 
   useEffect(() => {

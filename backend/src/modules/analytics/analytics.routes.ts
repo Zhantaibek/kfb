@@ -23,7 +23,12 @@ const listQuery = z.object({
 
 /** Публичный счётчик: POST /api/public/visit { path, visitorId }. */
 export async function postVisit(req: Request, res: Response) {
-  const body = visitBody.parse(req.body ?? {});
+  const parsed = visitBody.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    res.status(400).json({ error: "Некорректный запрос" });
+    return;
+  }
+  const body = parsed.data;
   const result = await recordVisit({
     path: body.path,
     visitorId: body.visitorId,

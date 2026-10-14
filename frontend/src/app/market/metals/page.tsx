@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import { LivePage } from "@/components/live/LiveParts";
 import { loadSnapshot, type TablesPage } from "@/lib/kse-live";
 import { DataTable } from "@/components/live/LiveParts";
 import { MarketLinks } from "@/components/live/LiveViews";
 import css from "@/components/live/live.module.css";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Котировки по драгоценным металлам" };
+export const generateMetadata = pageMetadata("Котировки по драгоценным металлам");
 
 /** Живые данные с kse.kg/ru/QuotesGold (обновляются раз в 15 минут). */
 export default async function Page() {

@@ -19,10 +19,17 @@ import {
   HeroCandleSkyline,
   HeroCandleStairs,
 } from "./HeroCandleScenes";
+import { HeroCandleBook, HeroCandleBuild, HeroCandleHelix, HeroCandleTunduk } from "./HeroCandleNew";
+import { HeroFlow, HeroHorns, HeroNet, HeroTopo } from "./HeroScenesAbstract";
+import { HeroDots, HeroMosaic, HeroRipple, HeroStrings } from "./HeroScenesMore";
+import { HeroCircle, HeroLine, HeroMark, HeroSteps } from "./HeroScenesMinimal";
+import { HeroArrow, HeroGrid, HeroPulse, HeroTundukLine } from "./HeroScenesMinimal2";
+import { HeroBlocks, HeroComposition, HeroMorph, HeroPlanes } from "./HeroScenesShapes";
+import { HeroDotChart, HeroRidges, HeroWind } from "./HeroScenesData";
 import styles from "./HomeHero.module.css";
 
 /** Как свечи встроены в фон: по кольцу, внутри стеклянных шариков или полосой вдоль низа. */
-export type HeroCandles = "skyline" | "stairs" | "mirror" | "clock" | "field" | "orbit" | "feed" | "rise" | "wave" | "ribbon" | "horizon" | "radial" | "bubbles" | "dial" | "peaks" | "glass" | "lines" | "dots" | "monument" | "ring" | "orbs" | "strip";
+export type HeroCandles = "ridges" | "wind" | "dotchart" | "composition" | "blocks" | "planes" | "morph" | "pulse" | "grid" | "arrow" | "tundukline" | "line" | "mark" | "circle" | "steps" | "ripple" | "dotfield" | "strings" | "mosaic" | "flow" | "topo" | "horns" | "net" | "tunduk" | "helix" | "build" | "book" | "skyline" | "stairs" | "mirror" | "clock" | "field" | "orbit" | "feed" | "rise" | "wave" | "ribbon" | "horizon" | "radial" | "bubbles" | "dial" | "peaks" | "glass" | "lines" | "dots" | "monument" | "ring" | "orbs" | "strip";
 
 type Props = {
   index: { value: number; change: number; capitalization: number };
@@ -778,6 +785,9 @@ function RadialChart() {
   );
 }
 
+/** Сцены на canvas: кольца и шары SVG-фона под ними не нужны. */
+const CANVAS_SCENES = new Set<HeroCandles>(["radial", "horizon", "ribbon", "wave", "orbit", "feed", "rise", "field", "skyline", "stairs", "mirror", "clock", "tunduk", "helix", "build", "book", "flow", "topo", "horns", "net", "ripple", "dotfield", "strings", "mosaic", "line", "mark", "circle", "steps", "pulse", "grid", "arrow", "tundukline", "composition", "blocks", "planes", "morph", "ridges", "wind", "dotchart"]);
+
 function HeroScene({ candles }: { candles: HeroCandles }) {
   return (
     <svg className={styles.scene} viewBox="0 0 1600 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -797,7 +807,7 @@ function HeroScene({ candles }: { candles: HeroCandles }) {
             ))
           : null}
       </defs>
-      <g className={styles.rings} style={candles === "radial" || candles === "horizon" || candles === "ribbon" || candles === "wave" || candles === "orbit" || candles === "feed" || candles === "rise" || candles === "field" || candles === "skyline" || candles === "stairs" || candles === "mirror" || candles === "clock" ? { display: "none" } : undefined}>
+      <g className={styles.rings} style={CANVAS_SCENES.has(candles) ? { display: "none" } : undefined}>
         {RINGS.map((r, i) => (
           <circle
             key={r}
@@ -826,7 +836,7 @@ function HeroScene({ candles }: { candles: HeroCandles }) {
       </g>
       ) : null}
       {candles === "bubbles" ? <BubbleMarket /> : null}
-      {candles === "bubbles" || candles === "radial" || candles === "horizon" || candles === "ribbon" || candles === "wave" || candles === "orbit" || candles === "feed" || candles === "rise" || candles === "field" || candles === "skyline" || candles === "stairs" || candles === "mirror" || candles === "clock"
+      {candles === "bubbles" || CANVAS_SCENES.has(candles)
         ? null
         : candles === "orbs"
         ? LENS_ORBS.map((orb) => <LensOrb key={orb.seed} orb={orb} />)
@@ -904,6 +914,33 @@ export function HomeHero({ index, volume, listing, candles = "rise" }: Props) {
         {candles === "stairs" ? <HeroCandleStairs /> : null}
         {candles === "mirror" ? <HeroCandleMirror /> : null}
         {candles === "clock" ? <HeroCandleClock /> : null}
+        {candles === "tunduk" ? <HeroCandleTunduk /> : null}
+        {candles === "helix" ? <HeroCandleHelix /> : null}
+        {candles === "build" ? <HeroCandleBuild /> : null}
+        {candles === "book" ? <HeroCandleBook /> : null}
+        {candles === "flow" ? <HeroFlow /> : null}
+        {candles === "topo" ? <HeroTopo /> : null}
+        {candles === "horns" ? <HeroHorns /> : null}
+        {candles === "net" ? <HeroNet /> : null}
+        {candles === "ripple" ? <HeroRipple /> : null}
+        {candles === "dotfield" ? <HeroDots /> : null}
+        {candles === "strings" ? <HeroStrings /> : null}
+        {candles === "mosaic" ? <HeroMosaic /> : null}
+        {candles === "line" ? <HeroLine /> : null}
+        {candles === "mark" ? <HeroMark /> : null}
+        {candles === "circle" ? <HeroCircle /> : null}
+        {candles === "steps" ? <HeroSteps /> : null}
+        {candles === "pulse" ? <HeroPulse /> : null}
+        {candles === "grid" ? <HeroGrid /> : null}
+        {candles === "arrow" ? <HeroArrow /> : null}
+        {candles === "tundukline" ? <HeroTundukLine /> : null}
+        {candles === "composition" ? <HeroComposition /> : null}
+        {candles === "blocks" ? <HeroBlocks /> : null}
+        {candles === "planes" ? <HeroPlanes /> : null}
+        {candles === "morph" ? <HeroMorph /> : null}
+        {candles === "ridges" ? <HeroRidges /> : null}
+        {candles === "wind" ? <HeroWind /> : null}
+        {candles === "dotchart" ? <HeroDotChart /> : null}
       </div>
 
       <div className={styles.main}>

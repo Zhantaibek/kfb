@@ -13,7 +13,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ ticker: string }> }): Promise<Metadata> {
   const { ticker } = await params;
   const item = getInstrument(ticker);
-  return { title: item ? `${item.ticker} — ${item.name}` : "Инструмент" };
+  // Карточки инструментов пока на демо-данных — в поиск их не отдаём, пока не придут реальные данные.
+  return { title: item ? `${item.ticker} — ${item.name}` : "Инструмент", robots: { index: false, follow: true } };
 }
 
 export default async function InstrumentPage({ params }: { params: Promise<{ ticker: string }> }) {

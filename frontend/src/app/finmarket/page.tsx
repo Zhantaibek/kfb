@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import { LivePage } from "@/components/live/LiveParts";
 import { loadSnapshot, type TablesPage } from "@/lib/kse-live";
 import css from "@/components/live/live.module.css";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Финансовый рынок KG" };
+export const generateMetadata = pageMetadata("Финансовый рынок KG");
 
 /** Выпуски журнала «Финансовый рынок.KG» — живой список с kse.kg/ru/FinMarket: новые выпуски появляются сами. */
 export default async function FinMarketPage() {

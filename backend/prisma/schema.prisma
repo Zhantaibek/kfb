@@ -201,9 +201,27 @@ model Issuer {
   listing          ListingEntry[]
   news             News[]
   sustainableBonds SustainableBond[]
+  disclosures      IssuerDisclosure[]
 
   @@index([sortOrder])
   @@map("issuers")
+}
+
+/// Существенные факты эмитента (раскрытие информации, oi.kse.kg) — лента на странице /disclosure/<slug>.
+model IssuerDisclosure {
+  id         String   @id
+  issuerSlug String   @map("issuer_slug")
+  issuer     Issuer   @relation(fields: [issuerSlug], references: [slug], onDelete: Cascade, onUpdate: Cascade)
+  /// Дата раскрытия, ГГГГ-ММ-ДД
+  date       String
+  title      String
+  /// Карточка сообщения в системе раскрытия oi.kse.kg
+  url        String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([issuerSlug, url])
+  @@index([issuerSlug, date(sort: Desc)])
+  @@map("issuer_disclosures")
 }
 
 model ListingEntry {

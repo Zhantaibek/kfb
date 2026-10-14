@@ -1,9 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import type { Request } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { config } from "../../config";
 import {
   findUserByEmail,
-  insertUser,
   updateUserPassword,
 } from "../../db/repositories/cms.repository";
 import { prisma } from "../../db/prisma";
@@ -16,7 +15,7 @@ function signToken(payload: string) {
   return `${payload}.${signature}`;
 }
 
-function readToken(token: string): AuthSession | null {
+function readTokenPayload(token: string): (AuthSession & { pv?: string }) | null {
   const split = token.lastIndexOf(".");
   if (split <= 0) return null;
   const payload = token.slice(0, split);
@@ -26,19 +25,59 @@ function readToken(token: string): AuthSession | null {
   const right = Buffer.from(expected);
   if (left.length !== right.length || !timingSafeEqual(left, right)) return null;
   try {
-    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as AuthSession & { exp?: number };
+    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as AuthSession & { exp?: number; pv?: string };
     if (!session.email || !session.role || (session.exp && session.exp < Date.now())) return null;
-    return { id: session.id, email: session.email, name: session.name, role: session.role };
+    return session;
   } catch {
     return null;
   }
 }
 
+function readToken(token: string): AuthSession | null {
+  const session = readTokenPayload(token);
+  return session ? { id: session.id, email: session.email, name: session.name, role: session.role } : null;
+}
+
+/**
+ * Отпечаток пароля в cookie: сменили пароль — старые сессии перестают действовать.
+ * Хранится только внутри подписанного токена, клиенту в JSON не отдаётся.
+ */
+function passwordVersion(passwordHash: string) {
+  return createHmac("sha256", config.sessionSecret).update(passwordHash).digest("base64url").slice(0, 16);
+}
+
+const sessionVersions = new WeakMap<AuthSession, string>();
+
 export function encodeSession(session: AuthSession) {
-  const payload = Buffer.from(JSON.stringify({ ...session, exp: Date.now() + config.cookieMaxAgeMs }), "utf8").toString(
+  const pv = sessionVersions.get(session);
+  const payload = Buffer.from(JSON.stringify({ ...session, pv, exp: Date.now() + config.cookieMaxAgeMs }), "utf8").toString(
     "base64url",
   );
   return signToken(payload);
+}
+
+/**
+ * Сверка cookie с базой на каждый запрос: удалённый пользователь, понижение роли или смена пароля
+ * сразу закрывают доступ, а не через 7 дней, когда истечёт cookie.
+ */
+export async function revokeStaleSessions(req: Request, res: Response, next: NextFunction) {
+  try {
+    for (const name of [config.cookieName, config.userCookieName]) {
+      const token = req.cookies?.[name] as string | undefined;
+      if (!token) continue;
+      const session = readTokenPayload(token);
+      const user = session?.id
+        ? await prisma.user.findUnique({ where: { id: session.id }, select: { role: true, password: true } })
+        : null;
+      if (!session || !user || user.role !== session.role || passwordVersion(user.password) !== session.pv) {
+        delete req.cookies[name];
+        res.clearCookie(name, { path: "/" });
+      }
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
 }
 
 export function readCookieSession(req: Request, cookieName: string): AuthSession | null {
@@ -66,10 +105,14 @@ function toSession(user: { id: string; email: string; name: string; role: UserRo
 export async function authenticate(email: string, password: string): Promise<AuthSession | null> {
   const user = await findUserByEmail(email);
   if (!user || !(await verifyPassword(password, user.password))) return null;
+  let passwordHash = user.password;
   if (!isHashed(user.password)) {
-    await updateUserPassword(user.id, await hashPassword(password));
+    passwordHash = await hashPassword(password);
+    await updateUserPassword(user.id, passwordHash);
   }
-  return toSession(user);
+  const session = toSession(user);
+  sessionVersions.set(session, passwordVersion(passwordHash));
+  return session;
 }
 
 export async function ensureAuthAccounts() {
@@ -78,14 +121,6 @@ export async function ensureAuthAccounts() {
     if (!isHashed(row.password)) {
       await updateUserPassword(row.id, await hashPassword(row.password));
     }
-  }
-  const emails = new Set(rows.map((row: { email: string }) => row.email.toLowerCase()));
-  const extras = [
-    { id: "user-issuer", name: "Эмитент", email: "issuer@kse.kg", role: "issuer" as const, password: "kse" },
-  ];
-  for (const user of extras) {
-    if (emails.has(user.email)) continue;
-    await insertUser({ ...user, password: await hashPassword(user.password) });
   }
 }
 

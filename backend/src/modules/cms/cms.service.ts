@@ -9,6 +9,7 @@ import {
   updateItem,
 } from "../../db/repositories/cms.repository";
 import { isLandingCollection } from "../../db/landing";
+import { prisma } from "../../db/prisma";
 import {
   auditDetail,
   orderedHubs,
@@ -206,6 +207,17 @@ export async function mutateCollection(
   }
   if (collection === "users" && op === "create" && !String(rawItem.password ?? "")) {
     throw new AppError("Укажите пароль", 400);
+  }
+  if (collection === "users" && typeof rawItem.email === "string") {
+    // Один e-mail — один аккаунт, без вариантов «Admin@» и «admin@».
+    rawItem.email = rawItem.email.trim().toLowerCase();
+  }
+  if (collection === "users" && id && (op === "delete" || (op === "update" && rawItem.role && rawItem.role !== "admin"))) {
+    // Без администратора в админку не войти — последнего удалить или понизить нельзя.
+    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (target?.role === "admin" && (await prisma.user.count({ where: { role: "admin" } })) <= 1) {
+      throw new AppError("Это единственный администратор. Сначала назначьте другого администратора.", 400);
+    }
   }
 
   const now = new Date().toISOString();

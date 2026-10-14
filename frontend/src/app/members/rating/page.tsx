@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
 import { DataTable, LivePage } from "@/components/live/LiveParts";
 import { loadSnapshot, type MembersRating } from "@/lib/kse-live";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Рейтинг участников торгов" };
+export const generateMetadata = pageMetadata("Рейтинг участников торгов");
 
 /** Рейтинг участников — с kse.kg/ru/MembersRating (последний год, за который он опубликован). */
 export default async function MembersRatingPage() {

@@ -144,7 +144,9 @@ export function HubsManager() {
                     <button className={css.ghost} type="button" onClick={() => setEditing(item)}>
                       Изменить
                     </button>
-                    <button className={css.danger} type="button" onClick={() => void mutate("delete", "hubs", undefined, item.id)}>
+                    <button className={css.danger} type="button" onClick={() => {
+                        if (window.confirm("Удалить карточку?")) void mutate("delete", "hubs", undefined, item.id).catch(() => undefined);
+                      }}>
                       Удалить
                     </button>
                   </div>

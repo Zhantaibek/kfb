@@ -14,11 +14,12 @@ export async function adminJson<T>(input: string, init?: RequestInit): Promise<T
       ...init?.headers,
     },
   });
-  const data = (await response.json()) as T & { error?: string };
+  // Сначала 401: ответ может быть не JSON (прокси, обрыв), а на вход отправить нужно в любом случае.
   if (response.status === 401) {
     window.location.href = "/admin/login";
     throw new Error("unauthorized");
   }
+  const data = (await response.json().catch(() => ({ error: `Сервер ответил с ошибкой ${response.status}` }))) as T & { error?: string };
   if (!response.ok) throw new Error(data.error ?? "Ошибка запроса");
   return data;
 }

@@ -40,6 +40,8 @@ export async function loadPublicContent(): Promise<PublicContent> {
 export async function getPublicContent(): Promise<PublicContent> {
   const response = await fetch(`${apiUrl}/api/public/content`, {
     cache: "no-store",
+    // Зависший бэкенд не должен подвешивать все страницы сайта.
+    signal: AbortSignal.timeout(6000),
   });
   if (!response.ok) {
     throw new Error("CMS API недоступен");
@@ -49,11 +51,27 @@ export async function getPublicContent(): Promise<PublicContent> {
 
 export async function loadIssuerData(): Promise<IssuerData> {
   try {
-    const response = await fetch(`${apiUrl}/api/public/issuers`, { cache: "no-store" });
+    const response = await fetch(`${apiUrl}/api/public/issuers`, { cache: "no-store", signal: AbortSignal.timeout(6000) });
     if (!response.ok) throw new Error("CMS API недоступен");
     return (await response.json()) as IssuerData;
   } catch {
     return { issuers: [], listing: [] };
+  }
+}
+
+/** Существенный факт эмитента (раскрытие информации, oi.kse.kg) — из таблицы issuer_disclosures. */
+export type DisclosureEvent = { date: string; title: string; url: string };
+
+export async function loadIssuerDisclosures(slug: string): Promise<DisclosureEvent[]> {
+  try {
+    const response = await fetch(`${apiUrl}/api/public/issuers/${encodeURIComponent(slug)}/disclosures`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!response.ok) return [];
+    return ((await response.json()) as { items?: DisclosureEvent[] }).items ?? [];
+  } catch {
+    return [];
   }
 }
 

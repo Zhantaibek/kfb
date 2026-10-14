@@ -88,7 +88,9 @@ export function UsersManager() {
                     <button className={css.ghost} type="button" onClick={() => setEditing({ ...item, password: "" })}>
                       Изменить
                     </button>
-                    <button className={css.danger} type="button" onClick={() => void mutate("delete", "users", undefined, item.id)}>
+                    <button className={css.danger} type="button" onClick={() => {
+                        if (window.confirm(`Удалить пользователя ${item.email}? Он больше не сможет войти.`)) void mutate("delete", "users", undefined, item.id).catch(() => undefined);
+                      }}>
                       Удалить
                     </button>
                   </div>

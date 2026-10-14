@@ -1,10 +1,23 @@
 import type { CmsIssuer, CmsListingEntry, CmsPartner, CmsStore } from "../../../shared/cms";
 import { createSeedStore } from "../data/seed";
+import { config } from "../config";
 import { hashPassword } from "../modules/auth/password";
 import { prisma } from "./prisma";
 import { esgReportData, gcbParticipantData, landingSectionData, sustainableBondData, verifierData } from "./landing";
 
+/** Демо-пароли из начального наполнения: в production их быть не должно. */
+const demoPasswords = new Set(["admin", "editor", "kse"]);
+
 export async function seedDatabase(store: CmsStore = createSeedStore()) {
+  if (config.isProduction) {
+    // Демо-редактора и демо-эмитента не создаём, администратору ставим пароль из ADMIN_PASSWORD.
+    store.users = store.users.filter((user) => user.role === "admin" || !demoPasswords.has(user.password));
+    for (const user of store.users) {
+      if (!demoPasswords.has(user.password)) continue;
+      if (!config.adminPassword) throw new Error("Задайте ADMIN_PASSWORD — пароль первого администратора");
+      user.password = config.adminPassword;
+    }
+  }
   for (const user of store.users) {
     user.password = await hashPassword(user.password);
   }

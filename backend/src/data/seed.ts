@@ -123,9 +123,8 @@ export function createSeedStore(): CmsStore {
     settings: [{ ...defaultSiteSettings, updatedAt: now }],
     requests: [],
     users: [
+      // Только администратор; редакторов он заводит сам в разделе «Пользователи».
       { id: "user-admin", name: "Администратор", email: "admin@kse.kg", role: "admin", password: "admin" },
-      { id: "user-editor", name: "Редактор", email: "editor@kse.kg", role: "editor", password: "editor" },
-      { id: "user-issuer", name: "Эмитент", email: "issuer@kse.kg", role: "issuer", password: "kse" },
     ],
     visits: [],
     audit: [

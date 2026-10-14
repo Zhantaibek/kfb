@@ -9,6 +9,7 @@ import {
   postRequest,
   readAdminData,
   readIssuerData,
+  readIssuerDisclosureList,
   readPublicContent,
   writeAdminData,
   createCollectionItem,
@@ -49,6 +50,7 @@ for (const collection of collections) {
 export const publicCmsRoutes = Router();
 publicCmsRoutes.get("/content", asyncHandler(readPublicContent));
 publicCmsRoutes.get("/issuers", asyncHandler(readIssuerData));
+publicCmsRoutes.get("/issuers/:slug/disclosures", asyncHandler(readIssuerDisclosureList));
 publicCmsRoutes.get("/search", asyncHandler(getSearch));
 publicCmsRoutes.get("/market/:key", asyncHandler(getMarketSnapshot));
 publicCmsRoutes.post("/request", validateBody(publicRequestSchema), asyncHandler(postRequest));

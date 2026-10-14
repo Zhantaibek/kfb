@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageIntro } from "@/components/Forms";
 import { NewsList } from "@/components/NewsList";
 import { PublicMain } from "@/components/PublicMain";
-import type { DisclosureEvent } from "@/data/disclosure-news";
+import type { DisclosureEvent } from "@/lib/cms/public";
 import type { CmsIssuer, CmsListingEntry, CmsNews } from "@/lib/cms/types";
 import ui from "@/app/ui.module.css";
 import css from "./disclosure.module.css";

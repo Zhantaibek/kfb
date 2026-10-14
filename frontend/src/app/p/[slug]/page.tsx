@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CmsPageView } from "@/components/CmsPageView";
 import { findPage, loadPublicContent } from "@/lib/cms/public";
+import { applyLocale } from "@/lib/cms/locale";
+import { contentMetadata, requestLocale } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +15,9 @@ async function loadPage(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const page = await loadPage(slug);
-  return { title: page?.title ?? "Страница" };
+  if (!page) return { title: "Страница", robots: { index: false } };
+  const text = applyLocale(page, (await requestLocale()).lang, ["title", "lead", "body"]);
+  return contentMetadata({ title: text.title, description: text.lead || text.body });
 }
 
 export default async function CmsPublicPage({ params }: { params: Promise<{ slug: string }> }) {

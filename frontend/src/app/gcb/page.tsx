@@ -1,14 +1,14 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { FeedbackForm, PageIntro } from "@/components/Forms";
 import { DataTable } from "@/components/live/LiveParts";
 import { MarketLinks } from "@/components/live/LiveViews";
 import { loadSnapshot, type TablesPage } from "@/lib/kse-live";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Государственные ценные бумаги" };
+export const generateMetadata = pageMetadata("Государственные ценные бумаги");
 
 export default async function GcbPage() {
   // Расписание аукционов — живые данные с kse.kg/ru/ScheduleGS.

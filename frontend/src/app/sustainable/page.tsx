@@ -1,12 +1,9 @@
-import type { Metadata } from "next";
 import { SustainableView } from "@/components/landing/SustainableView";
 import { loadPublicContent } from "@/lib/cms/public";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Сектор устойчивого развития",
-  description: "Сектор устойчивого развития КФБ: зелёные и социальные облигации, ESG-отчётность, верификаторы.",
-};
+export const generateMetadata = pageMetadata("Сектор устойчивого развития", "Сектор устойчивого развития КФБ: зелёные и социальные облигации, ESG-отчётность, верификаторы.");
 
 /** Лендинг kse.kg/sustainable.html: тексты, бумаги, верификаторы и ESG-отчёты — из админки. */
 export default async function SustainablePage() {

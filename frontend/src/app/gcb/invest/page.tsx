@@ -1,12 +1,9 @@
-import type { Metadata } from "next";
 import { GcbView } from "@/components/landing/GcbView";
 import { loadPublicContent } from "@/lib/cms/public";
+import { pageMetadata } from "@/lib/seo-server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Инвестиции в ГЦБ",
-  description: "Государственные ценные бумаги ГКВ-12 и ГКО-2 на Кыргызской фондовой бирже: доходность, как купить, участники торгов.",
-};
+export const generateMetadata = pageMetadata("Инвестиции в ГЦБ", "Государственные ценные бумаги ГКВ-12 и ГКО-2 на Кыргызской фондовой бирже: доходность, как купить, участники торгов.");
 
 /** Новости с этим тегом показываются в блоке «Актуальные новости по ГЦБ». */
 const gcbNewsTag = "ГЦБ";

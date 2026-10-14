@@ -300,7 +300,9 @@ export function ManagementManager() {
                     <button
                       className={css.danger}
                       type="button"
-                      onClick={() => void mutate("delete", "management", undefined, item.id)}
+                      onClick={() => {
+                        if (window.confirm("Удалить запись о руководителе?")) void mutate("delete", "management", undefined, item.id).catch(() => undefined);
+                      }}
                     >
                       Удалить
                     </button>
