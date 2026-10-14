@@ -92,9 +92,9 @@ export async function removeUploadedFile(url: string) {
   }
 }
 
+/** Убирает ссылки на файл из всего содержимого. Сам файл удаляется позже — после удаления записи (см. cms.service). */
 export async function purgeMediaRecord(existing: Record<string, unknown>) {
   const url = String(existing.url ?? "");
   if (!url) return;
   await detachMediaUrl(url);
-  await removeUploadedFile(url);
 }

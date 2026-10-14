@@ -28,7 +28,7 @@ import { hashPassword } from "../auth/password";
 import { sanitizeRichHtml } from "../../utils/sanitize-html";
 import { AppError } from "../../middleware/error";
 import { itemSchemas, mutateSchema, type MutableCollection } from "../../validation/cms";
-import { purgeMediaRecord } from "../media/media.service";
+import { purgeMediaRecord, removeUploadedFile } from "../media/media.service";
 
 function descendantIds(menu: { id: string; parentId: string | null }[], rootId: string) {
   const blocked = new Set<string>([rootId]);
@@ -288,6 +288,8 @@ export async function mutateCollection(
     } else {
       await deleteItem(collection, id);
     }
+    // Файл с диска — последним: если запись удалить не удалось, файл остаётся на месте.
+    if (collection === "media") await removeUploadedFile(String(existing.url ?? ""));
     await insertAudit({
       action: "delete",
       entity: collection,
@@ -304,7 +306,8 @@ export async function getPublicContent() {
   return {
     news: publishedNews(store),
     slides: orderedSlides(store),
-    media: store.media,
+    // Список всех загрузок (включая файлы черновиков) публично не отдаём — сайту он не нужен.
+    media: [],
     pages: store.pages.filter((item) => item.status === "published"),
     menu: [...store.menu].sort((a, b) => a.order - b.order),
     hubs: orderedHubs(store),

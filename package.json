@@ -12,6 +12,7 @@
     "build:api": "npm run build -w backend",
     "start": "npm run start -w frontend",
     "start:api": "npm run start -w backend",
+    "test": "npm run test -w backend",
     "lint": "npm run lint -w frontend",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",

@@ -108,15 +108,10 @@ export async function insertUser(user: CmsUser) {
   });
 }
 
+/** Журнал аудита хранится год: по дате, а не по количеству — иначе активная работа стирала бы вчерашние записи. */
+const AUDIT_KEEP_MS = 365 * 24 * 60 * 60 * 1000;
 async function trimAudit() {
-  const keep = await prisma.audit.findMany({
-    orderBy: { at: "desc" },
-    take: 200,
-    select: { id: true },
-  });
-  const ids = keep.map((row) => row.id);
-  if (ids.length === 0) return;
-  await prisma.audit.deleteMany({ where: { id: { notIn: ids } } });
+  await prisma.audit.deleteMany({ where: { at: { lt: new Date(Date.now() - AUDIT_KEEP_MS) } } });
 }
 
 export async function insertAudit(entry: Omit<CmsAudit, "id" | "at">) {
@@ -133,17 +128,8 @@ export async function insertAudit(entry: Omit<CmsAudit, "id" | "at">) {
   await trimAudit();
 }
 
-async function trimRequests() {
-  const keep = await prisma.request.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    select: { id: true },
-  });
-  const ids = keep.map((row) => row.id);
-  if (ids.length === 0) return;
-  await prisma.request.deleteMany({ where: { id: { notIn: ids } } });
-}
-
+// Заявки с сайта не удаляются автоматически (раньше хранились только последние 200 — необработанные пропадали).
+// Удаляет их только сотрудник в админке.
 export async function insertRequest(source: string, payload: Record<string, string>) {
   await prisma.request.create({
     data: {
@@ -154,7 +140,6 @@ export async function insertRequest(source: string, payload: Record<string, stri
       createdAt: new Date(),
     },
   });
-  await trimRequests();
 }
 
 export async function insertMedia(media: CmsMedia) {
@@ -174,9 +159,30 @@ function escapeRegExp(value: string) {
 
 function stripUrlFromHtml(html: string, url: string) {
   const escaped = escapeRegExp(url);
+  // «Внутри одной фигуры»: между <figure> и </figure> не должно быть другого </figure>,
+  // иначе ленивый поиск захватывал соседние фото вместе с удаляемым.
+  const inside = "(?:(?!</figure>)[\\s\\S])*?";
   return html
-    .replace(new RegExp(`<figure[^>]*>[\\s\\S]*?<img[^>]*src="${escaped}"[^>]*>[\\s\\S]*?</figure>`, "gi"), "")
-    .replace(new RegExp(`<img[^>]*src="${escaped}"[^>]*>`, "gi"), "");
+    .replace(new RegExp(`<figure\\b${inside}<img[^>]*src="${escaped}"${inside}</figure>`, "gi"), "")
+    .replace(new RegExp(`<img[^>]*src="${escaped}"[^>]*>`, "gi"), "")
+    // Вложение-документ: абзац-плашка со ссылкой на файл.
+    .replace(new RegExp(`<p class="rte-file"(?:(?!</p>)[\\s\\S])*?href="${escaped}"(?:(?!</p>)[\\s\\S])*?</p>`, "gi"), "");
+}
+
+/** Убрать файл из переводов (KY/EN) — там тот же текст со своими копиями фото и вложений. */
+function stripUrlFromI18n(i18n: unknown, url: string) {
+  if (!i18n || typeof i18n !== "object") return null;
+  let changed = false;
+  const next: Record<string, Record<string, string>> = {};
+  for (const [lang, pack] of Object.entries(i18n as Record<string, Record<string, string>>)) {
+    next[lang] = { ...pack };
+    for (const [field, value] of Object.entries(pack ?? {})) {
+      if (typeof value !== "string" || !value.includes(url)) continue;
+      next[lang][field] = field === "photo" ? "" : stripUrlFromHtml(value, url);
+      changed ||= next[lang][field] !== value;
+    }
+  }
+  return changed ? next : null;
 }
 
 export async function detachMediaUrl(url: string) {
@@ -197,6 +203,16 @@ export async function detachMediaUrl(url: string) {
   for (const row of pages) {
     const body = stripUrlFromHtml(row.body, url);
     if (body !== row.body) await prisma.page.update({ where: { id: row.id }, data: { body } });
+  }
+
+  // Переводы новостей и страниц: раньше там оставались битые ссылки на удалённый файл.
+  for (const row of await prisma.news.findMany({ select: { id: true, i18n: true } })) {
+    const i18n = stripUrlFromI18n(row.i18n, url);
+    if (i18n) await prisma.news.update({ where: { id: row.id }, data: { i18n } });
+  }
+  for (const row of await prisma.page.findMany({ select: { id: true, i18n: true } })) {
+    const i18n = stripUrlFromI18n(row.i18n, url);
+    if (i18n) await prisma.page.update({ where: { id: row.id }, data: { i18n } });
   }
 }
 
