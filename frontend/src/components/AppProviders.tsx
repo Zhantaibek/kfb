@@ -37,8 +37,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
     localStorage.removeItem("kse-user");
     localStorage.removeItem("kse-watch");
 
-    // Для обычных посетителей ответ 401 — это нормально, просто админа нет.
-    fetch("/api/admin/session", { credentials: "include" })
+    // Для посетителя без входа сервер отвечает user: null (без ошибки 401 в консоли).
+    fetch("/api/auth/session", { credentials: "include" })
       .then(async (response) => {
         if (!response.ok) {
           setAdminUser(null);

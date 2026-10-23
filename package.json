@@ -19,7 +19,8 @@
     "db:seed": "npm run db:seed -w backend",
     "db:studio": "npm run db:studio -w backend",
     "prod:up": "docker compose up -d --build",
-    "prod:down": "docker compose down"
+    "prod:down": "docker compose down",
+    "test": "npm run test -w backend"
   },
   "devDependencies": {
     "concurrently": "^10.0.5"

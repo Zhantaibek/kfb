@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteSplash } from "@/components/SiteSplash";
 import { TickerTape } from "@/components/TickerTape";
 import { SiteNavProvider } from "@/lib/cms/use-site-nav";
+import { useTr } from "@/lib/use-tr";
 
 /** Случайный id браузера для подсчёта уникальных посетителей (без cookie и личных данных). */
 function visitorId() {
@@ -39,6 +40,7 @@ function collectStaggerItems(root: Element) {
 
 export function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const tr = useTr();
   const isAdmin = pathname.startsWith("/admin");
   const bare = isAdmin;
 
@@ -109,10 +111,16 @@ export function SiteChrome({ children }: { children: ReactNode }) {
     <SiteNavProvider>
       {/* Колонка на всю высоту окна: на коротких страницах подвал прижат к низу экрана. */}
       <div className={ui.siteShell}>
+        {/* Первая остановка Tab: сразу к содержимому, минуя ленту и меню. */}
+        <a className="skip-link" href="#content">
+          {tr("Перейти к содержимому")}
+        </a>
         <SiteSplash />
         <TickerTape />
         <SiteHeader />
-        {children}
+        <div id="content" tabIndex={-1} className={ui.content}>
+          {children}
+        </div>
         <SiteFooter />
       </div>
     </SiteNavProvider>

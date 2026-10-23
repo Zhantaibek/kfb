@@ -39,7 +39,8 @@
 }
 
 .tickerItem span {
-  color: var(--brand);
+  /* Осветлённый фирменный цвет: чистый --brand на тёмной ленте не дотягивал до контраста 4,5:1. */
+  color: color-mix(in srgb, var(--brand) 60%, #fff);
   font-weight: 700;
 }
 
@@ -53,7 +54,7 @@
 }
 
 .tickerItem small {
-  color: color-mix(in srgb, var(--ticker-fg) 50%, transparent);
+  color: color-mix(in srgb, var(--ticker-fg) 78%, transparent);
   font-size: 11px;
   text-transform: none;
 }
@@ -369,7 +370,7 @@
 }
 
 .navPanel a:hover b {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .navPanel b {
@@ -430,7 +431,7 @@ a.cabinetBtn {
   padding: 0 18px;
   border-radius: 12px;
   background: var(--brand);
-  color: var(--inverse-fg);
+  color: var(--on-brand);
   border: 1px solid var(--brand);
   font-size: 14px;
   font-weight: 650;
@@ -501,7 +502,7 @@ a.cabinetBtn {
 }
 
 .dropPanel button[data-active="true"] {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .iconBtn {
@@ -623,7 +624,8 @@ a.cabinetBtn {
 }
 
 .wrap {
-  width: min(1480px, calc(100% - 20px));
+  /* Поля как у главной и шапки (24px), а не 10px: контент не прилипает к краю окна. */
+  width: min(1480px, calc(100% - 48px));
   margin: 0 auto;
   padding: 28px 0 88px;
 }
@@ -878,7 +880,7 @@ a.cabinetBtn {
 
 .primary {
   background: var(--brand);
-  color: var(--inverse-fg);
+  color: var(--on-brand);
   border-color: var(--brand);
   box-shadow: var(--glow);
 }
@@ -977,7 +979,7 @@ a.cabinetBtn {
 .footerNav a:hover,
 .footerRows a:hover,
 .footerBottom a:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .footerBanner {
@@ -987,7 +989,9 @@ a.cabinetBtn {
   padding: 34px 32px 34px 36%;
   border-radius: 56px;
   background: var(--hero);
-  color: #fff;
+  /* Тёмный текст на фирменном бирюзовом: белый давал контраст 2,4:1 (нужно ≥ 4,5:1). */
+  --on-brand: #0b2a2e;
+  color: var(--on-brand);
 }
 
 .footerLaptop {
@@ -1111,7 +1115,7 @@ a.cabinetBtn {
 }
 
 .laptopScreen [data-tone="up"] {
-  --tone: #0d8a62;
+  --tone: #0a7a56;
 }
 
 .laptopScreen [data-tone="down"] {
@@ -1187,7 +1191,7 @@ a.cabinetBtn {
 .footerBannerCopy p {
   margin: 0;
   max-width: 34em;
-  color: #fff;
+  color: var(--on-brand);
   font-size: clamp(15px, 1.15vw, 18px);
   font-weight: 750;
   letter-spacing: -0.03em;
@@ -1198,7 +1202,7 @@ a.cabinetBtn {
   display: block;
   max-width: 46em;
   margin-top: 4px;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(11, 42, 46, 0.82);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0;
@@ -1654,7 +1658,7 @@ a.cabinetBtn {
   }
 
   .wrap {
-    width: min(1200px, calc(100% - 20px));
+    width: min(1200px, calc(100% - 32px));
   }
 }
 
@@ -1998,6 +2002,12 @@ a.cabinetBtn {
   margin-top: auto;
 }
 
+/* Цель ссылки «Перейти к содержимому»: фокус сюда без рамки вокруг всей страницы. */
+.content {
+  flex: 1 0 auto;
+  outline: none;
+}
+
 /* Кыргызские и английские названия длиннее: на узких ноутбуках строка не влезает — разделы остаются в бургере. */
 @media (min-width: 1280px) and (max-width: 1339px) {
   :global(html[lang="ky"]) .nav {
@@ -2019,7 +2029,7 @@ a.cabinetBtn {
   max-width: 600px;
   margin: 4px 0 0;
   padding: 10px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  border-top: 1px solid rgba(11, 42, 46, 0.2);
   list-style: none;
 }
 
@@ -2027,7 +2037,7 @@ a.cabinetBtn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: #fff;
+  color: var(--on-brand);
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.3;
@@ -2039,7 +2049,7 @@ a.cabinetBtn {
 }
 
 .footerContacts a:hover {
-  color: #fff;
+  color: var(--on-brand);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -2049,7 +2059,7 @@ a.cabinetBtn {
   width: 15px;
   height: 15px;
   fill: none;
-  stroke: rgba(255, 255, 255, 0.8);
+  stroke: rgba(11, 42, 46, 0.75);
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;

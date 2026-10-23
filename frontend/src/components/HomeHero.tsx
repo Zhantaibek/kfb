@@ -83,7 +83,12 @@ function MarketMap() {
         ))}
       </div>
       <p className={styles.mapNote}>
-        <span>{market.live ? `${tr("Данные kse.kg")} · ${market.sessionDate}` : tr("Демо-данные")}</span>
+        {/* На живых данных плитки нейтральные: kse.kg не публикует изменение цены — говорим об этом прямо. */}
+        <span>
+          {market.live
+            ? `${tr("Данные kse.kg")} · ${market.sessionDate} · ${tr("размер плитки — объём за неделю; изменение цены kse.kg не публикует")}`
+            : tr("Демо-данные")}
+        </span>
         <Link href="/market/quotes">
           {tr("Все котировки")} <Arrow />
         </Link>

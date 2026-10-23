@@ -64,21 +64,9 @@ function sliceHistory(indexHistory: MarketData["indexHistory"], days: number) {
   return sliced.length >= 2 ? sliced : indexHistory.slice(-2);
 }
 
-function smoothPath(points: { x: number; y: number }[]) {
-  if (points.length < 2) return "";
-  let path = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const p0 = points[i - 1] ?? points[i];
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const p3 = points[i + 2] ?? p2;
-    const c1x = p1.x + (p2.x - p0.x) / 6;
-    const c1y = p1.y + (p2.y - p0.y) / 6;
-    const c2x = p2.x - (p3.x - p1.x) / 6;
-    const c2y = p2.y - (p3.y - p1.y) / 6;
-    path += ` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
-  }
-  return path;
+/** Ломаная по реальным точкам: сглаживание сплайном рисовало бы между днями значения индекса, которых не было. */
+function linePath(points: { x: number; y: number }[]) {
+  return points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
 }
 
 function lineGeometry(values: number[], width: number, height: number, pad = 10) {
@@ -134,7 +122,7 @@ function indexChart(series: { date: string; value: number }[]) {
     x: box.left + (index / Math.max(series.length - 1, 1)) * innerW,
     y: box.top + innerH - ((item.value - yMin) / ySpan) * innerH,
   }));
-  const line = smoothPath(points);
+  const line = linePath(points);
   const base = box.top + innerH;
   const last = points[points.length - 1];
   const area = `${line} L${last.x.toFixed(1)},${base} L${points[0].x.toFixed(1)},${base} Z`;

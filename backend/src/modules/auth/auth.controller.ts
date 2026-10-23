@@ -3,6 +3,11 @@ import { config } from "../../config";
 import { isStaffRole } from "../../../../shared/cms";
 import { authenticate, cookieOptions, encodeSession, readSession } from "./auth.service";
 
+/** Для сайта: кто вошёл. Посетитель без входа — это норма, поэтому 200 и user: null, а не 401 в консоли. */
+export function getPublicSession(req: Request, res: Response) {
+  res.json({ user: readSession(req) });
+}
+
 export function getSession(req: Request, res: Response) {
   const session = readSession(req);
   if (!session) {

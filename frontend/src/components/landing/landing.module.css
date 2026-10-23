@@ -306,7 +306,7 @@
 }
 
 .num {
-  color: var(--brand);
+  color: var(--brand-text);
   font-size: 34px;
   font-weight: 800;
   line-height: 1;

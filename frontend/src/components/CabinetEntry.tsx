@@ -26,7 +26,7 @@ export function CabinetEntry() {
         </aside>
 
         <div className={styles.formSide}>
-          <h2>{tr("Вход")}</h2>
+          <h1>{tr("Вход")}</h1>
           <LoginForm />
         </div>
       </div>

@@ -48,7 +48,8 @@
   max-width: 10em;
   margin: 0 0 20px;
   font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: 36px;
+  /* На 320px крупнее 30px предлог «в» остаётся один на строке. */
+  font-size: clamp(30px, 9.4vw, 36px);
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.1;

@@ -3,10 +3,14 @@
   color-scheme: light;
   --brand: #57b6c0;
   --brand-soft: #e3f4f6;
-  --brand-strong: #3f9aa4;
+  /* Текст фирменного цвета: #57b6c0 и #3f9aa4 на белом давали 2,4:1 и 3,3:1 (нужно ≥ 4,5:1). */
+  --brand-text: #276f77;
+  --brand-strong: #276f77;
+  /* Текст на заливке фирменным цветом (кнопки, плашки): тёмный, белый на #57b6c0 нечитаем. */
+  --on-brand: #0b2a2e;
   --brand-deep: #1d4f55;
   --ink: #13211e;
-  --ink-muted: #56706e;
+  --ink-muted: #4a6260;
   --line: #d0e3e2;
   --bg: #f1f6f6;
   --surface: #ffffff;
@@ -14,7 +18,7 @@
   --pill-track: #e3efee;
   --inverse: #13211e;
   --inverse-fg: #f3f7f5;
-  --up: #0d8a62;
+  --up: #0a7a56;
   --down: #c4454e;
   --radius: 16px;
   --shadow: 0 22px 50px rgba(19, 33, 30, 0.08);
@@ -30,6 +34,8 @@
   --brand: #57b6c0;
   --brand-soft: rgba(87, 182, 192, 0.14);
   --brand-strong: #cdebf0;
+  --brand-text: #57b6c0;
+  --on-brand: #0b2a2e;
   --brand-deep: #e6f5f7;
   --ink: #e4f4f3;
   --ink-muted: #86aeab;
@@ -157,7 +163,7 @@
 .theme-toggle:hover,
 .icon-ghost:hover {
   border-color: color-mix(in srgb, var(--brand) 45%, transparent);
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .theme-toggle-icons {
@@ -254,4 +260,23 @@ html.js-reveal [data-reveal] [data-reveal-item] {
 html.js-reveal [data-reveal].is-visible [data-reveal-item] {
   opacity: 1;
   translate: 0 0;
+}
+
+/* «Перейти к содержимому» — невидима, пока до неё не дойдёт Tab. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #1d4f55;
+  color: #fff;
+  font-weight: 700;
+  transform: translateY(-160%);
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus-visible {
+  transform: none;
 }

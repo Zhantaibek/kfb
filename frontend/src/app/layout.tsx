@@ -3,6 +3,7 @@ import { MarketDataProvider } from "@/components/MarketDataProvider";
 import { loadMarketData } from "@/lib/market-data";
 import { SiteChrome } from "@/components/SiteChrome";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Manrope, Montserrat, Unbounded } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
@@ -26,7 +27,7 @@ const brand = Montserrat({
   display: "swap",
 });
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: new URL("https://kse.kg"),
   title: {
     default: "Кыргызская фондовая биржа — финансовый рынок Кыргызстана",
@@ -47,11 +48,9 @@ export const metadata: Metadata = {
     icon: "/brand/kse-mark.jpg",
     apple: "/brand/kse-mark.jpg",
   },
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "ru_KG",
-    url: "/",
     siteName: "Кыргызская фондовая биржа",
     title: "Кыргызская фондовая биржа",
     description:
@@ -64,7 +63,21 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `try{var t=localStorage.getItem("kse-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}else{document.documentElement.setAttribute("data-theme","dark")}}catch(e){}`;
+/**
+ * Canonical и og:url — адрес самой страницы (путь передаёт src/proxy.ts), а не главной для всех.
+ * Страница может переопределить их в своей metadata.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const path = (await headers()).get("x-pathname") || "/";
+  return {
+    ...baseMetadata,
+    alternates: { canonical: path },
+    openGraph: { ...baseMetadata.openGraph, url: path },
+  };
+}
+
+// Тема и «заставка уже показана в этом сеансе» — до первой отрисовки, чтобы не было вспышек.
+const themeScript = `try{var t=localStorage.getItem("kse-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}else{document.documentElement.setAttribute("data-theme","dark")}}catch(e){}try{if(sessionStorage.getItem("kse-splash")==="1"){document.documentElement.setAttribute("data-splash","seen")}}catch(e){}`;
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Живые данные kse.kg для бегущей строки, подвала и главной (или демо, если их ещё нет).

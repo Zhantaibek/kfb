@@ -37,7 +37,7 @@
 }
 
 .side a:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 @media (max-width: 800px) {

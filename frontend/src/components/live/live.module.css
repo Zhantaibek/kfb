@@ -96,7 +96,7 @@
 .tabs button[aria-selected="true"] {
   border-color: var(--brand);
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
 }
 
 .chartCard {

@@ -33,7 +33,7 @@ async function fetchRows(url: string): Promise<Row[]> {
 }
 
 /** Проверка строки по схеме формы админки; неверную пропускаем и пишем в лог причину. */
-function validRows<S extends z.ZodType>(rows: Row[], schema: S, label: string, keyOf: (row: Row) => unknown) {
+export function validRows<S extends z.ZodType>(rows: Row[], schema: S, label: string, keyOf: (row: Row) => unknown) {
   const out: { raw: Row; item: z.infer<S> }[] = [];
   for (const raw of rows) {
     const parsed = schema.safeParse(raw);
@@ -44,14 +44,14 @@ function validRows<S extends z.ZodType>(rows: Row[], schema: S, label: string, k
 }
 
 /** В update попадают только поля, которые есть в ответе API (поле order → колонка sortOrder). */
-function presentFields<T extends Record<string, unknown>>(raw: Row, data: T): Partial<T> {
+export function presentFields<T extends Record<string, unknown>>(raw: Row, data: T): Partial<T> {
   return Object.fromEntries(
     Object.entries(data).filter(([key]) => key in raw || (key === "sortOrder" && ("order" in raw || "sortOrder" in raw))),
   ) as Partial<T>;
 }
 
 /** Ссылки на документы — только http(s) или пути сайта, чтобы в href не попал javascript: и подобное. */
-function safeUrl(value: string) {
+export function safeUrl(value: string) {
   return /^(https?:\/\/|\/(?!\/))/i.test(value) ? value : "";
 }
 

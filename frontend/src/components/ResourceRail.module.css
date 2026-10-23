@@ -44,7 +44,7 @@
 
 .all:hover {
   border-color: var(--brand);
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .grid {
@@ -160,7 +160,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 8px;
-  color: var(--brand);
+  color: var(--brand-text);
   font-size: 14px;
   font-weight: 700;
 }

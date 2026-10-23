@@ -442,7 +442,7 @@ export const openApiSpec = {
         security: [{ cookieAuth: [] }],
         responses: {
           "200": {
-            description: "Текущий сотрудник; без сессии — 401 и `user: null`",
+            description: "Текущий сотрудник или `user: null`, если вход не выполнен",
             content: {
               "application/json": {
                 schema: {
