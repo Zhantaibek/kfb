@@ -4,7 +4,10 @@ import { PrimaryNavManager } from "@/components/admin/PrimaryNavManager";
 import { useAdminStore } from "@/lib/cms/client";
 import css from "@/app/admin/admin.module.css";
 
-/** Ссылки подвала: колонки (группа «footer»), кнопки баннера и ссылки с иконкой документа. */
+/**
+ * Ссылки подвала: колонки (группа «footer»), кнопки баннера и ссылки с иконкой документа.
+ * Показывается в разделе «Контакты и подвал» под формой контактов.
+ */
 export function FooterNavManager() {
   const { store, error, busy, mutate, setError } = useAdminStore();
   const menu = store?.menu ?? [];
@@ -13,11 +16,9 @@ export function FooterNavManager() {
 
   return (
     <>
-      <p className={css.kicker}>CMS · КФБ</p>
-      <h1>Ссылки подвала</h1>
+      <h2 style={{ margin: "36px 0 6px", fontSize: 22 }}>Ссылки подвала</h2>
       <p className={css.lead}>
-        Колонки, кнопки и ссылки внизу сайта. Меняются отдельно от бургер-меню, каждый пункт сохраняется сразу. Телефоны, адрес и
-        копирайт — в разделе «Контакты и подвал».
+        Колонки, кнопки и ссылки внизу сайта. Меняются отдельно от бургер-меню, каждый пункт сохраняется сразу.
       </p>
       {error ? <p className={css.error}>{error}</p> : null}
 

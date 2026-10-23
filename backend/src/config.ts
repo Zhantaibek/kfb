@@ -17,8 +17,10 @@ const nodeEnv = process.env.NODE_ENV ?? "development";
 const isProduction = nodeEnv === "production";
 const sessionSecret = process.env.SESSION_SECRET ?? (isProduction ? "" : "kse-dev-session-secret");
 
-if (isProduction && !sessionSecret) {
-  throw new Error("SESSION_SECRET обязателен в production");
+// Ключом подписывается cookie админа: известный или короткий ключ позволяет подделать вход без пароля.
+const weakSecret = /^(change-me|kse-dev-session-secret)/i.test(sessionSecret) || sessionSecret.length < 32;
+if (isProduction && weakSecret) {
+  throw new Error("SESSION_SECRET в production должен быть случайной строкой не короче 32 символов (не заглушкой из примера)");
 }
 
 const corsOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:3000,http://127.0.0.1:3000")

@@ -7,10 +7,19 @@ import { useTr } from "@/lib/use-tr";
 import ui from "@/app/ui.module.css";
 import styles from "@/app/login/login.module.css";
 
-/** Куда вернуть после входа: только пути этого же сайта (защита от открытого редиректа). */
+/**
+ * Куда вернуть после входа: только страницы этого же сайта (защита от открытого редиректа).
+ * Сверяем origin после разбора URL — простая проверка «начинается с /» пропускала бы «/\evil.com».
+ */
 function nextPath() {
   const next = new URLSearchParams(window.location.search).get("next");
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+  if (!next) return null;
+  try {
+    const url = new URL(next, window.location.origin);
+    return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : null;
+  } catch {
+    return null;
+  }
 }
 
 function MailIcon() {
@@ -43,22 +52,26 @@ export function LoginForm() {
     setBusy(true);
     setError(null);
     const data = new FormData(event.currentTarget);
-    const result = await login(String(data.get("email")), String(data.get("password")));
-    setBusy(false);
-    if ("error" in result) {
-      setError(result.error);
-      return;
+    try {
+      const result = await login(String(data.get("email")), String(data.get("password")));
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+      router.push(nextPath() ?? "/admin");
+    } catch {
+      setError("Не удалось войти. Проверьте соединение и попробуйте ещё раз.");
+    } finally {
+      setBusy(false);
     }
-    const next = nextPath();
-    const target = next ?? (result.staff ? "/admin" : "/cabinet");
-    router.push(target);
   }
 
+  // Поля пустые: сайт ничего не подставляет сам. Автозаполнение браузера и менеджеры паролей работают как обычно.
   return (
     <form className={`${ui.form} ${styles.form}`} onSubmit={(event) => void submit(event)}>
       <label className={styles.field}>
         <span>{tr("E-mail")}</span>
-        <input name="email" type="email" placeholder={tr("E-mail")} defaultValue="investor@kse.kg" required />
+        <input name="email" type="email" placeholder={tr("E-mail")} autoComplete="username" required />
         <MailIcon />
       </label>
       <label className={styles.field}>
@@ -67,7 +80,7 @@ export function LoginForm() {
           name="password"
           type="password"
           placeholder={tr("Пароль")}
-          defaultValue="kse"
+          autoComplete="current-password"
           required
           minLength={4}
         />
@@ -76,7 +89,7 @@ export function LoginForm() {
       {error ? (
         <p className={ui.down}>{tr(error)}</p>
       ) : (
-        <p className={ui.muted}>{tr("Учётную запись выдаёт биржа. Демо: investor@kse.kg / kse.")}</p>
+        <p className={ui.muted}>{tr("Вход только для сотрудников биржи.")}</p>
       )}
       <button className={ui.primary} type="submit" disabled={busy}>
         {busy ? "…" : tr("Войти")}

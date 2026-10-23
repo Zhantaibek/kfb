@@ -1,15 +1,11 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { Request } from "express";
 import { config } from "../../config";
-import {
-  findUserByEmail,
-  insertUser,
-  updateUserPassword,
-} from "../../db/repositories/cms.repository";
+import { findUserByEmail, updateUserPassword } from "../../db/repositories/cms.repository";
 import { prisma } from "../../db/prisma";
 import { hashPassword, isHashed, verifyPassword } from "./password";
 import type { AdminSession, AuthSession, UserRole } from "../../../../shared/cms";
-import { isPublicRole, isStaffRole } from "../../../../shared/cms";
+import { isStaffRole } from "../../../../shared/cms";
 
 function signToken(payload: string) {
   const signature = createHmac("sha256", config.sessionSecret).update(payload).digest("base64url");
@@ -53,12 +49,6 @@ export function readSession(req: Request): AdminSession | null {
   return session as AdminSession;
 }
 
-export function readUserSession(req: Request): AuthSession | null {
-  const session = readCookieSession(req, config.userCookieName);
-  if (!session || !isPublicRole(session.role)) return null;
-  return session;
-}
-
 function toSession(user: { id: string; email: string; name: string; role: UserRole }): AuthSession {
   return { id: user.id, email: user.email, name: user.name, role: user.role };
 }
@@ -78,15 +68,6 @@ export async function ensureAuthAccounts() {
     if (!isHashed(row.password)) {
       await updateUserPassword(row.id, await hashPassword(row.password));
     }
-  }
-  const emails = new Set(rows.map((row: { email: string }) => row.email.toLowerCase()));
-  const extras = [
-    { id: "user-investor", name: "Инвестор", email: "investor@kse.kg", role: "investor" as const, password: "kse" },
-    { id: "user-issuer", name: "Эмитент", email: "issuer@kse.kg", role: "issuer" as const, password: "kse" },
-  ];
-  for (const user of extras) {
-    if (emails.has(user.email)) continue;
-    await insertUser({ ...user, password: await hashPassword(user.password) });
   }
 }
 

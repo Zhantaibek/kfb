@@ -56,5 +56,4 @@ docker compose up -d --build
 
 | Где | Email | Пароль |
 |-----|-------|--------|
-| Кабинет сайта | `investor@kse.kg` | `kse` |
 | Админка `/admin` | `admin@kse.kg` | `admin` |

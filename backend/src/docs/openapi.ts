@@ -4,7 +4,7 @@ export const openApiSpec = {
     title: "KSE CMS API",
     version: "0.1.0",
     description:
-      "API Кыргызской фондовой биржи: публичный контент, кабинет и админ-CMS.\n\nКабинет: `investor@kse.kg` / `kse` (`POST /api/auth/session`). CMS: `admin@kse.kg` / `admin` (`POST /api/admin/session`).",
+      "API Кыргызской фондовой биржи: публичный контент и админ-CMS.\n\nВход только для сотрудников: `admin@kse.kg` / `admin` (`POST /api/auth/session` или `POST /api/admin/session`).",
   },
   servers: [
     { url: "http://localhost:4000", description: "Локальный backend" },
@@ -25,12 +25,6 @@ export const openApiSpec = {
         name: "kse-admin",
         description: "HttpOnly-cookie после POST /api/admin/session",
       },
-      userCookie: {
-        type: "apiKey",
-        in: "cookie",
-        name: "kse-user",
-        description: "HttpOnly-cookie после POST /api/auth/session",
-      },
     },
     schemas: {
       Error: {
@@ -44,15 +38,6 @@ export const openApiSpec = {
           email: { type: "string", example: "admin@kse.kg" },
           name: { type: "string", example: "Администратор" },
           role: { type: "string", enum: ["admin", "editor"] },
-        },
-      },
-      UserSession: {
-        type: "object",
-        properties: {
-          id: { type: "string" },
-          email: { type: "string", example: "investor@kse.kg" },
-          name: { type: "string", example: "Инвестор" },
-          role: { type: "string", enum: ["investor", "issuer"] },
         },
       },
       CmsNews: {
@@ -160,7 +145,7 @@ export const openApiSpec = {
           id: { type: "string" },
           name: { type: "string" },
           email: { type: "string" },
-          role: { type: "string", enum: ["admin", "editor", "investor", "issuer"] },
+          role: { type: "string", enum: ["admin", "editor"] },
         },
       },
       CmsVisit: {
@@ -453,16 +438,16 @@ export const openApiSpec = {
     "/api/auth/session": {
       get: {
         tags: ["Auth"],
-        summary: "Сессия кабинета",
-        security: [{ userCookie: [] }],
+        summary: "Сессия сотрудника (то же, что GET /api/admin/session)",
+        security: [{ cookieAuth: [] }],
         responses: {
           "200": {
-            description: "Текущий пользователь или `user: null`, если нет сессии",
+            description: "Текущий сотрудник; без сессии — 401 и `user: null`",
             content: {
               "application/json": {
                 schema: {
                   type: "object",
-                  properties: { user: { anyOf: [{ $ref: "#/components/schemas/UserSession" }, { type: "null" }] } },
+                  properties: { user: { anyOf: [{ $ref: "#/components/schemas/AdminSession" }, { type: "null" }] } },
                 },
               },
             },
@@ -471,7 +456,7 @@ export const openApiSpec = {
       },
       post: {
         tags: ["Auth"],
-        summary: "Вход в кабинет",
+        summary: "Вход с кнопки «Войти» — только админ или редактор",
         requestBody: {
           required: true,
           content: {
@@ -480,8 +465,8 @@ export const openApiSpec = {
                 type: "object",
                 required: ["email", "password"],
                 properties: {
-                  email: { type: "string", example: "investor@kse.kg" },
-                  password: { type: "string", example: "kse" },
+                  email: { type: "string", example: "admin@kse.kg" },
+                  password: { type: "string", example: "admin" },
                 },
               },
             },
@@ -489,10 +474,10 @@ export const openApiSpec = {
         },
         responses: {
           "200": {
-            description: "Cookie `kse-user` установлена",
+            description: "Cookie `kse-admin` установлена",
             content: {
               "application/json": {
-                schema: { type: "object", properties: { user: { $ref: "#/components/schemas/UserSession" } } },
+                schema: { type: "object", properties: { user: { $ref: "#/components/schemas/AdminSession" } } },
               },
             },
           },
@@ -504,7 +489,7 @@ export const openApiSpec = {
       },
       delete: {
         tags: ["Auth"],
-        summary: "Выход из кабинета",
+        summary: "Выход",
         responses: {
           "200": {
             description: "Cookie сброшена",

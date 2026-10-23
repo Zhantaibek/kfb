@@ -22,7 +22,7 @@ export function CabinetEntry() {
         <aside className={styles.welcome}>
           <img src="/brand/kse-mark.png" alt="" />
           <h2>{tr("Добро пожаловать")}</h2>
-          <p>{tr("Личный кабинет. Учётную запись создаёт администратор биржи.")}</p>
+          <p>{tr("Вход в панель управления сайтом. Учётную запись создаёт администратор биржи.")}</p>
         </aside>
 
         <div className={styles.formSide}>

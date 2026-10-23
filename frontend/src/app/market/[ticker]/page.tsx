@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
-import { WatchButton } from "@/components/WatchButton";
 import { formatChange, formatSom, getInstrument, instruments, typeLabel } from "@/data/catalog";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
@@ -38,9 +37,6 @@ export default async function InstrumentPage({ params }: { params: Promise<{ tic
           <h2>{formatSom(item.price)} сом</h2>
           <p className={item.change < 0 ? ui.down : ui.up}>{formatChange(item.change)}</p>
           <p>Объём {formatSom(item.volume)} · листинг {item.listing} · {typeLabel[item.type]}</p>
-          <div style={{ marginTop: 16 }}>
-            <WatchButton ticker={item.ticker} />
-          </div>
         </article>
         <article className={ui.card}>
           <h2>Об инструменте</h2>

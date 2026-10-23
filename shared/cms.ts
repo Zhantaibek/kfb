@@ -1,9 +1,8 @@
 export type NewsKind = "exchange" | "company" | "urgent";
 export type PublishStatus = "draft" | "published";
 export type AdminRole = "admin" | "editor";
-/** student / teacher — аккаунты учебного центра (схема edu), входят через общий /login. */
-export type PublicRole = "investor" | "issuer" | "student" | "teacher";
-export type UserRole = AdminRole | PublicRole;
+/** На сайт входят только сотрудники биржи: ролей инвестора и эмитента нет. */
+export type UserRole = AdminRole;
 export type RequestStatus = "new" | "done";
 export type LocaleCode = "ky" | "en";
 export type CmsI18n = Partial<Record<LocaleCode, Record<string, string>>>;
@@ -26,10 +25,6 @@ export function parseI18n(value: unknown): CmsI18n {
 
 export function isStaffRole(role: string): role is AdminRole {
   return role === "admin" || role === "editor";
-}
-
-export function isPublicRole(role: string): role is PublicRole {
-  return role === "investor" || role === "issuer" || role === "student" || role === "teacher";
 }
 
 export type CmsNews = {

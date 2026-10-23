@@ -1,8 +1,7 @@
 export type NewsKind = "exchange" | "company" | "urgent";
 export type PublishStatus = "draft" | "published";
 export type AdminRole = "admin" | "editor";
-export type PublicRole = "investor" | "issuer" | "student" | "teacher";
-export type UserRole = AdminRole | PublicRole;
+export type UserRole = AdminRole;
 export type RequestStatus = "new" | "done";
 export type LocaleCode = "ky" | "en";
 export type CmsI18n = Partial<Record<LocaleCode, Record<string, string>>>;

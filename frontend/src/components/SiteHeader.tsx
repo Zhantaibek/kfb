@@ -110,7 +110,7 @@ function translateNav(items: SiteLink[], translate: (text: string) => string): S
 }
 
 export function SiteHeader() {
-  const { label, lang, setLang, user, adminUser, logout, tr } = useApp();
+  const { label, lang, setLang, adminUser, logout, tr } = useApp();
   const pathname = usePathname();
   // primary — строка навигации шапки (как на kse.kg), nav — полное меню в бургере. Оба из БД.
   const { nav, primary } = useSiteNav();
@@ -181,13 +181,12 @@ export function SiteHeader() {
 
         <ThemeToggle />
 
-        {/* Войти / Кабинет */}
-        {user || adminUser ? (
+        {/* Войти — только для сотрудников (админ, редактор) */}
+        {adminUser ? (
           <details className={ui.drop} name="kse-header" key={pathname + "-cab"} {...hoverClose}>
-            <summary className={ui.cabinetBtn}>{user ? label("cabinet") : tr("Админ-панель")}</summary>
+            <summary className={ui.cabinetBtn}>{tr("Админ-панель")}</summary>
             <div className={ui.dropPanel}>
-              {user ? <Link href="/cabinet">{user.name}</Link> : null}
-              {adminUser ? <Link href="/admin">{tr("Админ-панель")}</Link> : null}
+              <Link href="/admin">{tr("Админ-панель")}</Link>
               <button type="button" onClick={() => void logout()}>
                 {label("logout")}
               </button>
@@ -208,6 +207,7 @@ export function SiteHeader() {
           onToggle={(event) => lockPageScroll(event.currentTarget.open)}
         >
           <summary aria-label={label("menu")}>
+            <i />
             <i />
             <i />
           </summary>

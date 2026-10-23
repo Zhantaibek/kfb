@@ -22,27 +22,27 @@ export function publicUsers(store: CmsStore) {
   return store.users.map(({ password: _password, ...user }) => user);
 }
 
-export function publishedNews(store: CmsStore) {
+export function publishedNews(store: Pick<CmsStore, "news">) {
   return [...store.news]
     .filter((item) => item.status === "published")
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
-export function orderedSlides(store: CmsStore) {
+export function orderedSlides(store: Pick<CmsStore, "slides">) {
   return [...store.slides].sort((a, b) => a.order - b.order);
 }
 
-export function orderedHubs(store: CmsStore) {
+export function orderedHubs(store: Pick<CmsStore, "hubs">) {
   return [...store.hubs].sort((a, b) => a.order - b.order);
 }
 
-export function publishedManagement(store: CmsStore) {
+export function publishedManagement(store: Pick<CmsStore, "management">) {
   return [...store.management]
     .filter((item) => item.status === "published")
     .sort((a, b) => a.order - b.order);
 }
 
-export function publishedPartners(store: CmsStore) {
+export function publishedPartners(store: Pick<CmsStore, "partners">) {
   return [...store.partners].filter((item) => item.status === "published").sort((a, b) => a.order - b.order);
 }
 

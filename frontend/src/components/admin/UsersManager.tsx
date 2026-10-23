@@ -49,8 +49,6 @@ export function UsersManager() {
               <select value={editing.role} onChange={(event) => setEditing({ ...editing, role: event.target.value as UserRole })}>
                 <option value="admin">admin</option>
                 <option value="editor">editor</option>
-                <option value="investor">investor</option>
-                <option value="issuer">issuer</option>
               </select>
             </label>
             <label className={css.field}>

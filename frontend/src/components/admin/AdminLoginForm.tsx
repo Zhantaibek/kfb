@@ -18,19 +18,25 @@ export function AdminLoginForm() {
     setBusy(true);
     setError(null);
     const data = new FormData(event.currentTarget);
-    const response = await fetch("/api/admin/session", {
-      method: "POST",
-      credentials: "include",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: data.get("email"), password: data.get("password") }),
-    });
-    const payload = (await response.json()) as { error?: string };
-    setBusy(false);
-    if (!response.ok) {
-      setError(payload.error ?? "Ошибка входа");
-      return;
+    try {
+      const response = await fetch("/api/admin/session", {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: data.get("email"), password: data.get("password") }),
+      });
+      // Прокси при недоступном API может вернуть не JSON — тогда показываем общую ошибку.
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        setError(payload.error ?? "Ошибка входа");
+        return;
+      }
+      router.replace("/admin/dashboard");
+    } catch {
+      setError("Не удалось войти. Проверьте соединение и попробуйте ещё раз.");
+    } finally {
+      setBusy(false);
     }
-    router.replace("/admin/dashboard");
   }
 
   return (
@@ -39,19 +45,20 @@ export function AdminLoginForm() {
       <div className={css.loginLang}>
         <AdminLangSwitch />
       </div>
+      {/* Поля пустые: сайт ничего не подставляет сам; автозаполнение браузера работает как обычно. */}
       <form className={css.loginCard} onSubmit={submit}>
         <Logo />
         <h1>{tr("Портал администратора")}</h1>
-        <p className={css.lead}>{tr("CMS Кыргызской фондовой биржи — новости, фото, слайдер и заявки.")}</p>
+        <p className={css.lead}>{tr("CMS Кыргызской фондовой биржи — новости, страницы, фото и заявки.")}</p>
         <label className={css.field}>
           <span>E-mail</span>
-          <input name="email" type="email" defaultValue="admin@kse.kg" required />
+          <input name="email" type="email" autoComplete="username" required />
         </label>
         <label className={css.field}>
           <span>{tr("Пароль")}</span>
-          <input name="password" type="password" defaultValue="admin" required />
+          <input name="password" type="password" autoComplete="current-password" required />
         </label>
-        {error ? <p className={css.error}>{error}</p> : <p className={css.lead}>{tr("Демо: admin@kse.kg / admin")}</p>}
+        {error ? <p className={css.error}>{error}</p> : null}
         <button className={css.primary} disabled={busy} type="submit">
           {tr("Войти")}
         </button>

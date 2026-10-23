@@ -55,6 +55,13 @@ export function QuoteBoard() {
           <h2>{tr("Аукционы ГЦБ")}</h2>
           <Link href="/gcb">{tr("Календарь")}</Link>
         </header>
+        {/* Колонки и строки той же высоты, что у котировок, — линии двух панелей совпадают. */}
+        <div className={`${styles.columns} ${styles.auctionColumns}`} aria-hidden="true">
+          <span>{tr("Выпуск")}</span>
+          <span>{tr("Дата")}</span>
+          <span>{tr("Объём")}</span>
+          <span>{tr("Статус")}</span>
+        </div>
         <div className={styles.auctions}>
           {market.auctions.map((item) => (
             <Link href="/gcb" key={`${item.date}-${item.type}`}>

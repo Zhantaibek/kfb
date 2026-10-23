@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/admin", destination: "/admin/dashboard", permanent: false },
+      // Слайдер убран из админки; ссылки подвала теперь в «Контакты и подвал».
+      { source: "/admin/slider", destination: "/admin/dashboard", permanent: false },
+      { source: "/admin/footer", destination: "/admin/settings", permanent: false },
+      // Кабинета инвестора больше нет: вход на сайт только для сотрудников.
+      { source: "/cabinet", destination: "/login", permanent: true },
       { source: "/PublicInfo", destination: "/disclosure", permanent: false },
       { source: "/PublicInfo/:slug", destination: "/disclosure/:slug", permanent: false },
     ];

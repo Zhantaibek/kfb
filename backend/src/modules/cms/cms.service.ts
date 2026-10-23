@@ -6,6 +6,7 @@ import {
   insertRequest,
   readFullStore,
   readIssuerData,
+  readPublicStore,
   updateItem,
 } from "../../db/repositories/cms.repository";
 import { isLandingCollection } from "../../db/landing";
@@ -28,6 +29,7 @@ import { sanitizeRichHtml } from "../../utils/sanitize-html";
 import { AppError } from "../../middleware/error";
 import { itemSchemas, mutateSchema, type MutableCollection } from "../../validation/cms";
 import { purgeMediaRecord } from "../media/media.service";
+import { cachedPublic, invalidatePublicContent } from "../../store/public-cache";
 
 function descendantIds(menu: { id: string; parentId: string | null }[], rootId: string) {
   const blocked = new Set<string>([rootId]);
@@ -191,7 +193,16 @@ export async function getAdminData() {
   return sanitizeStore(await readStore());
 }
 
-export async function mutateCollection(
+/** Любая правка в админке сразу сбрасывает кеш публичного контента. */
+export async function mutateCollection(session: AdminSession, body: unknown) {
+  try {
+    return await applyMutation(session, body);
+  } finally {
+    invalidatePublicContent();
+  }
+}
+
+async function applyMutation(
   session: AdminSession,
   body: unknown,
 ) {
@@ -205,6 +216,10 @@ export async function mutateCollection(
 
   if (collection === "users" && session.role !== "admin") {
     throw new AppError("Только администратор может управлять пользователями", 403);
+  }
+  // Эмитенты и бумаги листинга добавляются только через внешний API (modules/issuers-sync), не из админки.
+  if ((collection === "issuers" || collection === "listing") && op === "create") {
+    throw new AppError("Эмитенты и листинг добавляются через API (ISSUERS_API_URL / LISTING_API_URL в .env)", 400);
   }
   if (collection === "users" && op === "create" && !String(rawItem.password ?? "")) {
     throw new AppError("Укажите пароль", 400);
@@ -289,8 +304,12 @@ export async function mutateCollection(
   return sanitizeStore(await readFullStore());
 }
 
-export async function getPublicContent() {
-  const store = await readFullStore();
+export function getPublicContent() {
+  return cachedPublic(loadPublicContent);
+}
+
+async function loadPublicContent() {
+  const store = await readPublicStore();
   return {
     news: publishedNews(store),
     slides: orderedSlides(store),
@@ -321,7 +340,7 @@ export async function createRequest(source: string, payload: Record<string, stri
   );
 
   const trimmedSource = source.slice(0, 80);
+  // В журнал аудита публичные заявки не пишем: он для действий сотрудников.
   await insertRequest(trimmedSource, clean);
-  await insertAudit({ action: "create", entity: "requests", detail: trimmedSource, actor: "public" });
 }
 

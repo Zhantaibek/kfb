@@ -85,6 +85,37 @@ export async function readFullStore(): Promise<CmsStore> {
   };
 }
 
+/**
+ * Только то, что видит посетитель сайта: без пользователей, заявок, посещений, журнала и эмитентов
+ * (эмитенты — отдельным запросом readIssuerData). Черновики новостей и страниц не читаем вовсе.
+ */
+export async function readPublicStore() {
+  const [news, slides, media, pages, menu, hubs, management, partners, settings] = await Promise.all([
+    prisma.news.findMany({ where: { status: "published" }, orderBy: { updatedAt: "desc" } }),
+    prisma.slide.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.media.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.page.findMany({ where: { status: "published" }, orderBy: { updatedAt: "desc" } }),
+    prisma.menuItem.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.homeHub.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.managementPerson.findMany({ where: { status: "published" }, orderBy: [{ groupId: "asc" }, { sortOrder: "asc" }] }),
+    prisma.partner.findMany({ where: { status: "published" }, orderBy: { sortOrder: "asc" } }),
+    prisma.siteSettings.findMany(),
+  ]);
+  const landing = await readLandingStore();
+  return {
+    ...landing,
+    news: news.map(toCmsNews),
+    slides: slides.map(toCmsSlide),
+    media: media.map(toCmsMedia),
+    pages: pages.map(toCmsPage),
+    menu: menu.map(toCmsMenuItem),
+    hubs: hubs.map(toCmsHomeHub),
+    management: management.map(toCmsManagementPerson),
+    partners: partners.map(toCmsPartner),
+    settings: settings.map(toCmsSiteSettings),
+  };
+}
+
 export async function findUserByEmail(email: string): Promise<CmsUser | null> {
   const user = await prisma.user.findFirst({
     where: { email: { equals: email.trim(), mode: "insensitive" } },
@@ -108,15 +139,13 @@ export async function insertUser(user: CmsUser) {
   });
 }
 
-async function trimAudit() {
-  const keep = await prisma.audit.findMany({
-    orderBy: { at: "desc" },
-    take: 200,
-    select: { id: true },
-  });
-  const ids = keep.map((row) => row.id);
-  if (ids.length === 0) return;
-  await prisma.audit.deleteMany({ where: { id: { notIn: ids } } });
+/**
+ * Журнал аудита хранится год (а не «последние N записей»): иначе поток любых записей вытеснил бы действия админов.
+ * Вызывается по расписанию из index.ts, а не на каждую запись.
+ */
+export async function pruneOldAudit() {
+  const cutoff = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+  await prisma.audit.deleteMany({ where: { at: { lt: cutoff } } });
 }
 
 export async function insertAudit(entry: Omit<CmsAudit, "id" | "at">) {
@@ -130,18 +159,6 @@ export async function insertAudit(entry: Omit<CmsAudit, "id" | "at">) {
       at: new Date(),
     },
   });
-  await trimAudit();
-}
-
-async function trimRequests() {
-  const keep = await prisma.request.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    select: { id: true },
-  });
-  const ids = keep.map((row) => row.id);
-  if (ids.length === 0) return;
-  await prisma.request.deleteMany({ where: { id: { notIn: ids } } });
 }
 
 export async function insertRequest(source: string, payload: Record<string, string>) {
@@ -154,7 +171,7 @@ export async function insertRequest(source: string, payload: Record<string, stri
       createdAt: new Date(),
     },
   });
-  await trimRequests();
+  // Заявки сами не удаляются: спам формы не должен стирать настоящие обращения. Убирают их в админке.
 }
 
 export async function insertMedia(media: CmsMedia) {

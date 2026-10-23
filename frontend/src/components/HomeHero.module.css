@@ -6,12 +6,6 @@
   --hero-bg-a: #f5fbfb;
   --hero-bg-b: #e4f3f5;
   --hero-bg-c: #d6ecef;
-  --blob-a: rgba(87, 182, 192, 0.5);
-  --blob-b: rgba(126, 196, 232, 0.5);
-  --blob-c: rgba(178, 232, 214, 0.65);
-  --ring: rgba(63, 154, 164, 0.22);
-  --orb-hi: rgba(255, 255, 255, 0.95);
-  --orb-lo: rgba(143, 211, 218, 0.55);
   --stats-bg: rgba(255, 255, 255, 0.55);
   --stat-hover: rgba(255, 255, 255, 0.6);
   --up: #0f8f62;
@@ -32,12 +26,6 @@
   --hero-bg-a: #0b2125;
   --hero-bg-b: #0a1c20;
   --hero-bg-c: #071518;
-  --blob-a: rgba(87, 182, 192, 0.32);
-  --blob-b: rgba(46, 120, 170, 0.3);
-  --blob-c: rgba(60, 160, 130, 0.2);
-  --ring: rgba(127, 208, 216, 0.14);
-  --orb-hi: rgba(200, 245, 248, 0.5);
-  --orb-lo: rgba(87, 182, 192, 0.08);
   --stats-bg: rgba(7, 22, 26, 0.5);
   --stat-hover: rgba(255, 255, 255, 0.04);
   --up: #5fe0a8;
@@ -46,13 +34,14 @@
 
 .main {
   min-height: clamp(360px, 50vh, 500px);
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   align-items: center;
+  padding: 0 var(--edge);
 }
 
 .copy {
-  max-width: calc(620px + var(--edge));
-  padding: 40px 32px 40px var(--edge);
+  padding: 40px 32px 40px 0;
 }
 
 .copy h1 {
@@ -152,80 +141,213 @@
   outline-offset: 3px;
 }
 
-/* Фон: градиент, размытые цветовые пятна и SVG-сцена поверх них. */
+/* Фон: цветные радиальные пятна поверх диагонального градиента. */
+.hero {
+  --glow-a: rgba(87, 182, 192, 0.55);
+  --glow-b: rgba(126, 196, 232, 0.5);
+  --glow-c: rgba(178, 232, 214, 0.7);
+}
+
+:global([data-theme="dark"]) .hero {
+  --glow-a: rgba(87, 182, 192, 0.35);
+  --glow-b: rgba(46, 120, 170, 0.32);
+  --glow-c: rgba(60, 160, 130, 0.22);
+}
+
 .photo {
   position: absolute;
   inset: 0;
   z-index: -2;
-  overflow: hidden;
-  background: linear-gradient(135deg, var(--hero-bg-a) 0%, var(--hero-bg-b) 55%, var(--hero-bg-c) 100%);
+  background:
+    radial-gradient(ellipse 45% 70% at 78% 10%, var(--glow-a), transparent 70%),
+    radial-gradient(ellipse 40% 60% at 55% 100%, var(--glow-b), transparent 70%),
+    radial-gradient(ellipse 35% 60% at 100% 65%, var(--glow-c), transparent 70%),
+    linear-gradient(135deg, var(--hero-bg-a) 0%, var(--hero-bg-b) 55%, var(--hero-bg-c) 100%);
 }
 
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  pointer-events: none;
+/* Карта рынка: плитки по объёму, цвет — изменение цены. */
+.hero {
+  --tile-flat: rgba(255, 255, 255, 0.7);
+  --tile-up-1: #d7f3e1;
+  --tile-up-2: #bfeccf;
+  --tile-up-3: #9fe0b7;
+  --tile-down-1: #fde0e0;
+  --tile-down-2: #fbcfd0;
+  --tile-down-3: #f6a9ac;
+  --tile-ink: #13211e;
 }
 
-.blobA {
-  top: -18%;
-  right: 8%;
-  width: 40vw;
-  height: 40vw;
-  background: var(--blob-a);
-  animation: heroDrift 20s ease-in-out infinite alternate;
+:global([data-theme="dark"]) .hero {
+  --tile-flat: rgba(255, 255, 255, 0.07);
+  --tile-up-1: rgba(61, 206, 152, 0.16);
+  --tile-up-2: rgba(61, 206, 152, 0.26);
+  --tile-up-3: rgba(61, 206, 152, 0.4);
+  --tile-down-1: rgba(240, 113, 124, 0.16);
+  --tile-down-2: rgba(240, 113, 124, 0.26);
+  --tile-down-3: rgba(240, 113, 124, 0.4);
+  --tile-ink: #f3f7f5;
 }
 
-.blobB {
-  bottom: -30%;
-  right: 34%;
-  width: 34vw;
-  height: 34vw;
-  background: var(--blob-b);
-  animation: heroDrift 24s ease-in-out -8s infinite alternate-reverse;
-}
-
-.blobC {
-  top: 30%;
-  right: -8%;
-  width: 28vw;
-  height: 28vw;
-  background: var(--blob-c);
-  animation: heroDrift 18s ease-in-out -4s infinite alternate;
-}
-
-.scene {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  translate: 0 var(--hero-shift, 0px);
-}
-
-.rings {
-  fill: none;
-  stroke: var(--ring);
-  stroke-width: 1;
-  transform-box: view-box;
-  transform-origin: 1220px 380px;
-  animation: heroSpin 120s linear infinite;
-}
-
-/* Шарики мягко покачиваются на месте — без «парада планет». */
-.orb {
-  stroke: rgba(255, 255, 255, 0.6);
-  stroke-width: 1;
-  opacity: 0.75;
-  animation: heroFloat 9s ease-in-out infinite alternate;
-}
-
-/* Кольца расходятся из центра при загрузке. */
-.rings circle {
-  transform-box: fill-box;
-  transform-origin: center;
+.map {
+  display: grid;
+  gap: 14px;
+  padding: 36px 0;
   opacity: 0;
-  animation: heroRingIn 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: heroUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+}
+
+.mapGroups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 24px 18px;
+}
+
+.mapGroup {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.mapGroup h2 {
+  margin: 0 0 6px;
+  color: var(--hero-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mapRow {
+  display: flex;
+  gap: 4px;
+}
+
+.tile {
+  flex: 1 1 0;
+  min-width: 0;
+  display: grid;
+  align-content: space-between;
+  gap: 2px;
+  min-height: 92px;
+  padding: 10px 10px 9px;
+  border-radius: 6px;
+  background: var(--tile-flat);
+  color: var(--tile-ink);
+  font-variant-numeric: tabular-nums;
+  transition: filter 0.15s ease, translate 0.15s ease;
+}
+
+.tile:hover {
+  filter: brightness(0.96) saturate(1.15);
+  translate: 0 -1px;
+}
+
+.tile:focus-visible {
+  outline: 2px solid #3f9aa4;
+  outline-offset: 2px;
+}
+
+.tile[data-tone="up"][data-level="1"] {
+  background: var(--tile-up-1);
+}
+
+.tile[data-tone="up"][data-level="2"] {
+  background: var(--tile-up-2);
+}
+
+.tile[data-tone="up"][data-level="3"] {
+  background: var(--tile-up-3);
+}
+
+.tile[data-tone="down"][data-level="1"] {
+  background: var(--tile-down-1);
+}
+
+.tile[data-tone="down"][data-level="2"] {
+  background: var(--tile-down-2);
+}
+
+.tile[data-tone="down"][data-level="3"] {
+  background: var(--tile-down-3);
+}
+
+.tile b,
+.tile span,
+.tile em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tile b {
+  margin-bottom: auto;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.tile span {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.tile em {
+  font-style: normal;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.tile[data-size="1"] {
+  min-height: 76px;
+}
+
+.tile[data-size="1"] b,
+.tile[data-size="1"] span {
+  font-size: 15px;
+}
+
+.tile[data-size="2"] {
+  min-height: 64px;
+  padding: 8px 8px 7px;
+}
+
+.tile[data-size="2"] b {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tile[data-size="2"] span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tile[data-size="2"] em {
+  font-size: 12px;
+}
+
+.mapNote {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin: 0;
+  color: var(--hero-muted);
+  font-size: 13px;
+}
+
+.mapNote a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--hero-ink);
+  font-weight: 650;
+}
+
+.mapNote svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Появление текста и показателей. */
@@ -270,7 +392,7 @@
 /* Пока на экране заставка, появление баннера ждёт и стартует, когда она начинает исчезать. */
 :global(body:has([data-site-splash="show"])) .copy > *,
 :global(body:has([data-site-splash="show"])) .stat,
-:global(body:has([data-site-splash="show"])) .rings circle {
+:global(body:has([data-site-splash="show"])) .map {
   animation-play-state: paused;
 }
 
@@ -286,51 +408,10 @@
   }
 }
 
-@keyframes heroRingIn {
-  from {
-    opacity: 0;
-    scale: 0.7;
-  }
-
-  to {
-    opacity: 1;
-    scale: 1;
-  }
-}
-
-@keyframes heroDrift {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-
-  to {
-    transform: translate(-5vw, 3vw) scale(1.12);
-  }
-}
-
-@keyframes heroFloat {
-  from {
-    translate: 0 -10px;
-  }
-
-  to {
-    translate: 0 10px;
-  }
-}
-
-@keyframes heroSpin {
-  to {
-    rotate: 360deg;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .blob,
-  .rings,
-  .rings circle,
-  .orb,
   .copy > *,
-  .stat {
+  .stat,
+  .map {
     animation: none;
     opacity: 1;
   }
@@ -408,14 +489,15 @@
 @media (max-width: 980px) {
   .main {
     min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .copy {
-    padding: 72px var(--edge) 48px;
+    padding: 72px 0 8px;
   }
 
-  .scene {
-    opacity: 0.6;
+  .map {
+    padding: 24px 0 40px;
   }
 
   .stats {
@@ -439,191 +521,5 @@
 
   .stat {
     padding: 16px 14px 18px;
-  }
-}
-
-/* Свечи по кольцу — второстепенная деталь: приглушены и вращаются вместе с кольцами. */
-.hero {
-  --candle-up: #1ccf45;
-  --candle-down: #ff4d5e;
-  --candle-wick: rgba(13, 42, 46, 0.45);
-}
-
-:global([data-theme="dark"]) .hero {
-  --candle-up: #2fe05a;
-  --candle-down: #ff5d6c;
-  --candle-wick: rgba(255, 255, 255, 0.4);
-}
-
-.candleRing {
-  opacity: 0.55;
-  transform-box: view-box;
-  transform-origin: 1220px 380px;
-  animation: heroSpin 120s linear infinite;
-}
-
-.candleUp,
-.candleDown {
-  opacity: 0;
-  animation: heroCandleIn 0.6s ease forwards;
-}
-
-.candleUp rect {
-  fill: var(--candle-up);
-}
-
-.candleDown rect {
-  fill: var(--candle-down);
-}
-
-.candleUp line,
-.candleDown line {
-  stroke: var(--candle-wick);
-  stroke-width: 1.5;
-}
-
-@keyframes heroCandleIn {
-  to {
-    opacity: 1;
-  }
-}
-
-:global(body:has([data-site-splash="show"])) .candleUp,
-:global(body:has([data-site-splash="show"])) .candleDown {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .candleRing {
-    animation: none;
-  }
-
-  .candleUp,
-  .candleDown {
-    opacity: 1;
-    animation: none;
-  }
-}
-
-/* Шарики покачиваются (у «линз» покачивается вся группа вместе с графиком внутри). */
-.orb {
-  animation: none;
-}
-
-.floating,
-.lens {
-  animation: heroFloat 9s ease-in-out infinite alternate;
-}
-
-/* Свечи внутри шариков — мелкие, без колец-подсветки. */
-.lens .candleUp line,
-.lens .candleDown line {
-  stroke-width: 1.2;
-}
-
-/* Полоса свечей вдоль нижнего края баннера, над показателями; плывёт влево бесконечно. */
-.strip {
-  position: absolute;
-  left: 45%;
-  right: 0;
-  bottom: calc(var(--hero-stats-h, 104px) + 14px);
-  width: auto;
-  height: 84px;
-  overflow: hidden;
-  opacity: 0.5;
-  mask-image: linear-gradient(90deg, transparent 0%, #000 22%, #000 92%, transparent 100%);
-}
-
-.stripTrack {
-  animation: heroStrip 90s linear infinite;
-}
-
-@keyframes heroStrip {
-  to {
-    translate: -2000px 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .floating,
-  .lens,
-  .stripTrack {
-    animation: none;
-  }
-}
-
-/* Стеклянные свечи — того же материала, что шарики. */
-.glassCandles {
-  opacity: 0;
-  animation: heroCandleIn 1.2s ease 0.6s forwards;
-}
-
-/* Стекло тонировано: рост — зелёный, падение — красный; блик и белый контур — как у шариков. */
-.hero {
-  --glass-hi: rgba(255, 255, 255, 0.95);
-  --glass-up: rgba(28, 207, 69, 0.55);
-  --glass-down: rgba(255, 77, 94, 0.5);
-}
-
-:global([data-theme="dark"]) .hero {
-  --glass-hi: rgba(220, 255, 230, 0.55);
-  --glass-up: rgba(47, 224, 90, 0.3);
-  --glass-down: rgba(255, 93, 108, 0.3);
-}
-
-.glassUp rect,
-.glassDown rect {
-  stroke: rgba(255, 255, 255, 0.75);
-  stroke-width: 1.2;
-}
-
-.glassUp line {
-  stroke: rgba(20, 150, 60, 0.55);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-}
-
-.glassDown line {
-  stroke: rgba(210, 60, 75, 0.55);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-}
-
-:global([data-theme="dark"]) .glassUp line {
-  stroke: rgba(120, 240, 150, 0.5);
-}
-
-:global([data-theme="dark"]) .glassDown line {
-  stroke: rgba(255, 150, 160, 0.5);
-}
-
-:global(body:has([data-site-splash="show"])) .glassCandles {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .glassCandles {
-    opacity: 1;
-    animation: none;
-  }
-}
-
-/* Слой стеклянных свечей: справа, над показателями, не кадрируется вместе с кольцами. */
-.glassLayer {
-  position: absolute;
-  top: 5%;
-  left: 40%;
-  right: 2%;
-  width: 58%;
-  height: calc(95% - var(--hero-stats-h, 104px) - 24px);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 12%);
-  overflow: visible;
-  translate: 0 var(--hero-shift, 0px);
-}
-
-@media (max-width: 980px) {
-  .glassLayer {
-    opacity: 0.35;
-    width: 70%;
   }
 }

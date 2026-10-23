@@ -55,7 +55,11 @@ export default async function Home() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      {/* «<» экранируем: иначе e-mail или телефон из админки вида «</script><script>…» выполнился бы на главной. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }}
+      />
       <HomeView
         slides={content.slides}
         urgent={content.news

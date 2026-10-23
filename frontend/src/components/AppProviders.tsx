@@ -4,33 +4,17 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { t, tr, htmlLang, type Lang } from "@/lib/i18n";
 import { useStoredString, writeStored } from "@/lib/local-store";
 
-const defaultWatchlist = ["KTEL", "KAKB"];
-
-function parseWatchlist(raw: string | null): string[] {
-  if (!raw) return defaultWatchlist;
-  try {
-    const list = JSON.parse(raw) as unknown;
-    return Array.isArray(list) ? list.filter((item): item is string => typeof item === "string") : defaultWatchlist;
-  } catch {
-    return defaultWatchlist;
-  }
-}
-
-type User = { id?: string; name: string; email: string; role: "investor" | "issuer" | "student" | "teacher" };
 type AdminUser = { id?: string; name: string; email: string; role: "admin" | "editor" };
 
 type AppState = {
   lang: Lang;
   setLang: (lang: Lang) => void;
-  user: User | null;
-  /** Сотрудник CMS (admin/editor), вошедший через /admin/login. */
+  /** Сотрудник CMS (admin/editor). На сайт входят только сотрудники — ролей инвестора и эмитента нет. */
   adminUser: AdminUser | null;
   authReady: boolean;
-  /** Возвращает текст ошибки или признак того, что вошёл сотрудник CMS. */
-  login: (email: string, password: string) => Promise<{ error: string } | { staff: boolean; role: string }>;
+  /** Возвращает текст ошибки или роль вошедшего сотрудника. */
+  login: (email: string, password: string) => Promise<{ error: string } | { role: string }>;
   logout: () => Promise<void>;
-  watchlist: string[];
-  toggleWatch: (ticker: string) => void;
   label: (key: Parameters<typeof t>[1]) => string;
   tr: (text: string) => string;
 };
@@ -38,12 +22,9 @@ type AppState = {
 const AppContext = createContext<AppState | null>(null);
 
 export function AppProviders({ children }: { children: ReactNode }) {
-  // Язык и избранное живут в localStorage; до гидратации — значения по умолчанию.
+  // Язык живёт в localStorage; до гидратации — значение по умолчанию.
   const storedLang = useStoredString("kse-lang");
   const lang: Lang = storedLang === "ky" || storedLang === "en" ? storedLang : "ru";
-  const storedWatch = useStoredString("kse-watch");
-  const watchlist = useMemo(() => parseWatchlist(storedWatch), [storedWatch]);
-  const [user, setUser] = useState<User | null>(null);
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
 
@@ -52,17 +33,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
   }, [lang]);
 
   useEffect(() => {
+    // Остатки прежнего кабинета инвестора в браузере.
     localStorage.removeItem("kse-user");
-
-    const userSession = fetch("/api/auth/session", { credentials: "include" })
-      .then(async (response) => {
-        const data = (await response.json()) as { user?: User | null };
-        setUser(response.ok ? (data.user ?? null) : null);
-      })
-      .catch(() => setUser(null));
+    localStorage.removeItem("kse-watch");
 
     // Для обычных посетителей ответ 401 — это нормально, просто админа нет.
-    const adminSession = fetch("/api/admin/session", { credentials: "include" })
+    fetch("/api/admin/session", { credentials: "include" })
       .then(async (response) => {
         if (!response.ok) {
           setAdminUser(null);
@@ -72,9 +48,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
         const role = data.user?.role;
         setAdminUser(role === "admin" || role === "editor" ? (data.user ?? null) : null);
       })
-      .catch(() => setAdminUser(null));
-
-    void Promise.all([userSession, adminSession]).finally(() => setAuthReady(true));
+      .catch(() => setAdminUser(null))
+      .finally(() => setAuthReady(true));
   }, []);
 
   const value = useMemo<AppState>(
@@ -84,7 +59,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
         writeStored("kse-lang", next);
         document.cookie = `kse-lang=${next};path=/;max-age=31536000`;
       },
-      user,
       adminUser,
       authReady,
       async login(email, password) {
@@ -94,34 +68,20 @@ export function AppProviders({ children }: { children: ReactNode }) {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
-        const payload = (await response.json()) as { user?: User | AdminUser; error?: string };
-        if (!response.ok) return { error: payload.error ?? "Не удалось войти" };
-        const account = payload.user ?? null;
-        // Бэкенд выдаёт админу/редактору админскую cookie, поэтому и в состоянии он админ.
-        if (account?.role === "admin" || account?.role === "editor") {
-          setAdminUser(account);
-          return { staff: true, role: account.role };
-        }
-        setUser(account as User | null);
-        return { staff: false, role: account?.role ?? "" };
+        // Прокси при недоступном API может вернуть не JSON — тогда общая ошибка, а не исключение.
+        const payload = (await response.json().catch(() => ({}))) as { user?: AdminUser; error?: string };
+        if (!response.ok || !payload.user) return { error: payload.error ?? "Не удалось войти" };
+        setAdminUser(payload.user);
+        return { role: payload.user.role };
       },
       async logout() {
-        await Promise.all([
-          fetch("/api/auth/session", { method: "DELETE", credentials: "include" }),
-          adminUser ? fetch("/api/admin/session", { method: "DELETE", credentials: "include" }) : null,
-        ]);
-        setUser(null);
+        await fetch("/api/auth/session", { method: "DELETE", credentials: "include" });
         setAdminUser(null);
-      },
-      watchlist,
-      toggleWatch(ticker) {
-        const next = watchlist.includes(ticker) ? watchlist.filter((item) => item !== ticker) : [...watchlist, ticker];
-        writeStored("kse-watch", JSON.stringify(next));
       },
       label: (key) => t(lang, key),
       tr: (text) => tr(lang, text),
     }),
-    [lang, user, adminUser, authReady, watchlist],
+    [lang, adminUser, authReady],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

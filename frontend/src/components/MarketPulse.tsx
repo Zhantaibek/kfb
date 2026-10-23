@@ -171,8 +171,8 @@ function moversOf(market: MarketData) {
     })),
   ];
   return {
-    gainers: movers.filter((item) => item.change > 0).sort((a, b) => b.change - a.change).slice(0, 5),
-    losers: movers.filter((item) => item.change < 0).sort((a, b) => a.change - b.change).slice(0, 5),
+    gainers: movers.filter((item) => item.change > 0).sort((a, b) => b.change - a.change).slice(0, 8),
+    losers: movers.filter((item) => item.change < 0).sort((a, b) => a.change - b.change).slice(0, 8),
   };
 }
 
@@ -255,65 +255,6 @@ function MoverList({ title, list, href, fill }: { title: string; list: Mover[]; 
       ) : (
         <p className={styles.empty}>{tr("Нет инструментов")}</p>
       )}
-    </article>
-  );
-}
-
-/** Под топами: ширина рынка (растут / падают / без изменений) и лидеры по объёму торгов. */
-function MarketOverviewCard() {
-  const tr = useTr();
-  const market = useMarketData();
-  const { instruments } = market;
-  const breadth = {
-    up: instruments.filter((item) => item.change > 0).length,
-    down: instruments.filter((item) => item.change < 0).length,
-    flat: instruments.filter((item) => item.change === 0).length,
-  };
-  const volumeLeaders = [...instruments].sort((a, b) => b.volume - a.volume).slice(0, 4);
-  const total = breadth.up + breadth.down + breadth.flat || 1;
-  const share = (value: number) => `${(value / total) * 100}%`;
-  return (
-    <article className={`${styles.card} ${styles.fill}`}>
-      <header className={styles.cardHead}>
-        <h3>{tr("Обзор рынка")}</h3>
-        <Link href="/market/quotes" aria-label={tr("Обзор рынка")}>
-          <Arrow />
-        </Link>
-      </header>
-
-      <p className={styles.overviewLabel}>{tr("Ширина рынка")}</p>
-      <div className={styles.breadthBar} aria-hidden="true">
-        <i className={styles.breadthUp} style={{ width: share(breadth.up) }} />
-        <i className={styles.breadthFlat} style={{ width: share(breadth.flat) }} />
-        <i className={styles.breadthDown} style={{ width: share(breadth.down) }} />
-      </div>
-      <dl className={styles.breadth}>
-        <div>
-          <dt>{tr("Растут")}</dt>
-          <dd className={styles.up}>{breadth.up}</dd>
-        </div>
-        <div>
-          <dt>{tr("Без изменений")}</dt>
-          <dd>{breadth.flat}</dd>
-        </div>
-        <div>
-          <dt>{tr("Падают")}</dt>
-          <dd className={styles.down}>{breadth.down}</dd>
-        </div>
-      </dl>
-
-      <p className={styles.overviewLabel}>{tr("Лидеры по объёму")}</p>
-      <ul className={styles.movers}>
-        {volumeLeaders.map((item) => (
-          <li key={item.ticker}>
-            <Link href={instrumentHref(market, item.ticker)}>
-              <Badge item={item} />
-              <span>{item.ticker}</span>
-              <em>{formatSom(item.volume)}</em>
-            </Link>
-          </li>
-        ))}
-      </ul>
     </article>
   );
 }
@@ -715,9 +656,8 @@ export function MarketPulse() {
           </>
         ) : (
           <>
-            <MoverList title="Топ роста" list={gainers} href="/market" />
-            <MoverList title="Топ падения" list={losers} href="/market" />
-            <MarketOverviewCard />
+            <MoverList title="Топ роста" list={gainers} href="/market" fill />
+            <MoverList title="Топ падения" list={losers} href="/market" fill />
           </>
         )}
       </aside>

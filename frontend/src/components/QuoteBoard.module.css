@@ -31,6 +31,8 @@
   font-size: 22px;
   font-weight: 600;
   letter-spacing: -0.04em;
+  /* В одну строку: иначе шапка панели выше соседней и линии строк расходятся. */
+  white-space: nowrap;
 }
 
 .head a {
@@ -110,13 +112,42 @@
   color: var(--down);
 }
 
+.panel:has(.auctions) {
+  container-type: inline-size;
+}
+
+.auctionColumns,
+.auctions a {
+  grid-template-columns: minmax(0, 1fr) 84px 104px 92px;
+}
+
 .auctions a {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px 12px;
-  padding: 14px 20px;
+  gap: 8px;
+  align-items: center;
+  padding: 13px 20px;
   border-top: 1px solid var(--line);
   color: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.auctionColumns span:nth-child(n + 2),
+.auctions a > :nth-child(n + 2) {
+  text-align: right;
+}
+
+/* Узкая панель: объём прячем, чтобы строка осталась в одну линию. */
+@container (max-width: 420px) {
+  .auctionColumns,
+  .auctions a {
+    grid-template-columns: minmax(0, 1fr) 84px 92px;
+  }
+
+  .auctionColumns span:nth-child(3),
+  .auctions a span {
+    display: none;
+  }
 }
 
 .auctions a:hover {
@@ -129,20 +160,20 @@
 }
 
 .auctions b {
-  font-size: 15px;
+  overflow: hidden;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .auctions time,
 .auctions span {
   color: var(--ink-muted);
-  font-size: 13px;
+  white-space: nowrap;
 }
 
 .auctions small {
-  justify-self: end;
-  align-self: center;
   color: var(--brand-strong);
   font-size: 12px;
   font-weight: 700;

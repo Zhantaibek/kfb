@@ -106,8 +106,8 @@
 
 .logoMark,
 .logoMarkMobile {
-  width: 42px;
-  height: 42px;
+  width: 52px;
+  height: 52px;
   flex: none;
   object-fit: contain;
 }
@@ -119,8 +119,8 @@
 .logoLockup {
   display: block;
   width: auto;
-  height: 52px;
-  max-width: min(340px, 32vw);
+  height: 62px;
+  max-width: min(400px, 36vw);
   object-fit: contain;
   object-position: left center;
 }
@@ -530,12 +530,21 @@ a.cabinetBtn {
   border-radius: 2px;
 }
 
+/* Три линии; открытое меню — крестик из крайних, средняя исчезает. Сдвиг = gap + толщина линии. */
+.menu > summary i {
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
 .menu[open] > summary i:first-child {
-  transform: translateY(3.4px) rotate(45deg);
+  transform: translateY(6.8px) rotate(45deg);
+}
+
+.menu[open] > summary i:nth-child(2) {
+  opacity: 0;
 }
 
 .menu[open] > summary i:last-child {
-  transform: translateY(-3.4px) rotate(-45deg);
+  transform: translateY(-6.8px) rotate(-45deg);
 }
 
 .menuPanel {
@@ -1501,7 +1510,7 @@ a.cabinetBtn {
 /* Контент шапки ограничен 1480px, поэтому компактные размеры нужны и на широких экранах. */
 @media (min-width: 1280px) {
   .logoLockup {
-    max-width: min(250px, 20vw);
+    max-width: min(300px, 20vw);
   }
 
   .navLink,
@@ -1562,8 +1571,8 @@ a.cabinetBtn {
 
   .header .logoMarkMobile {
     display: block;
-    width: 40px;
-    height: 40px;
+    width: 46px;
+    height: 46px;
   }
 }
 
@@ -1736,16 +1745,30 @@ a.cabinetBtn {
   }
 }
 
+/* Размер разделов подобран под свободное место: от 1760px появляется широкий логотип — строка снова плотнее. */
+@media (min-width: 1360px) {
+  .nav .navLink {
+    font-size: 13.5px;
+  }
+}
+
 @media (min-width: 1520px) {
   .nav .navLink {
     padding: 0 9px;
-    font-size: 13px;
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1760px) {
+  .nav .navLink {
+    padding: 0 7px;
+    font-size: 14px;
   }
 }
 
 @media (min-width: 1760px) {
   .logoLockup {
-    max-width: 210px;
+    max-width: 290px;
   }
 }
 
@@ -1817,7 +1840,10 @@ a.cabinetBtn {
   margin: 0 -10px;
   border-radius: 10px;
   color: var(--ink);
-  font-size: 14.5px;
+  /* Как пункты строки навигации в шапке (.navLink). */
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   line-height: 1.35;
 }
 
@@ -1834,7 +1860,7 @@ a.cabinetBtn {
   border-bottom: 1px solid var(--line);
   border-radius: 0;
   color: var(--brand-strong);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -1874,7 +1900,7 @@ a.cabinetBtn {
 .megaSub > a {
   padding-left: 22px;
   color: var(--ink-muted);
-  font-size: 14px;
+  font-weight: 500;
 }
 
 @keyframes megaIn {
