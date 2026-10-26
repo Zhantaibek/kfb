@@ -25,6 +25,7 @@ import type {
   CmsMedia,
   CmsMenuItem,
   CmsNews,
+  CmsNewsAttachment,
   CmsPage,
   CmsRequest,
   CmsSiteSettings,
@@ -52,10 +53,20 @@ export function toCmsNews(row: News): CmsNews {
     body: row.body,
     photo: row.photo,
     issuerSlug: row.issuerSlug ?? "",
+    attachments: parseAttachments(row.attachments),
     i18n: parseI18n(row.i18n),
     createdAt: iso(row.createdAt),
     updatedAt: iso(row.updatedAt),
   };
+}
+
+/** Вложения новости из JSON: только корректные записи. */
+function parseAttachments(value: unknown): CmsNewsAttachment[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((row): row is Record<string, unknown> => !!row && typeof row === "object")
+    .map((row) => ({ name: String(row.name ?? ""), url: String(row.url ?? ""), ext: String(row.ext ?? ""), size: Number(row.size) || 0 }))
+    .filter((row) => row.name && row.url);
 }
 
 export function toCmsManagementPerson(row: ManagementPerson): CmsManagementPerson {
@@ -239,6 +250,7 @@ export function toCmsUser(row: User): CmsUser {
     email: row.email,
     role: row.role as CmsUser["role"],
     password: row.password,
+    totpEnabled: row.totpEnabled,
   };
 }
 

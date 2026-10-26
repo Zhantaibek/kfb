@@ -6,6 +6,9 @@ export type RequestStatus = "new" | "done";
 export type LocaleCode = "ky" | "en";
 export type CmsI18n = Partial<Record<LocaleCode, Record<string, string>>>;
 
+/** Документ, прикреплённый к новости (файл загружен через /api/admin/upload). */
+export type CmsNewsAttachment = { name: string; url: string; ext: string; size: number };
+
 export type CmsNews = {
   id: string;
   slug: string;
@@ -18,6 +21,7 @@ export type CmsNews = {
   body: string;
   photo: string;
   issuerSlug: string;
+  attachments?: CmsNewsAttachment[];
   i18n?: CmsI18n;
   createdAt: string;
   updatedAt: string;
@@ -337,6 +341,17 @@ export type CmsUser = {
   email: string;
   role: UserRole;
   password: string;
+  /** Включён ли двухфакторный вход (сам секрет сервер не отдаёт). */
+  totpEnabled?: boolean;
+};
+
+/** Существенный факт эмитента (центр раскрытия информации). */
+export type DisclosureEvent = {
+  /** Дата раскрытия, ГГГГ-ММ-ДД */
+  date: string;
+  title: string;
+  /** Карточка сообщения в системе раскрытия oi.kse.kg */
+  url: string;
 };
 
 export type CmsVisit = {

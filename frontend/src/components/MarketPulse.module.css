@@ -3,7 +3,7 @@
   grid-template-columns: 210px minmax(0, 1fr) 270px;
   gap: 14px;
   align-items: start;
-  width: min(1480px, calc(100% - 48px));
+  width: min(var(--page-max), calc(100% - 48px));
   margin: 22px auto 0;
 }
 
@@ -496,6 +496,116 @@ a.row:hover {
   font-style: normal;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* Полоса доли от лидера под строкой «Лидеров недели». */
+.share {
+  grid-column: 2 / -1;
+  height: 3px;
+  margin: -6px 0 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.share i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+}
+
+/* Растянутая карточка — колонкой: итоги прижаты к низу и занимают свободное место. */
+.fill {
+  display: flex;
+  flex-direction: column;
+}
+
+.totals {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0 6px;
+  border-top: 1px solid var(--line);
+}
+
+/* Итоги прижаты к низу растянутой карточки (сильнее, чем margin: 0 у .facts). */
+.fill > .totals {
+  margin: auto 0 0;
+}
+
+.sessionIndex {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 8px;
+  color: inherit;
+}
+
+.sessionIndex span {
+  grid-column: 1 / -1;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.sessionIndex b {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sessionIndex em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sessionIndex:hover b {
+  color: var(--brand-strong);
+}
+
+/* Высота по пропорциям рисунка (120 × 36), иначе график сжимается к центру. */
+.sessionSpark {
+  width: 100%;
+  height: auto;
+}
+
+.facts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.facts div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.facts dt {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.facts dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.facts dd small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.facts,
+.totals,
+.sessionIndex {
+  min-width: 0;
 }
 
 .empty {

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { IssuerView } from "../IssuerView";
-import { getDisclosureNews } from "@/data/disclosure-news";
-import { findIssuer, findListingBySlug, loadIssuerData, loadPublicContent } from "@/lib/cms/public";
+import { findIssuer, findListingBySlug, loadDisclosures, loadIssuerData, loadPublicContent } from "@/lib/cms/public";
 import { newsForIssuer } from "@/lib/cms/types";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -21,13 +20,14 @@ export default async function IssuerPage({ params }: Props) {
   const issuer = findIssuer(data, slug);
   if (!issuer) notFound();
   const news = newsForIssuer(content.news, issuer.slug);
+  const disclosures = await loadDisclosures(issuer.slug);
   // Списки эмитентов и листинга большие — в браузер уходит только нужный эмитент.
   return (
     <IssuerView
       issuer={issuer}
       news={news}
       listing={findListingBySlug(data, issuer.slug)}
-      disclosures={getDisclosureNews(issuer.slug)}
+      disclosures={disclosures}
     />
   );
 }

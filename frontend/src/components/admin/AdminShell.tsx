@@ -27,11 +27,10 @@ const groups: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin/news", label: "Новости", icon: "news" as const },
       { href: "/admin/menu", label: "Меню и страницы", icon: "menu" as const },
-      { href: "/admin/hubs", label: "Главная", icon: "site" as const },
       { href: "/admin/management", label: "Руководство", icon: "users" as const },
       { href: "/admin/issuers", label: "Эмитенты и листинг", icon: "pages" as const },
+      { href: "/admin/disclosure", label: "Раскрытие информации", icon: "news" as const },
       { href: "/admin/partners", label: "Партнёры", icon: "users" as const },
-      { href: "/admin/sections", label: "Карточки разделов", icon: "pages" as const },
       { href: "/admin/sustainable", label: "Устойчивое развитие", icon: "site" as const },
       { href: "/admin/gcb-invest", label: "Инвестиции в ГЦБ", icon: "site" as const },
       { href: "/admin/media", label: "Медиа / фото", icon: "media" as const },
@@ -53,11 +52,9 @@ const groups: { title: string; items: NavItem[] }[] = [
 const titles: Record<string, { title: string; lead: string }> = {
   "/admin/dashboard": { title: "Панель управления", lead: "Обзор CMS, API и быстрые переходы" },
   "/admin/news": { title: "Новости", lead: "Публикации сайта" },
-  "/admin/menu": { title: "Меню и страницы", lead: "Шапка сайта и тексты разделов" },
-  "/admin/hubs": { title: "Главная", lead: "Карточки на главной странице" },
+  "/admin/menu": { title: "Меню и страницы", lead: "Меню, тексты разделов, блоки главной и карточки разделов" },
   "/admin/management": { title: "Руководство", lead: "Совет директоров и исполнительный орган" },
   "/admin/partners": { title: "Партнёры", lead: "Блок «Наши партнеры» на главной и страницы партнёров" },
-  "/admin/sections": { title: "Карточки разделов", lead: "Страницы «О Бирже» и «Статистика торгов»" },
   "/admin/sustainable": { title: "Устойчивое развитие", lead: "Сектор устойчивого развития: тексты, бумаги, верификаторы, ESG-отчёты" },
   "/admin/gcb-invest": { title: "Инвестиции в ГЦБ", lead: "Тексты страницы, брокеры и банки" },
   "/admin/issuers": { title: "Эмитенты и листинг", lead: "Центр раскрытия информации и официальный список" },
@@ -127,7 +124,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
           router.replace("/admin/login");
           return;
         }
-        const data = (await response.json()) as { user?: { name: string } };
+        const data = (await response.json()) as { user?: { name: string }; mfaSetupRequired?: boolean };
+        // 2FA обязателен, а вход не подтверждён кодом: в админке доступна только страница его настройки.
+        if (data.mfaSetupRequired && pathname !== "/admin/profile") {
+          router.replace("/admin/profile");
+          return;
+        }
         setName(data.user?.name ?? "Админ");
         setReady(true);
       })

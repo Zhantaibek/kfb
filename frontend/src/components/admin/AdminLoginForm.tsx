@@ -9,9 +9,11 @@ import css from "@/app/admin/admin.module.css";
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const { tr } = useApp();
+  const { tr, login, verifyMfa } = useApp();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Билет второго шага: пароль верный, включён 2FA — ждём код из приложения.
+  const [ticket, setTicket] = useState<string | null>(null);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -19,16 +21,16 @@ export function AdminLoginForm() {
     setError(null);
     const data = new FormData(event.currentTarget);
     try {
-      const response = await fetch("/api/admin/session", {
-        method: "POST",
-        credentials: "include",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: data.get("email"), password: data.get("password") }),
-      });
-      // Прокси при недоступном API может вернуть не JSON — тогда показываем общую ошибку.
-      const payload = (await response.json().catch(() => ({}))) as { error?: string };
-      if (!response.ok) {
-        setError(payload.error ?? "Ошибка входа");
+      const result = ticket
+        ? await verifyMfa(ticket, String(data.get("code")))
+        : await login(String(data.get("email")), String(data.get("password")));
+      if ("mfaTicket" in result) {
+        setTicket(result.mfaTicket);
+        return;
+      }
+      if ("error" in result) {
+        setError(result.error);
+        if (ticket && /истекло/.test(result.error)) setTicket(null);
         return;
       }
       router.replace("/admin/dashboard");
@@ -50,18 +52,45 @@ export function AdminLoginForm() {
         <Logo />
         <h1>{tr("Портал администратора")}</h1>
         <p className={css.lead}>{tr("CMS Кыргызской фондовой биржи — новости, страницы, фото и заявки.")}</p>
-        <label className={css.field}>
-          <span>E-mail</span>
-          <input name="email" type="email" autoComplete="username" required />
-        </label>
-        <label className={css.field}>
-          <span>{tr("Пароль")}</span>
-          <input name="password" type="password" autoComplete="current-password" required />
-        </label>
-        {error ? <p className={css.error}>{error}</p> : null}
-        <button className={css.primary} disabled={busy} type="submit">
-          {tr("Войти")}
-        </button>
+        {ticket ? (
+          <>
+            <label className={css.field}>
+              <span>{tr("Код из приложения")}</span>
+              <input
+                name="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                placeholder="123 456"
+                pattern="\d{3}\s?\d{3}"
+                maxLength={7}
+                required
+                autoFocus
+              />
+            </label>
+            {error ? <p className={css.error}>{tr(error)}</p> : <p className={css.lead}>{tr("Введите 6 цифр из приложения-аутентификатора.")}</p>}
+            <button className={css.primary} disabled={busy} type="submit">
+              {tr("Подтвердить")}
+            </button>
+            <button className={css.ghost} type="button" onClick={() => { setTicket(null); setError(null); }}>
+              {tr("Назад")}
+            </button>
+          </>
+        ) : (
+          <>
+            <label className={css.field}>
+              <span>E-mail</span>
+              <input name="email" type="email" autoComplete="username" required />
+            </label>
+            <label className={css.field}>
+              <span>{tr("Пароль")}</span>
+              <input name="password" type="password" autoComplete="current-password" required />
+            </label>
+            {error ? <p className={css.error}>{tr(error)}</p> : null}
+            <button className={css.primary} disabled={busy} type="submit">
+              {tr("Войти")}
+            </button>
+          </>
+        )}
       </form>
     </div>
   );

@@ -35,6 +35,8 @@ const options: sanitizeHtml.IOptions = {
     "sup",
     "sub",
     "blockquote",
+    // Видео в тексте новости — только плеер YouTube или Vimeo (см. allowedIframeHostnames).
+    "iframe",
   ],
   allowedAttributes: {
     "*": ["style", "class"],
@@ -44,6 +46,8 @@ const options: sanitizeHtml.IOptions = {
     img: ["src", "alt", "width", "height", "style"],
     figure: ["data-align", "data-width", "data-ox", "data-oy", "class", "style"],
     figcaption: ["class"],
+    iframe: ["src", "title", "allow", "allowfullscreen", "loading", "referrerpolicy"],
+    div: ["class", "data-video"],
     span: ["style"],
     p: ["style"],
     h2: ["style"],
@@ -64,11 +68,34 @@ const options: sanitizeHtml.IOptions = {
       transform: [/^translate\(\s*-?\d+(?:\.\d+)?px\s*,\s*-?\d+(?:\.\d+)?px\s*\)$/],
     },
   },
-  allowedSchemes: ["http", "https", "mailto", "data"],
+  // data: — только у картинок: в ссылке он позволил бы открыть произвольный HTML.
+  allowedSchemes: ["http", "https", "mailto", "tel"],
   allowedSchemesByTag: {
     img: ["http", "https", "data"],
+    iframe: ["https"],
   },
+  allowedIframeHostnames: ["www.youtube-nocookie.com", "www.youtube.com", "player.vimeo.com"],
+  allowIframeRelativeUrls: false,
   transformTags: {
+    // Внешние ссылки открываются в новой вкладке без доступа к нашей странице (window.opener).
+    a: (_tagName, attribs) => {
+      const href = attribs.href ?? "";
+      const external = /^https?:\/\//i.test(href) && !/^https?:\/\/(www\.)?kse\.kg(\/|$)/i.test(href);
+      const linkAttribs: Record<string, string> = external ? { href, target: "_blank", rel: "noopener noreferrer" } : { href };
+      return { tagName: "a", attribs: linkAttribs };
+    },
+    // Плеер видео: только адрес встраивания; атрибуты задаём сами.
+    iframe: (_tagName, attribs) => ({
+      tagName: "iframe",
+      attribs: {
+        src: attribs.src ?? "",
+        title: attribs.title || "Видео",
+        allow: "accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen",
+        allowfullscreen: "",
+        loading: "lazy",
+        referrerpolicy: "strict-origin-when-cross-origin",
+      },
+    }),
     figure: (_tagName, attribs) => {
       const align = attribs["data-align"] ?? "inline";
       const width = align === "full" ? "100" : (attribs["data-width"] ?? "100");

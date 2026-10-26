@@ -58,7 +58,7 @@ export function DashboardView() {
           <b>Контакты</b>
           <small>Телефоны и подвал</small>
         </Link>
-        <Link href="/admin/hubs">
+        <Link href="/admin/menu?tab=home">
           <b>Главная</b>
           <small>Карточки на главной</small>
         </Link>

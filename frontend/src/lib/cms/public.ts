@@ -4,6 +4,7 @@ import type {
   CmsNews,
   CmsPage,
   CmsSiteSettings,
+  DisclosureEvent,
   IssuerData,
   PublicContent,
 } from "@/lib/cms/types";
@@ -54,6 +55,17 @@ export async function loadIssuerData(): Promise<IssuerData> {
     return (await response.json()) as IssuerData;
   } catch {
     return { issuers: [], listing: [] };
+  }
+}
+
+/** События эмитента из базы (синхронизация с kse.kg + добавленные в админке). API недоступен — пустой список. */
+export async function loadDisclosures(slug: string): Promise<DisclosureEvent[]> {
+  try {
+    const response = await fetch(`${apiUrl}/api/public/disclosure/${encodeURIComponent(slug)}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("CMS API недоступен");
+    return (await response.json()) as DisclosureEvent[];
+  } catch {
+    return [];
   }
 }
 

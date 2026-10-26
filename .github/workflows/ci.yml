@@ -1,0 +1,70 @@
+# Проверки каждого pull request и пуша в main: типы, lint, тесты, сборка backend и сайта.
+# Сборке сайта нужен работающий API (страницы читают контент при сборке) — он поднимается на тестовой базе.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kse
+          POSTGRES_PASSWORD: kse
+          POSTGRES_DB: kse
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U kse -d kse" --health-interval 3s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://kse:kse@localhost:5433/kse
+      API_URL: http://localhost:4000
+      KSE_SYNC: "off"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Migrate test database
+        run: npm run db:deploy -w backend
+
+      - name: Build backend (Prisma Client + TypeScript)
+        run: npm run build -w backend
+
+      - name: Typecheck frontend
+        run: npx tsc --noEmit -p frontend
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Start API for the site build
+        run: |
+          npm run start -w backend > api.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:4000/api/health && exit 0; sleep 2; done
+          cat api.log; exit 1
+
+      - name: Build site
+        run: npm run build -w frontend

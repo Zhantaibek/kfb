@@ -40,7 +40,7 @@ export const adminAnalyticsRoutes = Router();
 adminAnalyticsRoutes.get(
   "/summary",
   asyncHandler(async (req: Request, res: Response) => {
-    requireSession(req);
+    await requireSession(req);
     res.json(await visitSummary());
   }),
 );
@@ -48,7 +48,7 @@ adminAnalyticsRoutes.get(
 adminAnalyticsRoutes.get(
   "/visits",
   asyncHandler(async (req: Request, res: Response) => {
-    requireSession(req);
+    await requireSession(req);
     const query = listQuery.parse(req.query);
     res.json(await listVisits(query.period, query.page, query.pageSize));
   }),

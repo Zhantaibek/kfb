@@ -4,18 +4,18 @@ import { createRequest, getAdminData, getIssuerData, getPublicContent, mutateCol
 import type { MutableCollection } from "../../validation/cms";
 
 export async function readAdminData(req: Request, res: Response) {
-  requireSession(req);
+  await requireSession(req);
   res.json(await getAdminData());
 }
 
 export async function writeAdminData(req: Request, res: Response) {
-  const session = requireSession(req);
+  const session = await requireSession(req);
   res.json(await mutateCollection(session, req.body ?? {}));
 }
 
 export function createCollectionItem(collection: MutableCollection) {
   return async (req: Request, res: Response) => {
-    const session = requireSession(req);
+    const session = await requireSession(req);
     res.status(201).json(
       await mutateCollection(session, {
         op: "create",
@@ -28,7 +28,7 @@ export function createCollectionItem(collection: MutableCollection) {
 
 export function updateCollectionItem(collection: MutableCollection) {
   return async (req: Request, res: Response) => {
-    const session = requireSession(req);
+    const session = await requireSession(req);
     res.json(
       await mutateCollection(session, {
         op: "update",
@@ -42,7 +42,7 @@ export function updateCollectionItem(collection: MutableCollection) {
 
 export function deleteCollectionItem(collection: MutableCollection) {
   return async (req: Request, res: Response) => {
-    const session = requireSession(req);
+    const session = await requireSession(req);
     res.json(
       await mutateCollection(session, {
         op: "delete",

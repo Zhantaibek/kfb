@@ -1,10 +1,12 @@
 "use client";
 
+import { CmsImage } from "@/components/CmsImage";
 import { useLocalizedList } from "@/lib/cms/use-localized";
 import { managementByGroup, managementGroupIds, managementGroupTitles, paragraphs, type CmsManagementPerson } from "@/lib/cms/types";
 import { useTr } from "@/lib/use-tr";
 import ui from "@/app/ui.module.css";
 import css from "@/app/about/management/management.module.css";
+import { toggleDetails } from "@/lib/animate-details";
 
 function initials(name: string) {
   return name
@@ -22,7 +24,7 @@ function Person({ person }: { person: CmsManagementPerson }) {
 
   return (
     <details className={css.person}>
-      <summary className={css.head}>
+      <summary className={css.head} onClick={toggleDetails}>
         <span className={css.headText}>
           <b>{person.name}</b>
           <small>{person.role}</small>
@@ -34,7 +36,7 @@ function Person({ person }: { person: CmsManagementPerson }) {
       <div className={css.body}>
         <div className={css.portrait}>
           {person.photo ? (
-            <img src={person.photo} alt={person.name} loading="lazy" />
+            <CmsImage src={person.photo} alt={person.name} loading="lazy" />
           ) : (
             <span className={css.noPhoto} aria-hidden="true">
               {initials(person.name)}

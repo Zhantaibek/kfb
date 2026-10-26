@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FeedbackForm, PageIntro } from "@/components/Forms";
-import { DataTable, LiveSource } from "@/components/live/LiveParts";
+import { DataTable } from "@/components/live/LiveParts";
 import { MarketLinks } from "@/components/live/LiveViews";
 import { loadSnapshot, type TablesPage } from "@/lib/kse-live";
 import ui from "@/app/ui.module.css";
@@ -27,12 +27,7 @@ export default async function GcbPage() {
       <section style={{ marginBottom: 22 }}>
         <h2 style={{ margin: "0 0 10px", fontSize: 22 }}>{schedule?.data.title || "Расписание аукционов по ГЦБ"}</h2>
         {schedule ? (
-          <>
-            <LiveSource snapshot={schedule} />
-            {schedule.data.tables.map((table, i) => (
-              <DataTable key={i} table={table} />
-            ))}
-          </>
+          schedule.data.tables.map((table, i) => <DataTable key={i} table={table} />)
         ) : (
           <p className={ui.muted}>
             Расписание загружается с kse.kg.{" "}
@@ -60,7 +55,7 @@ export default async function GcbPage() {
             { name: "email", label: "E-mail", type: "email", required: true },
             { name: "type", label: "Инструмент (ГКВ-12 / ГКО-2)", required: true },
           ]}
-          success="Заявка принята. Это демо: письмо не отправляется, аукционы смотрите в таблице."
+          success="Заявка принята. Сотрудник биржи свяжется с вами в рабочее время; расписание аукционов — в таблице."
         />
       </div>
       <MarketLinks current="/gcb" />

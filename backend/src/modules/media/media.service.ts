@@ -1,8 +1,9 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "../../config";
-import { detachMediaUrl, insertAudit, insertMedia } from "../../db/repositories/cms.repository";
+import { insertAudit, insertMedia } from "../../db/repositories/cms.repository";
 import type { AdminSession } from "../../../../shared/cms";
+import { AppError } from "../../middleware/error";
 import { decodeUploadName } from "../../utils/upload-name";
 
 const allowed = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
@@ -28,17 +29,28 @@ function documentExt(file: { buffer: Buffer; originalname: string }) {
   return magic && file.buffer.subarray(0, magic.length).equals(magic) ? ext : null;
 }
 
+/** Тип картинки присылает браузер — сверяем с первыми байтами файла, чтобы под .png не сохранили что-то другое. */
+export function looksLikeImage(buffer: Buffer, mimetype: string) {
+  const head = buffer.subarray(0, 12);
+  if (mimetype === "image/jpeg") return head.subarray(0, 3).equals(Buffer.from("ffd8ff", "hex"));
+  if (mimetype === "image/png") return head.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex"));
+  if (mimetype === "image/gif") return head.subarray(0, 4).toString("latin1") === "GIF8";
+  if (mimetype === "image/webp") return head.subarray(0, 4).toString("latin1") === "RIFF" && head.subarray(8, 12).toString("latin1") === "WEBP";
+  return false;
+}
+
 export async function saveUpload(
   session: AdminSession,
   file: { buffer: Buffer; mimetype: string; originalname: string },
 ) {
   let ext: string;
   if (allowed.has(file.mimetype)) {
-    if (file.buffer.length > imageMaxBytes) throw new Error("Картинка больше 4 МБ");
+    if (file.buffer.length > imageMaxBytes) throw new AppError("Картинка больше 4 МБ", 400);
+    if (!looksLikeImage(file.buffer, file.mimetype)) throw new AppError("Файл не похож на изображение указанного формата", 400);
     ext = file.mimetype.split("/")[1] === "jpeg" ? "jpg" : file.mimetype.split("/")[1];
   } else {
     const doc = documentExt(file);
-    if (!doc) throw new Error("Можно загрузить JPG, PNG, WEBP, GIF или документ PDF, DOC, DOCX, XLS, XLSX, ZIP");
+    if (!doc) throw new AppError("Можно загрузить JPG, PNG, WEBP, GIF или документ PDF, DOC, DOCX, XLS, XLSX, ZIP", 400);
     ext = doc;
   }
 
@@ -70,11 +82,4 @@ export async function removeUploadedFile(url: string) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code !== "ENOENT") throw error;
   }
-}
-
-export async function purgeMediaRecord(existing: Record<string, unknown>) {
-  const url = String(existing.url ?? "");
-  if (!url) return;
-  await detachMediaUrl(url);
-  await removeUploadedFile(url);
 }

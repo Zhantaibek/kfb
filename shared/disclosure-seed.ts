@@ -1,4 +1,8 @@
-/** Новости (существенные факты) эмитентов — как на https://www.kse.kg/ru/PublicInfo/<slug> */
+/**
+ * Начальное заполнение таблицы disclosure_events (существенные факты эмитентов, снимок https://www.kse.kg/ru/PublicInfo/<slug>
+ * на 14.09.2026). Загружается один раз в пустую таблицу (backend/src/db/postgres.ts); дальше события приходят
+ * синхронизацией с kse.kg (modules/disclosure-sync) и из админки. Не править руками.
+ */
 
 export type DisclosureEvent = {
   /** Дата раскрытия, ГГГГ-ММ-ДД */
@@ -9,7 +13,7 @@ export type DisclosureEvent = {
   url: string;
 };
 
-const events: Record<string, DisclosureEvent[]> = {
+export const disclosureSeed: Record<string, DisclosureEvent[]> = {
   "AIF_Elesinvest": [
     { date: "2026-04-30", title: "Решения, принятые общим собранием акционеров", url: "https://oi.kse.kg/report/22/19/5468" },
     { date: "2026-04-06", title: "Проведение общего собрания акционеров", url: "https://oi.kse.kg/report/28/24/5048" },
@@ -2134,8 +2138,3 @@ const events: Record<string, DisclosureEvent[]> = {
   ],
 };
 
-const bySlug = new Map(Object.entries(events).map(([slug, list]) => [slug.toLowerCase(), list]));
-
-export function getDisclosureNews(slug: string): DisclosureEvent[] {
-  return bySlug.get(slug.toLowerCase()) ?? [];
-}

@@ -74,22 +74,25 @@ export function createApp() {
   app.use("/api/public/request", publicLimiter);
   app.use("/api/public/visit", publicLimiter);
 
-  app.get("/openapi.json", (_req, res) => {
-    res.json(openApiSpec);
-  });
-  app.use(
-    "/docs",
-    swaggerUi.serve,
-    swaggerUi.setup(openApiSpec as object, {
-      customSiteTitle: "KSE API — Swagger",
-      swaggerOptions: {
-        persistAuthorization: true,
-        withCredentials: true,
-        docExpansion: "list",
-        displayRequestDuration: true,
-      },
-    }),
-  );
+  // Документация API (все маршруты админки) — только при разработке; в production включается явно: API_DOCS=on.
+  if (!config.isProduction || process.env.API_DOCS === "on") {
+    app.get("/openapi.json", (_req, res) => {
+      res.json(openApiSpec);
+    });
+    app.use(
+      "/docs",
+      swaggerUi.serve,
+      swaggerUi.setup(openApiSpec as object, {
+        customSiteTitle: "KSE API — Swagger",
+        swaggerOptions: {
+          persistAuthorization: true,
+          withCredentials: true,
+          docExpansion: "list",
+          displayRequestDuration: true,
+        },
+      }),
+    );
+  }
   app.use("/api", api);
   app.use(errorHandler);
 

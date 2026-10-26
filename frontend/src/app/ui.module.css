@@ -70,14 +70,17 @@
   width: 100%;
   min-height: 72px;
   margin: 0;
-  padding: 8px max(24px, calc((100% - 1480px) / 2));
+  padding: 8px max(24px, calc((100% - var(--page-max)) / 2));
   border-radius: 0;
   overflow: visible;
   background: var(--header-bg);
   backdrop-filter: blur(18px) saturate(1.2);
   border: 0;
-  border-bottom: 1px solid var(--card-border);
-  box-shadow: 0 8px 24px rgba(18, 24, 32, 0.05);
+  /* Нижняя линия — тенью, а не border: рамка в 1px делала высоту нечётной, кнопки вставали
+     на полпикселя и линии иконки меню размывались неодинаково. */
+  box-shadow:
+    inset 0 -1px 0 var(--card-border),
+    0 8px 24px rgba(18, 24, 32, 0.05);
 }
 
 @keyframes ticker-run {
@@ -430,9 +433,9 @@ a.cabinetBtn {
   height: 44px;
   padding: 0 18px;
   border-radius: 12px;
-  background: var(--brand);
-  color: var(--on-brand);
-  border: 1px solid var(--brand);
+  background: var(--brand-fill);
+  color: #fff;
+  border: 1px solid var(--brand-fill);
   font-size: 14px;
   font-weight: 650;
   box-shadow: var(--glow);
@@ -516,7 +519,15 @@ a.cabinetBtn {
   height: 40px;
   padding: 0;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
+}
+
+/* Кнопки шапки — не текст: без выделения, мигающей каретки и серой вспышки при нажатии на телефоне. */
+.headerActions summary,
+.headerActions button {
+  user-select: none;
+  caret-color: transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .menu > summary::after {
@@ -526,26 +537,30 @@ a.cabinetBtn {
 .menu > summary i {
   display: block;
   width: 16px;
-  height: 1.8px;
+  /* Целые пиксели: при 1.8px браузер округлял линии по-разному и одна выглядела толще. */
+  height: 2px;
   background: var(--ink);
   border-radius: 2px;
 }
 
-/* Три линии; открытое меню — крестик из крайних, средняя исчезает. Сдвиг = gap + толщина линии. */
+/* Три линии; открытое меню — крестик из крайних, средняя исчезает. Сдвиг = gap + толщина линии (4 + 2). */
 .menu > summary i {
-  transition: transform 0.18s ease, opacity 0.18s ease;
+  transition:
+    transform 0.32s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.2s ease;
 }
 
-.menu[open] > summary i:first-child {
-  transform: translateY(6.8px) rotate(45deg);
+.menu[open]:not([data-closing]) > summary i:first-child {
+  transform: translateY(6px) rotate(45deg);
 }
 
-.menu[open] > summary i:nth-child(2) {
+.menu[open]:not([data-closing]) > summary i:nth-child(2) {
   opacity: 0;
+  transform: scaleX(0);
 }
 
-.menu[open] > summary i:last-child {
-  transform: translateY(-6.8px) rotate(-45deg);
+.menu[open]:not([data-closing]) > summary i:last-child {
+  transform: translateY(-6px) rotate(-45deg);
 }
 
 .menuPanel {
@@ -599,9 +614,10 @@ a.cabinetBtn {
   border-right: 1.6px solid currentColor;
   border-bottom: 1.6px solid currentColor;
   transform: rotate(45deg);
+  transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.menuGroup[open] summary::after {
+.menuGroup[open]:not([data-closing]) summary::after {
   transform: rotate(225deg);
 }
 
@@ -625,7 +641,7 @@ a.cabinetBtn {
 
 .wrap {
   /* Поля как у главной и шапки (24px), а не 10px: контент не прилипает к краю окна. */
-  width: min(1480px, calc(100% - 48px));
+  width: min(var(--page-max), calc(100% - 48px));
   margin: 0 auto;
   padding: 28px 0 88px;
 }
@@ -915,7 +931,7 @@ a.cabinetBtn {
 }
 
 .footer {
-  --footer-edge: max(24px, calc((100% - 1480px) / 2));
+  --footer-edge: max(24px, calc((100% - var(--page-max)) / 2));
   width: 100%;
   margin: 8px 0 0;
   padding: 12px var(--footer-edge) 8px;
@@ -989,8 +1005,8 @@ a.cabinetBtn {
   padding: 34px 32px 34px 36%;
   border-radius: 56px;
   background: var(--hero);
-  /* Тёмный текст на фирменном бирюзовом: белый давал контраст 2,4:1 (нужно ≥ 4,5:1). */
-  --on-brand: #0b2a2e;
+  /* Белый текст на фирменном бирюзовом (по просьбе заказчика; контраст ниже нормы WCAG 4,5:1). */
+  --on-brand: #fff;
   color: var(--on-brand);
 }
 
@@ -1202,7 +1218,7 @@ a.cabinetBtn {
   display: block;
   max-width: 46em;
   margin-top: 4px;
-  color: rgba(11, 42, 46, 0.82);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0;
@@ -1511,7 +1527,7 @@ a.cabinetBtn {
   }
 }
 
-/* Контент шапки ограничен 1480px, поэтому компактные размеры нужны и на широких экранах. */
+/* Контент шапки ограничен шириной страницы, поэтому компактные размеры нужны и на широких экранах. */
 @media (min-width: 1280px) {
   .logoLockup {
     max-width: min(300px, 20vw);
@@ -1801,11 +1817,11 @@ a.cabinetBtn {
     max-height: calc(100dvh - 120px);
     overflow: auto;
     overscroll-behavior: contain;
-    padding: 28px max(24px, calc((100% - 1480px) / 2)) 36px;
+    padding: 28px max(24px, calc((100% - var(--page-max)) / 2)) 36px;
     border-bottom: 1px solid var(--card-border);
     background: var(--surface);
     box-shadow: 0 24px 48px -24px rgba(18, 24, 32, 0.25);
-    animation: megaIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: megaIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .menu[open] .megaBackdrop {
@@ -1893,10 +1909,12 @@ a.cabinetBtn {
   border-right: 1.6px solid currentColor;
   border-bottom: 1.6px solid currentColor;
   transform: rotate(45deg);
-  transition: transform 0.18s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.65, 0, 0.35, 1),
+    margin-top 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.megaSub[open] > summary::after {
+.megaSub[open]:not([data-closing]) > summary::after {
   margin-top: 3px;
   transform: rotate(225deg);
 }
@@ -1920,10 +1938,96 @@ a.cabinetBtn {
   }
 }
 
+/* Закрытие меню (data-closing ставит SiteHeader): панель гаснет и чуть уезжает вверх, затемнение исчезает. */
+.menu[open][data-closing] .megaPanel {
+  animation: megaOut 0.24s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.menu[open][data-closing] .megaBackdrop {
+  animation: megaFadeOut 0.24s ease forwards;
+}
+
+.menu[open][data-closing] .menuPanel {
+  animation: menuOut 0.24s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes megaOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes megaFadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes menuOut {
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+/* Раскрытие меню: колонки большой панели появляются по очереди, мобильная панель выезжает,
+   подразделы (Комитеты, Участники торгов, группы мобильного меню) плавно раскрываются. */
+.menu[open] .megaCol {
+  animation: megaItem 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.menu[open] .megaCol:nth-child(2) {
+  animation-delay: 0.04s;
+}
+
+.menu[open] .megaCol:nth-child(3) {
+  animation-delay: 0.08s;
+}
+
+.menu[open] .megaCol:nth-child(4) {
+  animation-delay: 0.12s;
+}
+
+.menu[open] .megaCol:nth-child(5) {
+  animation-delay: 0.16s;
+}
+
+.menu[open] .menuPanel {
+  transform-origin: top right;
+  animation: menuPop 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Высоту разделов и появление пунктов анимирует toggleDetails (lib/animate-details.ts). */
+@keyframes megaItem {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes menuPop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .menu[open] .megaPanel,
-  .menu[open] .megaBackdrop {
-    animation: none;
+  .menu[open] .megaBackdrop,
+  .menu[open] .megaCol,
+  .menu[open] .menuPanel,
+  .menu[open][data-closing] .megaPanel,
+  .menu[open][data-closing] .megaBackdrop,
+  .menu[open][data-closing] .menuPanel,
+  .megaSub > summary::after,
+  .menuGroup summary::after {
+    transition: none;
+  }
+
+  .menu > summary i {
+    transition: none;
   }
 }
 
@@ -2029,7 +2133,7 @@ a.cabinetBtn {
   max-width: 600px;
   margin: 4px 0 0;
   padding: 10px 0 0;
-  border-top: 1px solid rgba(11, 42, 46, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
   list-style: none;
 }
 
@@ -2059,7 +2163,7 @@ a.cabinetBtn {
   width: 15px;
   height: 15px;
   fill: none;
-  stroke: rgba(11, 42, 46, 0.75);
+  stroke: rgba(255, 255, 255, 0.85);
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -2073,5 +2177,83 @@ a.cabinetBtn {
 
   .footerContacts li {
     align-items: flex-start;
+  }
+}
+
+/* Документы под текстом новости: формат, название, размер, «Скачать». */
+.newsDocs {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.newsDocs h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.newsDocs ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.newsDocs a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.newsDocs a:hover {
+  border-color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 6%, transparent);
+}
+
+.newsDocs a > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.newsDocs b {
+  overflow-wrap: anywhere;
+  font-weight: 650;
+}
+
+.newsDocs small {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.newsDocExt {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--brand) 14%, transparent);
+  color: var(--brand-text);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.newsDocAction {
+  color: var(--brand-text);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+@media (max-width: 520px) {
+  .newsDocAction {
+    display: none;
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { CmsImage } from "@/components/CmsImage";
 import { useState } from "react";
 import { useAdminStore } from "@/lib/cms/client";
 import { useContentLang } from "@/lib/cms/use-content-lang";
@@ -134,7 +135,7 @@ export function PartnersManager() {
             <div className={`${css.field} ${css.wide}`}>
               <span>Логотип</span>
               <div className={css.docRow} style={{ gridTemplateColumns: "auto auto 1fr auto" }}>
-                {editing.logo ? <img className={css.thumb} src={editing.logo} alt="" style={{ objectFit: "contain", background: "#fff" }} /> : <span className={css.docFile}>Нет логотипа</span>}
+                {editing.logo ? <CmsImage className={css.thumb} src={editing.logo} alt="" style={{ objectFit: "contain", background: "#fff" }} /> : <span className={css.docFile}>Нет логотипа</span>}
                 <label className={css.ghost} style={{ display: "inline-flex", alignItems: "center", whiteSpace: "nowrap" }}>
                   {busy ? "Загрузка…" : editing.logo ? "Заменить" : "Загрузить с ПК"}
                   <input
@@ -189,7 +190,7 @@ export function PartnersManager() {
             {partners.map((item, index) => (
               <tr key={item.id}>
                 <td>{index + 1}</td>
-                <td>{item.logo ? <img className={css.thumb} src={item.logo} alt="" style={{ objectFit: "contain", background: "#fff" }} /> : <b>{item.mark}</b>}</td>
+                <td>{item.logo ? <CmsImage className={css.thumb} src={item.logo} alt="" style={{ objectFit: "contain", background: "#fff" }} /> : <b>{item.mark}</b>}</td>
                 <td className={css.wrap}>
                   <b>
                     {item.mark} · {item.caption}

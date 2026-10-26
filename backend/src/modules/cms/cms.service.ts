@@ -1,6 +1,7 @@
 import {
   createItem,
   deleteItem,
+  detachMediaUrl,
   findItem,
   insertAudit,
   insertRequest,
@@ -28,7 +29,9 @@ import { hashPassword } from "../auth/password";
 import { sanitizeRichHtml } from "../../utils/sanitize-html";
 import { AppError } from "../../middleware/error";
 import { itemSchemas, mutateSchema, type MutableCollection } from "../../validation/cms";
-import { purgeMediaRecord } from "../media/media.service";
+import { removeUploadedFile } from "../media/media.service";
+import { inTransaction } from "../../db/prisma";
+import { notifyNewRequest } from "../notify/notify";
 import { cachedPublic, invalidatePublicContent } from "../../store/public-cache";
 
 function descendantIds(menu: { id: string; parentId: string | null }[], rootId: string) {
@@ -193,19 +196,23 @@ export async function getAdminData() {
   return sanitizeStore(await readStore());
 }
 
-/** Любая правка в админке сразу сбрасывает кеш публичного контента. */
+/**
+ * Правка из админки — одна транзакция: запись, связанные записи и журнал аудита сохраняются вместе или никак.
+ * Файлы с диска удаляются только после фиксации: откат базы их бы не вернул.
+ * Любая правка сразу сбрасывает кеш публичного контента.
+ */
 export async function mutateCollection(session: AdminSession, body: unknown) {
   try {
-    return await applyMutation(session, body);
+    const removedFiles: string[] = [];
+    await inTransaction(() => applyMutation(session, body, removedFiles));
+    for (const url of removedFiles) await removeUploadedFile(url);
+    return sanitizeStore(await readFullStore());
   } finally {
     invalidatePublicContent();
   }
 }
 
-async function applyMutation(
-  session: AdminSession,
-  body: unknown,
-) {
+async function applyMutation(session: AdminSession, body: unknown, removedFiles: string[]) {
   const parsed = mutateSchema.safeParse(body);
   if (!parsed.success) {
     throw new AppError(parsed.error.issues[0]?.message ?? "Некорректный запрос", 400);
@@ -218,6 +225,11 @@ async function applyMutation(
     throw new AppError("Только администратор может управлять пользователями", 403);
   }
   // Эмитенты и бумаги листинга добавляются только через внешний API (modules/issuers-sync), не из админки.
+  // Записи медиатеки появляются только при загрузке файла (/api/admin/upload): иначе можно завести запись
+  // с адресом чужого файла и, удалив её, стереть этот файл с диска.
+  if (collection === "media" && op === "create") {
+    throw new AppError("Файлы добавляются загрузкой, а не созданием записи", 400);
+  }
   if ((collection === "issuers" || collection === "listing") && op === "create") {
     throw new AppError("Эмитенты и листинг добавляются через API (ISSUERS_API_URL / LISTING_API_URL в .env)", 400);
   }
@@ -239,7 +251,7 @@ async function applyMutation(
           detail: auditDetail(item),
           actor: session.email,
         });
-        return sanitizeStore(await readFullStore());
+        return;
       }
     }
     const item = await prepareItem(collection, rawItem, crypto.randomUUID(), now);
@@ -259,6 +271,8 @@ async function applyMutation(
     if (!existing) throw new Error("not-found");
 
     const item = await prepareItem(collection, { ...existing, ...rawItem }, id, now, existing);
+    // У файла можно сменить только название: адрес привязан к загруженному файлу (см. выше про чужие файлы).
+    if (collection === "media") item.url = existing.url;
     if (collection === "users") {
       if (rawItem.password) {
         item.password = await hashPassword(String(rawItem.password));
@@ -281,8 +295,9 @@ async function applyMutation(
     }
     const existing = await findItem(collection, id);
     if (!existing) throw new Error("not-found");
-    if (collection === "media") {
-      await purgeMediaRecord(existing);
+    if (collection === "media" && existing.url) {
+      await detachMediaUrl(String(existing.url));
+      removedFiles.push(String(existing.url));
     }
     if (collection === "menu") {
       const store = await readStore();
@@ -300,8 +315,6 @@ async function applyMutation(
       actor: session.email,
     });
   }
-
-  return sanitizeStore(await readFullStore());
 }
 
 export function getPublicContent() {
@@ -342,5 +355,7 @@ export async function createRequest(source: string, payload: Record<string, stri
   const trimmedSource = source.slice(0, 80);
   // В журнал аудита публичные заявки не пишем: он для действий сотрудников.
   await insertRequest(trimmedSource, clean);
+  // Не ждём доставки: посетитель получает ответ сразу, сбой отправки только пишется в лог.
+  void notifyNewRequest(trimmedSource, clean);
 }
 

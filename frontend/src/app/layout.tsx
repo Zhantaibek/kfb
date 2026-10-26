@@ -76,8 +76,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Тема и «заставка уже показана в этом сеансе» — до первой отрисовки, чтобы не было вспышек.
-const themeScript = `try{var t=localStorage.getItem("kse-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}else{document.documentElement.setAttribute("data-theme","dark")}}catch(e){}try{if(sessionStorage.getItem("kse-splash")==="1"){document.documentElement.setAttribute("data-splash","seen")}}catch(e){}`;
+const themeScript = `try{var t=localStorage.getItem("kse-theme");if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t)}else{document.documentElement.setAttribute("data-theme","dark")}}catch(e){}try{if(sessionStorage.getItem("kse-splash")){document.documentElement.setAttribute("data-splash","seen")}}catch(e){}`;
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Живые данные kse.kg для бегущей строки, подвала и главной (или демо, если их ещё нет).

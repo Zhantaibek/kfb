@@ -162,74 +162,6 @@ function createFigure(src: string, caption = "") {
   return figure;
 }
 
-function moveFigure(figure: HTMLElement, dir: -1 | 1) {
-  if (dir === 1) {
-    const next = figure.nextElementSibling;
-    if (next) next.after(figure);
-  } else {
-    const prev = figure.previousElementSibling;
-    if (prev) prev.before(figure);
-  }
-}
-
-function nearestBlock(surface: HTMLElement, clientX: number, clientY: number, figure: HTMLElement) {
-  figure.style.pointerEvents = "none";
-  const el = document.elementFromPoint(clientX, clientY);
-  figure.style.pointerEvents = "";
-  if (!el || !surface.contains(el) || figure.contains(el)) return null;
-  if (el === surface) return surface;
-  return (el.closest("p, h2, h3, h4, figure, ul, ol, li") as HTMLElement | null) ?? surface;
-}
-
-function placeFigureAtPoint(figure: HTMLElement, surface: HTMLElement, clientX: number, clientY: number) {
-  const block = nearestBlock(surface, clientX, clientY, figure);
-  if (!block || block === figure) return;
-  if (block === surface) {
-    surface.append(figure);
-    return;
-  }
-  const rect = block.getBoundingClientRect();
-  if (clientY > rect.top + rect.height / 2) block.after(figure);
-  else block.before(figure);
-}
-
-function applyDragPlacement(figure: HTMLElement, surface: HTMLElement, clientX: number, clientY: number, startX: number) {
-  placeFigureAtPoint(figure, surface, clientX, clientY);
-  const rect = surface.getBoundingClientRect();
-  const x = clientX - rect.left;
-  const wrap = wrapOf(asAlign(figure.dataset.align));
-  if (wrap === "inline") {
-    if (Math.abs(clientX - startX) > 56) {
-      figure.dataset.align = x < rect.width / 2 ? "left" : "right";
-    }
-  } else if (wrap === "square") {
-    figure.dataset.align = x < rect.width / 2 ? "left" : "right";
-  } else {
-    if (x < rect.width * 0.33) figure.dataset.align = "below";
-    else if (x > rect.width * 0.66) figure.dataset.align = "block-right";
-    else figure.dataset.align = "center";
-  }
-  syncFigureWidth(figure);
-}
-
-function updateDropCaret(surface: HTMLElement, figure: HTMLElement, clientX: number, clientY: number, caretClass: string) {
-  let caret = surface.querySelector(".rte-drop-caret") as HTMLElement | null;
-  if (!caret) {
-    caret = document.createElement("div");
-    caret.className = `rte-ui rte-drop-caret ${caretClass}`;
-    surface.append(caret);
-  }
-  const block = nearestBlock(surface, clientX, clientY, figure);
-  const surfaceRect = surface.getBoundingClientRect();
-  if (!block || block === surface) {
-    caret.style.top = `${surface.scrollHeight - 2}px`;
-    return;
-  }
-  const rect = block.getBoundingClientRect();
-  const after = clientY > rect.top + rect.height / 2;
-  caret.style.top = `${(after ? rect.bottom : rect.top) - surfaceRect.top + surface.scrollTop}px`;
-}
-
 function wrapSvg(kind: Wrap) {
   if (kind === "inline") {
     return `<svg viewBox="0 0 28 28" aria-hidden="true"><rect x="4" y="5" width="20" height="3" fill="currentColor"/><rect x="8" y="11" width="12" height="7" fill="currentColor" opacity=".85"/><rect x="4" y="21" width="20" height="3" fill="currentColor"/></svg>`;
@@ -257,13 +189,18 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
     axis: "x" | "y" | "both";
   } | null>(null);
   const dragRef = useRef<{ figure: HTMLElement; startX: number; startY: number; startOx: number; startOy: number; active: boolean } | null>(null);
+  // mountFigureUi объявлена ниже и пересоздаётся каждый рендер — эффекты берут свежую версию через ref.
+  const mountUiRef = useRef<(figure: HTMLElement) => void>(() => {});
+  useEffect(() => {
+    mountUiRef.current = mountFigureUi;
+  });
 
   const emit = useCallback(() => {
     const node = surfaceRef.current;
     if (!node) return;
     stripEditorUi(node);
     onChange(node.innerHTML);
-    if (selectedRef.current && node.contains(selectedRef.current)) mountFigureUi(selectedRef.current);
+    if (selectedRef.current && node.contains(selectedRef.current)) mountUiRef.current(selectedRef.current);
   }, [onChange]);
 
   useEffect(() => {
@@ -278,7 +215,7 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
       selectedRef.current = null;
       if (selectedSrc) {
         const match = [...node.querySelectorAll("figure.rte-figure")].find((item) => item.querySelector("img")?.src === selectedSrc) as HTMLElement | undefined;
-        if (match) mountFigureUi(match);
+        if (match) mountUiRef.current(match);
       }
     }
     node.querySelectorAll("figure.rte-figure").forEach((figure) => syncFigureWidth(figure as HTMLElement));

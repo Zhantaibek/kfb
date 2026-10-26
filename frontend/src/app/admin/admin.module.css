@@ -1693,3 +1693,60 @@ button.visitStat[data-on] {
     grid-template-columns: 1fr;
   }
 }
+
+/* Документы новости: формат, редактируемое название, размер, действия. */
+.attachments {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.attachments li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-surface);
+}
+
+.attachments li input {
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+}
+
+.attachments li small {
+  color: var(--admin-muted);
+  white-space: nowrap;
+}
+
+.attachments li a,
+.attachments li button {
+  height: 34px;
+  padding: 0 12px;
+}
+
+.attachmentExt {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--admin-brand-12);
+  color: var(--admin-brand-strong);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .attachments li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+}

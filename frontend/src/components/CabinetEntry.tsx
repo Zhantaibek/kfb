@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { AdminEditButton } from "@/components/AdminEditButton";
 import { LoginForm } from "@/components/LoginForm";
@@ -20,7 +21,7 @@ export function CabinetEntry() {
 
       <div className={styles.card}>
         <aside className={styles.welcome}>
-          <img src="/brand/kse-mark.png" alt="" />
+          <Image src="/brand/kse-mark.png" alt="" width={160} height={152} />
           <h2>{tr("Добро пожаловать")}</h2>
           <p>{tr("Вход в панель управления сайтом. Учётную запись создаёт администратор биржи.")}</p>
         </aside>

@@ -4,6 +4,7 @@ import { initDb } from "./db/postgres";
 import { ensureAuthAccounts } from "./modules/auth/auth.service";
 import { startIssuersSync } from "./modules/issuers-sync/sync";
 import { startKseSync } from "./modules/kse-sync/sync";
+import { startDisclosureSync } from "./modules/disclosure/disclosure.service";
 import { pruneOldAudit } from "./db/repositories/cms.repository";
 
 async function main() {
@@ -18,6 +19,8 @@ async function main() {
   startKseSync();
   // Эмитенты и листинг — из внешнего API (ISSUERS_API_URL / LISTING_API_URL), если адреса заданы.
   startIssuersSync();
+  // Существенные факты эмитентов со страниц kse.kg — раз в 6 часов.
+  startDisclosureSync();
   // Журнал аудита — записи старше года удаляем раз в сутки.
   const pruneAudit = () => void pruneOldAudit().catch((error) => console.warn("audit prune:", error));
   pruneAudit();

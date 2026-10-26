@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useAdminStore } from "@/lib/cms/client";
+import { adminJson, useAdminStore } from "@/lib/cms/client";
 import type { UserRole } from "@/lib/cms/types";
 import css from "@/app/admin/admin.module.css";
 
 export function UsersManager() {
-  const { store, error, busy, mutate } = useAdminStore();
+  const { store, error, busy, mutate, reload } = useAdminStore();
+  const [notice, setNotice] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ id?: string; name: string; email: string; role: UserRole; password: string } | null>(null);
 
   async function save() {
@@ -16,17 +17,30 @@ export function UsersManager() {
     setEditing(null);
   }
 
+  /** Потерян телефон: сотрудник при следующем входе заново подключит приложение-аутентификатор. */
+  async function resetMfa(id: string, email: string) {
+    setNotice(null);
+    try {
+      await adminJson(`/api/admin/users/${encodeURIComponent(id)}/mfa-reset`, { method: "POST" });
+      await reload();
+      setNotice(`2FA для ${email} сброшен: при следующем входе сотрудник настроит его заново.`);
+    } catch (reason) {
+      setNotice((reason as Error).message);
+    }
+  }
+
   return (
     <>
       <p className={css.kicker}>Система</p>
       <h1>Пользователи</h1>
-      <p className={css.lead}>Учётные записи CMS и кабинета. Пароли хранятся в PostgreSQL в виде bcrypt-хеша.</p>
+      <p className={css.lead}>Учётные записи сотрудников. Пароли хранятся в виде bcrypt-хеша, вход — с кодом из приложения-аутентификатора (2FA).</p>
       <div className={css.toolbar}>
         <button className={css.primary} type="button" onClick={() => setEditing({ name: "", email: "", role: "editor", password: "" })}>
           + Добавить пользователя
         </button>
       </div>
       {error ? <p className={css.error}>{error}</p> : null}
+      {notice ? <p className={css.ok}>{notice}</p> : null}
       {editing ? (
         <form
           className={css.form}
@@ -52,8 +66,15 @@ export function UsersManager() {
               </select>
             </label>
             <label className={css.field}>
-              <span>Пароль</span>
-              <input type="text" value={editing.password} onChange={(event) => setEditing({ ...editing, password: event.target.value })} placeholder={editing.id ? "без изменения" : ""} />
+              <span>Пароль (не короче 12 символов)</span>
+              <input
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+                value={editing.password}
+                onChange={(event) => setEditing({ ...editing, password: event.target.value })}
+                placeholder={editing.id ? "без изменения" : ""}
+              />
             </label>
           </div>
           <div className={css.rowActions}>
@@ -73,6 +94,7 @@ export function UsersManager() {
               <th>Имя</th>
               <th>E-mail</th>
               <th>Роль</th>
+              <th>2FA</th>
               <th>Действия</th>
             </tr>
           </thead>
@@ -82,11 +104,17 @@ export function UsersManager() {
                 <td>{item.name}</td>
                 <td>{item.email}</td>
                 <td>{item.role}</td>
+                <td>{item.totpEnabled ? "включён" : "нет"}</td>
                 <td>
                   <div className={css.rowActions}>
                     <button className={css.ghost} type="button" onClick={() => setEditing({ ...item, password: "" })}>
                       Изменить
                     </button>
+                    {item.totpEnabled ? (
+                      <button className={css.ghost} type="button" onClick={() => void resetMfa(item.id, item.email)}>
+                        Сбросить 2FA
+                      </button>
+                    ) : null}
                     <button className={css.danger} type="button" onClick={() => void mutate("delete", "users", undefined, item.id)}>
                       Удалить
                     </button>

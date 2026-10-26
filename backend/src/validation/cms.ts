@@ -6,6 +6,15 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Укажите пароль"),
 });
 
+/** Код из приложения-аутентификатора: 6 цифр (пробелы, как в «123 456», допускаются). */
+export const mfaCodeSchema = z.object({
+  code: z.string().trim().regex(/^\d{3}\s?\d{3}$/, "Введите 6 цифр из приложения-аутентификатора"),
+});
+
+export const mfaLoginSchema = mfaCodeSchema.extend({
+  ticket: z.string().min(10).max(500),
+});
+
 export const publicRequestSchema = z.object({
   source: z.string().trim().min(1).max(80).default("site"),
   payload: z.record(z.string(), z.string()).default({}),
@@ -77,6 +86,36 @@ function requireI18n(fields: string[], properNames: string[] = []) {
   };
 }
 
+/**
+ * Ссылка из админки: путь сайта (/…, #…, ?…), http(s), mailto или tel. Другие схемы (javascript:, data: …)
+ * в href выполнили бы код у того, кто кликнет, — например, у администратора.
+ */
+const linkUrl = (max: number, message = "Ссылка: путь сайта (/…) или адрес вида https://…") =>
+  z
+    .string({ error: "Укажите ссылку" })
+    .trim()
+    .max(max)
+    .regex(/^(?:(?:\/(?!\/)|#|\?)\S*|\/|https?:\/\/\S+|mailto:\S+|tel:[\d\s()+-]+)?$/i, message);
+
+/** Существенный факт, добавленный сотрудником: дата, суть события и ссылка на карточку сообщения. */
+export const disclosureItemSchema = z.object({
+  issuerSlug: z.string({ error: "Выберите эмитента" }).trim().min(1, "Выберите эмитента").max(160),
+  date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Дата в формате ГГГГ-ММ-ДД"),
+  title: z.string({ error: "Укажите событие" }).trim().min(1, "Укажите событие").max(500),
+  url: z.string().trim().max(500).regex(/^https:\/\/\S+$/i, "Ссылка на сообщение вида https://…"),
+});
+
+/** Документ новости: только файл, загруженный в uploads, с разрешённым расширением. */
+const newsAttachmentSchema = z.object({
+  name: z.string().trim().min(1, "Укажите название документа").max(300),
+  url: z
+    .string()
+    .trim()
+    .regex(/^\/uploads\/[A-Za-z0-9-]+\.(pdf|docx?|xlsx?|zip)$/i, "Документ должен быть загружен через форму (PDF, DOC, DOCX, XLS, XLSX, ZIP)"),
+  ext: z.string().trim().max(8).default(""),
+  size: z.coerce.number().int().min(0).max(50 * 1024 * 1024).default(0),
+});
+
 export const newsItemSchema = z
   .object({
     slug: z.string({ error: "Укажите slug" }).trim().min(1, "Укажите slug").max(160),
@@ -89,9 +128,19 @@ export const newsItemSchema = z
     body: z.string().max(500_000).default(""),
     photo: z.string().trim().max(500).default(""),
     issuerSlug: z.string().trim().max(160).default(""),
+    attachments: z.array(newsAttachmentSchema).max(20, "Не больше 20 документов в одной новости").default([]),
     i18n: i18nSchema,
   })
-  .superRefine(requireI18n(["title", "body"]))
+  // Черновик можно сохранить на одном русском — чтобы не потерять начатый текст;
+  // перевод на кыргызский и английский и непустой текст обязательны при публикации.
+  .superRefine((data, ctx) => {
+    if (data.status !== "published") return;
+    if (!isLocaleValueFilled(data.body, "body")) {
+      ctx.addIssue({ code: "custom", message: "Добавьте текст новости перед публикацией.", path: ["body"] });
+      return;
+    }
+    requireI18n(["title", "body"])(data, ctx);
+  })
   .superRefine((data, ctx) => {
     if (data.kind === "company" && !data.issuerSlug) {
       ctx.addIssue({
@@ -110,7 +159,7 @@ export const slideItemSchema = z
   .object({
     title: z.string({ error: "Укажите заголовок" }).trim().min(1, "Укажите заголовок").max(200),
     text: z.string().trim().max(1000).default(""),
-    href: z.string().trim().max(300).default("/"),
+    href: linkUrl(300).default("/"),
     value: z.string().trim().max(120).default(""),
     photo: z.string().trim().max(500).default(""),
     order: z.coerce.number().int().min(0).max(10_000).default(0),
@@ -132,7 +181,7 @@ export const pageItemSchema = z
 export const menuItemSchema = z
   .object({
     label: z.string({ error: "Укажите название" }).trim().min(1, "Укажите название").max(120),
-    href: z.string({ error: "Укажите ссылку" }).trim().min(1, "Укажите ссылку").max(300),
+    href: linkUrl(300).min(1, "Укажите ссылку"),
     group: z.string({ error: "Укажите группу" }).trim().min(1, "Укажите группу").max(80),
     order: z.coerce.number().int().min(0).max(10_000).default(0),
     parentId: z
@@ -155,7 +204,12 @@ export const userItemSchema = z.object({
   name: z.string().trim().min(1).max(120),
   email: z.string().trim().email(),
   role: z.enum(["admin", "editor"]),
-  password: z.string().max(200).optional(),
+  // Пустой пароль при правке — «не менять»; новый пароль — от 12 символов, как у первого админа (data/seed.ts).
+  password: z
+    .string()
+    .max(200)
+    .optional()
+    .refine((value) => !value || value.length >= 12, "Пароль — не короче 12 символов"),
 });
 
 export const mediaItemSchema = z.object({
@@ -165,7 +219,7 @@ export const mediaItemSchema = z.object({
 
 export const hubItemSchema = z
   .object({
-    href: z.string({ error: "Укажите ссылку" }).trim().min(1, "Укажите ссылку").max(300),
+    href: linkUrl(300).min(1, "Укажите ссылку"),
     title: z.string({ error: "Укажите заголовок" }).trim().min(1, "Укажите заголовок").max(200),
     text: z.string().trim().max(500).default(""),
     photo: z.string().trim().max(500).default(""),
@@ -233,7 +287,7 @@ export const sustainableBondItemSchema = z
 export const esgReportItemSchema = z
   .object({
     title: z.string({ error: "Укажите название отчёта" }).trim().min(1, "Укажите название отчёта").max(300),
-    file: plain(500),
+    file: linkUrl(500).default(""),
     order: z.coerce.number().int().min(0).max(10_000).default(0),
     status: publishStatus,
     i18n: i18nSchema,
@@ -272,7 +326,7 @@ export const landingSectionItemSchema = z
     title: plain(300),
     text: z.string().trim().max(20_000).default(""),
     items: z.string().trim().max(5_000).default(""),
-    link: plain(500),
+    link: linkUrl(500).default(""),
     photo: plain(500),
     order: z.coerce.number().int().min(0).max(10_000).default(0),
     i18n: i18nSchema,
@@ -331,7 +385,7 @@ export const issuerItemSchema = z.object({
 
 const listingDocumentSchema = z.object({
   name: plain(300),
-  url: plain(1000),
+  url: linkUrl(1000).default(""),
 });
 
 export const listingItemSchema = z.object({
@@ -349,7 +403,7 @@ export const listingItemSchema = z.object({
   price: plain(100),
   cap: plain(100),
   count: plain(100),
-  doc: plain(1000),
+  doc: linkUrl(1000).default(""),
   symbols: plain(300),
   industry: plain(300),
   activity: plain(500),
@@ -389,7 +443,7 @@ export const settingsItemSchema = z
     telegramUrl: socialUrl,
     license: z.string().trim().max(200).default(""),
     copyright: z.string().trim().max(300).default(""),
-    eduUrl: z.string().trim().max(500).default(""),
+    eduUrl: linkUrl(500).default(""),
     disclosurePhone: z.string().trim().max(80).default(""),
     eduPhone: z.string().trim().max(80).default(""),
     i18n: i18nSchema,

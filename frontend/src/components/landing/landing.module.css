@@ -217,7 +217,7 @@
 }
 
 .btn {
-  background: var(--brand);
+  background: var(--brand-fill);
   color: #fff;
 }
 
@@ -318,7 +318,7 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--brand);
+  background: var(--brand-fill);
   color: #fff;
 }
 
@@ -367,7 +367,7 @@
   content: "+";
 }
 
-.bond[open] summary::after {
+.bond[open]:not([data-closing]) summary::after {
   content: "–";
 }
 
@@ -512,7 +512,7 @@
 }
 
 .tabs button[data-on="true"] {
-  background: var(--brand);
+  background: var(--brand-fill);
   color: #fff;
 }
 

@@ -164,22 +164,28 @@ function moversOf(market: MarketData) {
   };
 }
 
-/** Сделки с kse.kg (последняя сессия или лидеры недели): тикер и цена или объём. */
+/**
+ * Сделки с kse.kg (последняя сессия или лидеры недели): тикер и цена или объём.
+ * Для объёма под строкой — полоса доли от лидера, внизу — итоги недели по всем сделкам.
+ */
 function TradeList({
   title,
   rows,
   href,
   metric,
   fill,
+  total,
 }: {
   title: string;
   rows: TradeRow[];
   href: string;
   metric: "price" | "volume";
   fill?: boolean;
+  total?: MarketData["weekTotal"];
 }) {
   const tr = useTr();
   const market = useMarketData();
+  const top = Math.max(...rows.map((item) => item.volume), 1);
   return (
     <article className={fill ? `${styles.card} ${styles.fill}` : styles.card}>
       <header className={styles.cardHead}>
@@ -197,6 +203,12 @@ function TradeList({
                 <span>{item.ticker}</span>
                 {/* Объём недели у kse.kg — в тысячах сомов. */}
                 <em>{metric === "price" ? `${formatSom(item.price)} ${tr("сом")}` : formatSom(item.volume)}</em>
+                {metric === "volume" ? (
+                  <i className={styles.share} aria-hidden="true">
+                    {/* Доля от лидера; совсем малые объёмы всё равно видны тонкой чертой. */}
+                    <i style={{ width: `${Math.max((item.volume / top) * 100, 1.5)}%` }} />
+                  </i>
+                ) : null}
               </Link>
             </li>
           ))}
@@ -204,6 +216,22 @@ function TradeList({
       ) : (
         <p className={styles.empty}>{tr("Сделок не было")}</p>
       )}
+      {total && total.deals ? (
+        <dl className={`${styles.totals} ${styles.facts}`}>
+          <div>
+            <dt>{tr("Итого за неделю, тыс. сом")}</dt>
+            <dd>{formatSom(total.volume)}</dd>
+          </div>
+          <div>
+            <dt>{tr("Сделок")}</dt>
+            <dd>{total.deals.toLocaleString("ru-KG")}</dd>
+          </div>
+          <div>
+            <dt>{tr("Бумаг с объёмом")}</dt>
+            <dd>{total.papers}</dd>
+          </div>
+        </dl>
+      ) : null}
     </article>
   );
 }
@@ -255,10 +283,13 @@ function Arrow() {
   );
 }
 
-/** Итоги последней торговой сессии: объём по сегментам рынка и изменение к прошлой сессии. */
+/**
+ * Итоги последней торговой сессии: объём по сегментам рынка и изменение к прошлой сессии;
+ * внизу — индекс KSE с графиком за период, капитализация и число сделок.
+ */
 function SessionCard() {
   const tr = useTr();
-  const { sessionDate, sessionHours, tradingRows } = useMarketData();
+  const { sessionDate, sessionHours, tradingRows, index: indexKse, indexHistory, stats } = useMarketData();
   return (
     <article className={`${styles.card} ${styles.fill}`}>
       <header className={styles.cardHead}>
@@ -284,6 +315,31 @@ function SessionCard() {
         ))}
       </dl>
       <p className={styles.sessionMeta}>{tr("Объём, млн сом")}</p>
+
+      <div className={styles.totals}>
+        <Link href="/market/index" className={styles.sessionIndex}>
+          <span>{tr("Индекс KSE")}</span>
+          <b>{indexKse.value.toLocaleString("ru-KG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
+          <em className={indexKse.change < 0 ? styles.down : indexKse.change > 0 ? styles.up : undefined}>
+            {formatChange(indexKse.change)}
+          </em>
+        </Link>
+        {indexHistory.length > 1 ? (
+          <Sparkline values={indexHistory.map((item) => item.index)} className={styles.sessionSpark} />
+        ) : null}
+        <dl className={styles.facts}>
+          <div>
+            <dt>{tr("Капитализация")}</dt>
+            <dd>
+              {indexKse.capitalization.toLocaleString("ru-KG")} <small>{tr("млрд сом")}</small>
+            </dd>
+          </div>
+          <div>
+            <dt>{tr("Сделок за сессию")}</dt>
+            <dd>{stats.trades.toLocaleString("ru-KG")}</dd>
+          </div>
+        </dl>
+      </div>
     </article>
   );
 }
@@ -640,7 +696,7 @@ export function MarketPulse() {
         {market.live ? (
           <>
             <TradeList title={`Сделки ${market.sessionDate}`} rows={market.lastTrades} href="/market" metric="price" />
-            <TradeList title="Лидеры недели по объёму, тыс. сом" rows={market.weekLeaders} href="/market" metric="volume" fill />
+            <TradeList title="Лидеры недели по объёму, тыс. сом" rows={market.weekLeaders} href="/market" metric="volume" fill total={market.weekTotal} />
           </>
         ) : (
           <>

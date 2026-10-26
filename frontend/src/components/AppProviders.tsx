@@ -6,14 +6,20 @@ import { useStoredString, writeStored } from "@/lib/local-store";
 
 type AdminUser = { id?: string; name: string; email: string; role: "admin" | "editor" };
 
+type LoginResult = { error: string } | { role: string } | { mfaTicket: string };
+
 type AppState = {
   lang: Lang;
   setLang: (lang: Lang) => void;
   /** Сотрудник CMS (admin/editor). На сайт входят только сотрудники — ролей инвестора и эмитента нет. */
   adminUser: AdminUser | null;
   authReady: boolean;
-  /** Возвращает текст ошибки или роль вошедшего сотрудника. */
-  login: (email: string, password: string) => Promise<{ error: string } | { role: string }>;
+  /**
+   * Возвращает текст ошибки, роль вошедшего сотрудника или билет второго шага (включён 2FA — нужен код из
+   * приложения, его проверяет verifyMfa).
+   */
+  login: (email: string, password: string) => Promise<LoginResult>;
+  verifyMfa: (ticket: string, code: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
   label: (key: Parameters<typeof t>[1]) => string;
   tr: (text: string) => string;
@@ -69,6 +75,19 @@ export function AppProviders({ children }: { children: ReactNode }) {
           body: JSON.stringify({ email, password }),
         });
         // Прокси при недоступном API может вернуть не JSON — тогда общая ошибка, а не исключение.
+        const payload = (await response.json().catch(() => ({}))) as { user?: AdminUser; error?: string; ticket?: string };
+        if (response.ok && payload.ticket) return { mfaTicket: payload.ticket };
+        if (!response.ok || !payload.user) return { error: payload.error ?? "Не удалось войти" };
+        setAdminUser(payload.user);
+        return { role: payload.user.role };
+      },
+      async verifyMfa(ticket, code) {
+        const response = await fetch("/api/auth/session/mfa", {
+          method: "POST",
+          credentials: "include",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ ticket, code }),
+        });
         const payload = (await response.json().catch(() => ({}))) as { user?: AdminUser; error?: string };
         if (!response.ok || !payload.user) return { error: payload.error ?? "Не удалось войти" };
         setAdminUser(payload.user);

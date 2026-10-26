@@ -1,5 +1,6 @@
 "use client";
 
+import { CmsImage } from "@/components/CmsImage";
 import { useAdminStore } from "@/lib/cms/client";
 import type { CmsMedia } from "@/lib/cms/types";
 import css from "@/app/admin/admin.module.css";
@@ -48,7 +49,7 @@ export function MediaManager() {
                 {item.url.split(".").pop()?.toUpperCase()}
               </a>
             ) : (
-              <img src={item.url} alt={item.name} />
+              <CmsImage src={item.url} alt={item.name} />
             )}
             <div>
               <b>{item.name}</b>

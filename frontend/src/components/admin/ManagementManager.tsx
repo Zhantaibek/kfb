@@ -1,5 +1,6 @@
 "use client";
 
+import { CmsImage } from "@/components/CmsImage";
 import { useState } from "react";
 import { useAdminStore } from "@/lib/cms/client";
 import { useContentLang } from "@/lib/cms/use-content-lang";
@@ -194,7 +195,7 @@ export function ManagementManager() {
             {editing.photo ? (
               <div className={css.field}>
                 <span>Превью</span>
-                <img className={css.thumb} src={editing.photo} alt="" />
+                <CmsImage className={css.thumb} src={editing.photo} alt="" />
               </div>
             ) : null}
             <label className={`${css.field} ${css.wide}`}>
@@ -283,7 +284,7 @@ export function ManagementManager() {
                   </span>
                 </td>
                 <td>{item.order}</td>
-                <td>{item.photo ? <img className={css.thumb} src={item.photo} alt="" /> : "—"}</td>
+                <td>{item.photo ? <CmsImage className={css.thumb} src={item.photo} alt="" /> : "—"}</td>
                 <td className={css.wrap}>
                   <b>
                     {item.name}

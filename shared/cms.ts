@@ -27,6 +27,9 @@ export function isStaffRole(role: string): role is AdminRole {
   return role === "admin" || role === "editor";
 }
 
+/** Документ, прикреплённый к новости (файл загружен через /api/admin/upload). */
+export type CmsNewsAttachment = { name: string; url: string; ext: string; size: number };
+
 export type CmsNews = {
   id: string;
   slug: string;
@@ -39,6 +42,7 @@ export type CmsNews = {
   body: string;
   photo: string;
   issuerSlug: string;
+  attachments?: CmsNewsAttachment[];
   i18n?: CmsI18n;
   createdAt: string;
   updatedAt: string;
@@ -367,6 +371,8 @@ export type CmsUser = {
   email: string;
   role: UserRole;
   password: string;
+  /** Включён ли двухфакторный вход (сам секрет наружу не отдаётся). */
+  totpEnabled?: boolean;
 };
 
 export type CmsVisit = {
@@ -409,8 +415,9 @@ export type CmsStore = {
 
 export type CmsCollection = keyof CmsStore;
 
-export type AuthSession = { id: string; email: string; name: string; role: UserRole };
-export type AdminSession = { id: string; email: string; name: string; role: AdminRole };
+/** mfa: вход подтверждён кодом двухфакторной аутентификации (у cookie без него — только пароль). */
+export type AuthSession = { id: string; email: string; name: string; role: UserRole; mfa?: boolean };
+export type AdminSession = { id: string; email: string; name: string; role: AdminRole; mfa?: boolean };
 
 export type PublicContent = {
   news: CmsNews[];

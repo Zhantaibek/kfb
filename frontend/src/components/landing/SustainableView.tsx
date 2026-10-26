@@ -8,6 +8,7 @@ import { useLocalizedList } from "@/lib/cms/use-localized";
 import { useTr } from "@/lib/use-tr";
 import { lines, paragraphs, useSections } from "./landing-data";
 import css from "./landing.module.css";
+import { toggleDetails } from "@/lib/animate-details";
 
 type Props = {
   sections: CmsLandingSection[];
@@ -117,7 +118,7 @@ export function SustainableView(props: Props) {
           <div className={css.bonds}>
             {bonds.map((bond, index) => (
               <details key={bond.id} className={css.bond} open={index === 0}>
-                <summary>
+                <summary onClick={toggleDetails}>
                   {bond.name}
                   {bond.kind ? <small>{bond.kind}</small> : null}
                 </summary>

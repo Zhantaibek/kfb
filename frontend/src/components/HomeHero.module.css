@@ -1,15 +1,28 @@
 .hero {
-  --edge: max(24px, calc((100% - 1480px) / 2));
+  --edge: max(24px, calc((100% - var(--page-max)) / 2));
   --hero-ink: #0d2a2e;
   --hero-muted: #4a6468;
   --hero-line: rgba(13, 42, 46, 0.1);
   --hero-bg-a: #f5fbfb;
-  --hero-bg-b: #e4f3f5;
-  --hero-bg-c: #d6ecef;
   --stats-bg: rgba(255, 255, 255, 0.55);
   --stat-hover: rgba(255, 255, 255, 0.6);
   --up: #0f8f62;
   --down: #c93a50;
+  /* Сцена слайдов: светлый фон с лёгкой фирменной дымкой (в тёмной теме — тёмный, композиция та же). */
+  --stage-bg-a: #f6fafa;
+  --stage-bg-b: #e3eff1;
+  --stage-glow: rgba(87, 182, 192, 0.22);
+  --stage-ink: #0d2a2e;
+  --stage-muted: #4a6468;
+  --stage-line: rgba(13, 42, 46, 0.14);
+  --stage-accent: #2c7e87;
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --card-active: #ffffff;
+  --card-shadow: 0 18px 40px -22px rgba(13, 42, 46, 0.35);
+  /* Светлая дымка поверх фото со стороны текста (тёмный текст читается на любом снимке). */
+  --veil: rgba(246, 250, 250, 0.96);
+  --veil-mid: rgba(246, 250, 250, 0.82);
+  --veil-soft: rgba(246, 250, 250, 0.32);
   position: relative;
   isolation: isolate;
   width: 100%;
@@ -24,64 +37,204 @@
   --hero-muted: rgba(255, 255, 255, 0.68);
   --hero-line: rgba(255, 255, 255, 0.12);
   --hero-bg-a: #0b2125;
-  --hero-bg-b: #0a1c20;
-  --hero-bg-c: #071518;
   --stats-bg: rgba(7, 22, 26, 0.5);
   --stat-hover: rgba(255, 255, 255, 0.04);
   --up: #5fe0a8;
   --down: #ff8a93;
+  --stage-bg-a: #0c2327;
+  --stage-bg-b: #071518;
+  --stage-glow: rgba(87, 182, 192, 0.16);
+  --stage-ink: #ffffff;
+  --stage-muted: rgba(255, 255, 255, 0.72);
+  --stage-line: rgba(255, 255, 255, 0.18);
+  --stage-accent: #7fd0d8;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-active: rgba(255, 255, 255, 0.12);
+  --card-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.7);
+  --veil: rgba(7, 21, 24, 0.94);
+  --veil-mid: rgba(7, 21, 24, 0.8);
+  --veil-soft: rgba(7, 21, 24, 0.3);
 }
 
-.main {
-  min-height: clamp(360px, 50vh, 500px);
+/* ——— Сцена слайд-шоу ——— */
+
+.stage {
+  position: relative;
+  height: clamp(560px, 76vh, 760px);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 50% 70% at 85% 30%, var(--stage-glow), transparent 70%),
+    linear-gradient(120deg, var(--stage-bg-a) 0%, var(--stage-bg-b) 100%);
+  color: var(--stage-ink);
+  touch-action: pan-y;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--fade) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear var(--fade);
+}
+
+.slide[data-state="active"] {
+  z-index: 2;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--fade) cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s;
+}
+
+.slide[data-state="leaving"] {
+  z-index: 1;
+  opacity: 0;
+  visibility: visible;
+}
+
+/* Фото — на весь баннер, текст слева поверх светлой дымки; снизу место под карточки слайдов. */
+.content {
+  height: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   align-items: center;
-  padding: 0 var(--edge);
+  padding: 32px var(--edge) 140px;
 }
 
 .copy {
-  padding: 40px 32px 40px 0;
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
 }
 
-.copy h1 {
-  max-width: 10em;
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin: 0 0 20px;
+  color: var(--stage-accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.kicker::before {
+  content: "";
+  width: 36px;
+  height: 1px;
+  background: currentColor;
+}
+
+.title {
+  max-width: 13em;
+  margin: 0;
   font-family: var(--font-display), var(--font-sans), sans-serif;
-  /* На 320px крупнее 30px предлог «в» остаётся один на строке. */
-  font-size: clamp(30px, 9.4vw, 36px);
+  font-size: clamp(32px, 4vw, 58px);
   font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  color: var(--hero-ink);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  color: var(--stage-ink);
 }
 
-@media (min-width: 640px) {
-  .copy h1 {
-    font-size: 48px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .copy h1 {
-    font-size: 2.85rem;
-  }
-}
-
-.copy p {
-  max-width: 44ch;
-  margin: 24px 0 0;
-  color: var(--hero-muted);
-  font-size: 17px;
-  line-height: 1.55;
+.lead {
+  max-width: 46ch;
+  margin: 22px 0 0;
+  color: var(--stage-muted);
+  font-size: clamp(16px, 1.2vw, 18px);
+  line-height: 1.6;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 28px;
-  margin-top: 36px;
+  gap: 16px 30px;
+  margin-top: 32px;
+}
+
+/* Фото во весь баннер; поверх — дымка слева и снизу (под текстом и карточками). */
+.frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--stage-bg-b);
+}
+
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, var(--veil) 0%, var(--veil-mid) 34%, var(--veil-soft) 60%, transparent 82%),
+    linear-gradient(0deg, var(--veil-mid) 0%, transparent 30%);
+}
+
+.photo {
+  object-fit: cover;
+  object-position: var(--focus);
+  transform-origin: 55% 50%;
+}
+
+/* Медленное приближение фото, пока слайд на экране. */
+.slide[data-state="active"] .photo,
+.slide[data-state="leaving"] .photo {
+  animation: drift 9s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+@keyframes drift {
+  from {
+    transform: scale(1.01);
+  }
+  to {
+    transform: scale(1.07);
+  }
+}
+
+/* Появление: текст по строке, рамка с фото — чуть позже, выезжая справа. */
+.copy > *,
+.frame {
+  opacity: 0;
+  translate: 0 18px;
+  transition:
+    opacity 0.5s ease,
+    translate 0.5s ease;
+}
+
+.frame {
+  translate: 0 0;
+}
+
+.slide[data-state="active"] .copy > *,
+.slide[data-state="active"] .frame {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    translate 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.slide[data-state="active"] .copy > :nth-child(1) {
+  transition-delay: 0.2s;
+}
+
+.slide[data-state="active"] .copy > :nth-child(2) {
+  transition-delay: 0.3s;
+}
+
+.slide[data-state="active"] .copy > :nth-child(3) {
+  transition-delay: 0.42s;
+}
+
+.slide[data-state="active"] .copy > :nth-child(4) {
+  transition-delay: 0.54s;
+}
+
+.slide[data-state="active"] .frame {
+  transition-delay: 0.1s;
 }
 
 .primary,
@@ -97,29 +250,30 @@
   height: 52px;
   padding: 0 26px;
   border-radius: 999px;
-  background: #57b6c0;
-  color: #0b2a2e;
-  box-shadow: 0 10px 30px -12px rgba(63, 154, 164, 0.7);
+  background: var(--brand-fill, #2c7e87);
+  color: #fff;
+  box-shadow: 0 14px 30px -14px rgba(20, 90, 98, 0.75);
   transition: background-color 0.18s ease;
 }
 
 .primary:hover {
-  background: #7fd0d8;
+  background: #33929c;
 }
 
 .link {
   padding: 6px 0;
-  border-bottom: 1px solid var(--hero-line);
-  color: var(--hero-ink);
+  border-bottom: 1px solid var(--stage-line);
+  color: var(--stage-ink);
   transition: border-color 0.18s ease;
 }
 
 .link:hover {
-  border-color: var(--hero-ink);
+  border-color: var(--stage-ink);
 }
 
 .primary svg,
-.link svg {
+.link svg,
+.round svg {
   width: 16px;
   height: 16px;
   fill: none;
@@ -127,6 +281,10 @@
   stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.primary svg,
+.link svg {
   transition: translate 0.18s ease;
 }
 
@@ -137,237 +295,193 @@
 
 .primary:focus-visible,
 .link:focus-visible,
+.tab:focus-visible,
+.round:focus-visible,
 .stat:focus-visible {
-  outline: 2px solid #3f9aa4;
+  outline: 2px solid var(--stage-accent);
   outline-offset: 3px;
 }
 
-/* Фон: цветные радиальные пятна поверх диагонального градиента. */
-.hero {
-  --glow-a: rgba(87, 182, 192, 0.55);
-  --glow-b: rgba(126, 196, 232, 0.5);
-  --glow-c: rgba(178, 232, 214, 0.7);
-}
+/* ——— Карточки слайдов (активная — белая, с полосой времени) и стрелки ——— */
 
-:global([data-theme="dark"]) .hero {
-  --glow-a: rgba(87, 182, 192, 0.35);
-  --glow-b: rgba(46, 120, 170, 0.32);
-  --glow-c: rgba(60, 160, 130, 0.22);
-}
-
-.photo {
+.controls {
   position: absolute;
-  inset: 0;
-  z-index: -2;
-  background:
-    radial-gradient(ellipse 45% 70% at 78% 10%, var(--glow-a), transparent 70%),
-    radial-gradient(ellipse 40% 60% at 55% 100%, var(--glow-b), transparent 70%),
-    radial-gradient(ellipse 35% 60% at 100% 65%, var(--glow-c), transparent 70%),
-    linear-gradient(135deg, var(--hero-bg-a) 0%, var(--hero-bg-b) 55%, var(--hero-bg-c) 100%);
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 28px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 var(--edge);
 }
 
-/* Карта рынка: плитки по объёму, цвет — изменение цены. */
-.hero {
-  --tile-flat: rgba(255, 255, 255, 0.7);
-  --tile-up-1: #d7f3e1;
-  --tile-up-2: #bfeccf;
-  --tile-up-3: #9fe0b7;
-  --tile-down-1: #fde0e0;
-  --tile-down-2: #fbcfd0;
-  --tile-down-3: #f6a9ac;
-  --tile-ink: #13211e;
-}
-
-:global([data-theme="dark"]) .hero {
-  --tile-flat: rgba(255, 255, 255, 0.07);
-  --tile-up-1: rgba(61, 206, 152, 0.16);
-  --tile-up-2: rgba(61, 206, 152, 0.26);
-  --tile-up-3: rgba(61, 206, 152, 0.4);
-  --tile-down-1: rgba(240, 113, 124, 0.16);
-  --tile-down-2: rgba(240, 113, 124, 0.26);
-  --tile-down-3: rgba(240, 113, 124, 0.4);
-  --tile-ink: #f3f7f5;
-}
-
-.map {
+.tabs {
+  flex: 1;
   display: grid;
-  gap: 14px;
-  padding: 36px 0;
-  opacity: 0;
-  animation: heroUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 980px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--card-shadow);
 }
 
-.mapGroups {
+.tab {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: 24px 18px;
-}
-
-.mapGroup {
-  display: grid;
-  gap: 4px;
   align-content: start;
+  gap: 6px;
+  min-height: 88px;
+  padding: 16px 20px 20px;
+  border: 0;
+  border-left: 1px solid var(--stage-line);
+  background: transparent;
+  color: var(--stage-muted);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
-.mapGroup h2 {
-  margin: 0 0 6px;
-  color: var(--hero-muted);
+.tab:first-child {
+  border-left: 0;
+}
+
+.tab:hover {
+  color: var(--stage-ink);
+}
+
+.tab[aria-current="true"] {
+  background: var(--card-active);
+  color: var(--stage-ink);
+}
+
+.tabNumber {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--stage-accent);
+}
+
+.tabLabel {
+  display: -webkit-box;
+  overflow: hidden;
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
-.mapRow {
-  display: flex;
-  gap: 4px;
-}
-
-.tile {
-  flex: 1 1 0;
-  min-width: 0;
-  display: grid;
-  align-content: space-between;
-  gap: 2px;
-  min-height: 92px;
-  padding: 10px 10px 9px;
-  border-radius: 6px;
-  background: var(--tile-flat);
-  color: var(--tile-ink);
-  font-variant-numeric: tabular-nums;
-  transition: filter 0.15s ease, translate 0.15s ease;
-}
-
-.tile:hover {
-  filter: brightness(0.96) saturate(1.15);
-  translate: 0 -1px;
-}
-
-.tile:focus-visible {
-  outline: 2px solid #3f9aa4;
-  outline-offset: 2px;
-}
-
-.tile[data-tone="up"][data-level="1"] {
-  background: var(--tile-up-1);
-}
-
-.tile[data-tone="up"][data-level="2"] {
-  background: var(--tile-up-2);
-}
-
-.tile[data-tone="up"][data-level="3"] {
-  background: var(--tile-up-3);
-}
-
-.tile[data-tone="down"][data-level="1"] {
-  background: var(--tile-down-1);
-}
-
-.tile[data-tone="down"][data-level="2"] {
-  background: var(--tile-down-2);
-}
-
-.tile[data-tone="down"][data-level="3"] {
-  background: var(--tile-down-3);
-}
-
-.tile b,
-.tile span,
-.tile em {
+/* Полоса времени — подчёркивание активной карточки; закончилась — следующий слайд. */
+.track {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 11px;
+  height: 3px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  border-radius: 3px;
+}
+
+.tab[aria-current="true"] .track {
+  background: var(--stage-line);
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: var(--stage-accent);
+  transform-origin: left center;
+  animation-name: progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.fill[data-playing="false"] {
+  animation-play-state: paused;
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Белые квадраты со скруглением: ← и →. */
+.buttons {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 10px;
+}
+
+.round {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--card-active);
+  box-shadow: var(--card-shadow), 0 2px 6px rgba(13, 42, 46, 0.08);
+  backdrop-filter: blur(10px);
+  color: var(--stage-ink);
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    translate 0.18s ease;
+}
+
+.round:hover {
+  background: var(--stage-accent);
+  color: #fff;
+  translate: 0 -2px;
+}
+
+.round:active svg {
+  scale: 0.88;
+}
+
+.round svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.8;
+  transition: scale 0.12s ease;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
   white-space: nowrap;
 }
 
-.tile b {
-  margin-bottom: auto;
-  font-size: 17px;
-  font-weight: 700;
+/* ——— Пока на экране заставка, баннер и полоса времени ждут ——— */
+
+:global(html:not([data-splash="seen"]) body:has([data-site-splash="show"])) .fill,
+:global(html:not([data-splash="seen"]) body:has([data-site-splash="show"])) .photo,
+:global(html:not([data-splash="seen"]) body:has([data-site-splash="show"])) .stat {
+  animation-play-state: paused;
 }
 
-.tile span {
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.tile em {
-  font-style: normal;
-  font-size: 14px;
-  opacity: 0.8;
-}
-
-.tile[data-size="1"] {
-  min-height: 76px;
-}
-
-.tile[data-size="1"] b,
-.tile[data-size="1"] span {
-  font-size: 15px;
-}
-
-.tile[data-size="2"] {
-  min-height: 64px;
-  padding: 8px 8px 7px;
-}
-
-.tile[data-size="2"] b {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.tile[data-size="2"] span {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.tile[data-size="2"] em {
-  font-size: 12px;
-}
-
-.mapNote {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 6px 16px;
-  margin: 0;
-  color: var(--hero-muted);
-  font-size: 13px;
-}
-
-.mapNote a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--hero-ink);
-  font-weight: 650;
-}
-
-.mapNote svg {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Появление текста и показателей. */
-.copy > * {
-  opacity: 0;
-  animation: heroUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.copy > :nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.copy > :nth-child(2) {
-  animation-delay: 0.25s;
-}
-
-.copy > :nth-child(3) {
-  animation-delay: 0.4s;
-}
+/* ——— Показатели рынка под слайдами ——— */
 
 .stat {
   opacity: 0;
@@ -390,13 +504,6 @@
   animation-delay: 0.8s;
 }
 
-/* Пока на экране заставка, появление баннера ждёт и стартует, когда она начинает исчезать. */
-:global(body:has([data-site-splash="show"])) .copy > *,
-:global(body:has([data-site-splash="show"])) .stat,
-:global(body:has([data-site-splash="show"])) .map {
-  animation-play-state: paused;
-}
-
 @keyframes heroUp {
   from {
     opacity: 0;
@@ -406,15 +513,6 @@
   to {
     opacity: 1;
     translate: 0 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .copy > *,
-  .stat,
-  .map {
-    animation: none;
-    opacity: 1;
   }
 }
 
@@ -443,6 +541,10 @@
 
 .stat:hover {
   background: var(--stat-hover);
+}
+
+.stat:focus-visible {
+  outline-color: #3f9aa4;
 }
 
 .label {
@@ -487,20 +589,24 @@
   color: var(--down);
 }
 
+/* ——— Планшет ——— */
+
+@media (max-width: 1100px) {
+  .tab {
+    padding: 14px 14px 20px;
+  }
+
+  .track {
+    left: 14px;
+    right: 14px;
+  }
+
+  .tabLabel {
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 980px) {
-  .main {
-    min-height: 0;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .copy {
-    padding: 72px 0 8px;
-  }
-
-  .map {
-    padding: 24px 0 40px;
-  }
-
   .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -515,12 +621,127 @@
   }
 }
 
-@media (max-width: 640px) {
+/* ——— Телефон: фото сверху, текст под ним, вместо карточек — полосы ——— */
+
+@media (max-width: 760px) {
   .hero {
     --edge: 16px;
   }
 
+  .stage {
+    height: clamp(560px, 82svh, 660px);
+  }
+
+  .content {
+    align-items: end;
+    padding: 18px var(--edge) 96px;
+  }
+
+  /* Фото — в верхней части, ниже текст на дымке: главное на снимке не закрыто текстом. */
+  .frame::after {
+    background: linear-gradient(0deg, var(--veil) 0%, var(--veil) 46%, var(--veil-mid) 58%, var(--veil-soft) 74%, transparent 90%);
+  }
+
+  .photo {
+    object-position: var(--focus-mobile);
+  }
+
+  .kicker {
+    margin-bottom: 14px;
+    font-size: 12px;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+
+  .lead {
+    margin-top: 14px;
+    font-size: 15px;
+  }
+
+  .actions {
+    margin-top: 22px;
+    gap: 14px 22px;
+  }
+
+  .primary {
+    height: 48px;
+    padding: 0 22px;
+  }
+
+  .controls {
+    bottom: 20px;
+    align-items: center;
+  }
+
+  .tabs {
+    gap: 8px;
+    border-radius: 0;
+    overflow: visible;
+    background: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .tab,
+  .tab[aria-current="true"] {
+    min-height: 0;
+    padding: 14px 0;
+    border: 0;
+    background: none;
+  }
+
+  .tabNumber,
+  .tabLabel {
+    display: none;
+  }
+
+  .track,
+  .tab[aria-current="true"] .track {
+    position: relative;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: block;
+    background: var(--stage-line);
+  }
+
+  .round {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+
   .stat {
     padding: 16px 14px 18px;
+  }
+}
+
+/* ——— Меньше движения: без приближения фото и выезда (слайды листаются, полоса времени идёт) ——— */
+
+@media (prefers-reduced-motion: reduce) {
+  .slide,
+  .slide[data-state="active"],
+  .copy > *,
+  .frame,
+  .slide[data-state="active"] .copy > *,
+  .slide[data-state="active"] .frame {
+    transition: none;
+  }
+
+  .slide[data-state="active"] .photo,
+  .slide[data-state="leaving"] .photo {
+    animation: none;
+  }
+
+  .copy > *,
+  .frame {
+    translate: 0 0;
+  }
+
+  .stat {
+    animation: none;
+    opacity: 1;
   }
 }

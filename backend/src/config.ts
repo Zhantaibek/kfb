@@ -38,6 +38,11 @@ export const config = {
   userCookieName: "kse-user",
   sessionSecret,
   cookieMaxAgeMs: 7 * 24 * 60 * 60 * 1000,
+  /**
+   * Двухфакторный вход обязателен: сотрудник без 2FA попадает только на страницу его настройки.
+   * По умолчанию — в production; MFA_REQUIRED=on / off задаёт явно (в разработке демо-вход admin/admin без кода).
+   */
+  mfaRequired: process.env.MFA_REQUIRED ? process.env.MFA_REQUIRED === "on" : isProduction,
   corsOrigins,
   databaseUrl: process.env.DATABASE_URL ?? "postgres://kse:kse@localhost:5433/kse",
   rootDir,

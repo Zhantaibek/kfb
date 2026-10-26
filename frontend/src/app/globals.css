@@ -1,7 +1,11 @@
 :root,
 [data-theme="light"] {
   color-scheme: light;
+  /* Ширина контента страницы — как у шапки, чтобы блоки и меню стояли по одним краям. */
+  --page-max: 1640px;
   --brand: #57b6c0;
+  /* Фон под белым текстом (кнопки): тот же бирюзовый, но с контрастом 4.7:1 по WCAG AA. */
+  --brand-fill: #2c7e87;
   --brand-soft: #e3f4f6;
   /* Текст фирменного цвета: #57b6c0 и #3f9aa4 на белом давали 2,4:1 и 3,3:1 (нужно ≥ 4,5:1). */
   --brand-text: #276f77;
@@ -32,6 +36,7 @@
 [data-theme="dark"] {
   color-scheme: dark;
   --brand: #57b6c0;
+  --brand-fill: #2c7e87;
   --brand-soft: rgba(87, 182, 192, 0.14);
   --brand-strong: #cdebf0;
   --brand-text: #57b6c0;

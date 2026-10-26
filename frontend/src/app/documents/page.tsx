@@ -31,7 +31,7 @@ export default async function DocumentsPage() {
           <article className={ui.row} key={item.title}>
             <small>{item.group}</small>
             <h3>{item.title}</h3>
-            <p>Документ доступен в демо-режиме. На боевом сайте КФБ файлы публикуются в PDF.</p>
+            <p>Документ готовится к публикации.</p>
           </article>
         ))}
       </div>

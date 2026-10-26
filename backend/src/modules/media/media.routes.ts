@@ -9,13 +9,10 @@ mediaRoutes.post(
   "/upload",
   // Сначала проверяем вход, и только потом принимаем файл в память (до 20 МБ) — иначе загрузить мог бы кто угодно.
   (req, res, next) => {
-    try {
-      requireSession(req);
-    } catch {
-      res.status(401).json({ error: "unauthorized" });
-      return;
-    }
-    next();
+    requireSession(req).then(
+      () => next(),
+      () => res.status(401).json({ error: "unauthorized" }),
+    );
   },
   (req, res, next) => {
     upload.single("file")(req, res, (err) => {

@@ -32,6 +32,15 @@ services:
       UPLOADS_DIR: /app/uploads
       ISSUERS_API_URL: ${ISSUERS_API_URL:-}
       LISTING_API_URL: ${LISTING_API_URL:-}
+      SMTP_URL: ${SMTP_URL:-}
+      REQUEST_NOTIFY_EMAIL: ${REQUEST_NOTIFY_EMAIL:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      # Двухфакторный вход сотрудников: в production обязателен (MFA_REQUIRED=off — отключить требование).
+      MFA_REQUIRED: ${MFA_REQUIRED:-}
+      # Синхронизация раскрытия информации с kse.kg (off — выключить).
+      DISCLOSURE_SYNC: ${DISCLOSURE_SYNC:-}
       # Первый админ на чистой базе (демо admin/admin в production не создаётся).
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
@@ -54,11 +63,69 @@ services:
     container_name: kse-web
     environment:
       API_URL: http://api:4000
+    # Снаружи сайт открывается только через proxy: напрямую клиент мог бы прислать свой X-Forwarded-For
+    # и обойти ограничение попыток входа по IP. Порт 3000 — только с этой машины, для проверки.
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     depends_on:
       - api
+
+  # Резервные копии базы и загруженных файлов раз в сутки в ./backups (14 дней). Скрипт: docker/backup/backup.sh.
+  backup:
+    image: postgres:16-alpine
+    container_name: kse-backup
+    environment:
+      PGHOST: postgres
+      PGUSER: kse
+      PGPASSWORD: kse
+      PGDATABASE: kse
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./backups:/backups
+      - kse_uploads:/uploads:ro
+      - ./docker/backup/backup.sh:/backup.sh:ro
+    entrypoint: ["sh", "/backup.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Вход на сайт снаружи. DOMAIN задан и сертификат выпущен — HTTPS (HTTP переводится на HTTPS); иначе HTTP.
+  # Конфиги и логика выбора: docker/nginx (start.sh).
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: kse-proxy
+    environment:
+      DOMAIN: ${DOMAIN:-}
+    ports:
+      - "${PROXY_PORT:-80}:80"
+      - "${PROXY_TLS_PORT:-443}:443"
+    volumes:
+      - ./docker/nginx:/etc/nginx/kse:ro
+      - letsencrypt:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    entrypoint: ["sh", "/etc/nginx/kse/start.sh"]
+    depends_on:
+      - web
+
+  # Сертификат Let's Encrypt для DOMAIN: выпуск при первом запуске и продление каждые 12 часов.
+  # Без DOMAIN и LETSENCRYPT_EMAIL просто ждёт (сайт работает по HTTP). Скрипт: docker/certbot/run.sh.
+  certbot:
+    image: certbot/certbot:v3.0.1
+    container_name: kse-certbot
+    environment:
+      DOMAIN: ${DOMAIN:-}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-}
+      LETSENCRYPT_STAGING: ${LETSENCRYPT_STAGING:-}
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+      - ./docker/certbot/run.sh:/run.sh:ro
+    entrypoint: ["sh", "/run.sh"]
+    depends_on:
+      - proxy
 
 volumes:
   kse_pgdata:
   kse_uploads:
+  letsencrypt:
+  certbot_www:

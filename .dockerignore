@@ -1,0 +1,12 @@
+# В образ не попадают локальные зависимости (собраны под другую ОС), сборки, загрузки и секреты.
+**/node_modules
+**/.next
+**/dist
+backend/uploads
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.github
+.claude
+strix_runs

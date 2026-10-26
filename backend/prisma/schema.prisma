@@ -21,6 +21,8 @@ model News {
   issuerSlug String?
   issuer     Issuer?  @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
   i18n       Json     @default("{}")
+  /// Прикреплённые документы: [{ name, url, ext, size }] — файлы лежат в uploads.
+  attachments Json    @default("[]")
   createdAt  DateTime @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @map("updated_at") @db.Timestamptz(6)
 
@@ -116,6 +118,10 @@ model User {
   email    String @unique
   role     String
   password String
+  /// Двухфакторный вход: зашифрованный секрет TOTP, включён ли, шаг последнего принятого кода.
+  totpSecret   String?  @map("totp_secret")
+  totpEnabled  Boolean  @default(false) @map("totp_enabled")
+  totpLastStep Int?     @map("totp_last_step")
 
   @@map("users")
 }
@@ -204,6 +210,7 @@ model Issuer {
 
   @@index([sortOrder])
   @@map("issuers")
+  disclosures      DisclosureEvent[]
 }
 
 model ListingEntry {
@@ -358,4 +365,21 @@ model LandingSection {
 
   @@unique([page, key])
   @@map("landing_sections")
+}
+
+/// Существенный факт эмитента (центр раскрытия информации). source: kse — синхронизация, manual — из админки.
+model DisclosureEvent {
+  id         String   @id
+  issuerSlug String   @map("issuer_slug")
+  /// ГГГГ-ММ-ДД
+  date       String
+  title      String
+  /// Карточка сообщения (oi.kse.kg); уникальна — по ней синхронизация не дублирует события.
+  url        String   @unique
+  source     String   @default("kse")
+  createdAt  DateTime @default(now()) @map("created_at")
+  issuer     Issuer   @relation(fields: [issuerSlug], references: [slug], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([issuerSlug, date])
+  @@map("disclosure_events")
 }

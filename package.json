@@ -2,7 +2,10 @@
   "name": "kse-kg",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["frontend", "backend"],
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "concurrently -n web,api -c cyan,magenta \"npm run dev -w frontend\" \"npm run dev -w backend\"",
     "dev:web": "npm run dev -w frontend",
@@ -20,9 +23,9 @@
     "db:studio": "npm run db:studio -w backend",
     "prod:up": "docker compose up -d --build",
     "prod:down": "docker compose down",
-    "test": "npm run test -w backend"
+    "test": "npm run test -w backend && npm run test -w frontend"
   },
   "devDependencies": {
-    "concurrently": "^10.0.5"
+    "concurrently": "^10.0.6"
   }
 }

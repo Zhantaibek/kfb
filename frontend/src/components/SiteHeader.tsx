@@ -10,6 +10,7 @@ import { useApp } from "@/components/AppProviders";
 import { languages } from "@/lib/i18n";
 import { type SiteLink } from "@/data/site-nav";
 import { useSiteNav } from "@/lib/cms/use-site-nav";
+import { toggleDetails } from "@/lib/animate-details";
 import ui from "@/app/ui.module.css";
 
 /** Внешние ссылки (в т.ч. отдельная учебная платформа) — полный переход. */
@@ -92,6 +93,9 @@ function blurFocus() {
   }
 }
 
+/** Длительность анимации закрытия меню — та же, что у menuOut/megaOut в ui.module.css. */
+const MENU_CLOSE_MS = 240;
+
 /** Разделы-«хабы»: пункт меню горит и на страницах, куда ведут их карточки. */
 const hubSections: Record<string, string[]> = { "/statistics": ["/market", "/gcb"] };
 
@@ -125,6 +129,33 @@ export function SiteHeader() {
   function closeMenus() {
     blurFocus();
     closeDetails(menuRef);
+  }
+
+  /**
+   * Закрытие меню крестиком или кликом по затемнению — с обратной анимацией: панель уезжает и гаснет,
+   * затем снимаем open. Повторный клик по кнопке во время закрытия оставляет меню открытым.
+   */
+  function closeMenuAnimated() {
+    const menu = menuRef.current;
+    if (!menu?.open) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      closeMenus();
+      return;
+    }
+    menu.dataset.closing = "";
+    window.setTimeout(() => {
+      if (menu.dataset.closing === undefined) return;
+      delete menu.dataset.closing;
+      closeMenus();
+    }, MENU_CLOSE_MS);
+  }
+
+  function onMenuSummaryClick(event: React.MouseEvent<HTMLElement>) {
+    const menu = menuRef.current;
+    if (!menu?.open) return;
+    event.preventDefault();
+    if (menu.dataset.closing !== undefined) delete menu.dataset.closing;
+    else closeMenuAnimated();
   }
 
   // Переход на другую страницу пересоздаёт меню без события toggle — снимаем блокировку прокрутки сами.
@@ -206,7 +237,7 @@ export function SiteHeader() {
           key={pathname + "-menu"}
           onToggle={(event) => lockPageScroll(event.currentTarget.open)}
         >
-          <summary aria-label={label("menu")}>
+          <summary aria-label={label("menu")} onClick={onMenuSummaryClick}>
             <i />
             <i />
             <i />
@@ -216,7 +247,7 @@ export function SiteHeader() {
             {menus.map((group) =>
               group.items.length ? (
                 <details key={group.key} className={ui.menuGroup}>
-                  <summary>{group.label}</summary>
+                  <summary onClick={toggleDetails}>{group.label}</summary>
                   {group.items.flatMap((item) =>
                     item.children?.length
                       ? item.children.map((child) => (
@@ -249,7 +280,7 @@ export function SiteHeader() {
                   {group.items.map((item) =>
                     item.children?.length ? (
                       <details key={item.href + item.label} className={ui.megaSub}>
-                        <summary>{item.label}</summary>
+                        <summary onClick={toggleDetails}>{item.label}</summary>
                         {item.children.map((child) => (
                           <AppLink key={child.href + child.label} href={child.href} onClick={closeMenus}>
                             {child.label}
@@ -266,7 +297,7 @@ export function SiteHeader() {
               ))}
             </div>
           </nav>
-          <button className={ui.megaBackdrop} type="button" aria-label={label("menu")} tabIndex={-1} onClick={closeMenus} />
+          <button className={ui.megaBackdrop} type="button" aria-label={label("menu")} tabIndex={-1} onClick={closeMenuAnimated} />
         </details>
       </div>
     </header>
