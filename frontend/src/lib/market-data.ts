@@ -27,6 +27,8 @@ export type MarketData = {
   /** Сделки последней сессии и лидеры недели по объёму (только в живых данных). */
   lastTrades: TradeRow[];
   weekLeaders: TradeRow[];
+  /** Итоги недели по всем сделкам: объём (тыс. сом), число сделок и бумаг. */
+  weekTotal: { volume: number; deals: number; papers: number };
 };
 
 export const demoMarket: MarketData = {
@@ -41,6 +43,7 @@ export const demoMarket: MarketData = {
   auctions: demo.auctions,
   lastTrades: [],
   weekLeaders: [],
+  weekTotal: { volume: 0, deals: 0, papers: 0 },
 };
 
 /** Вид бумаги по названию из котировок kse.kg. */
@@ -147,7 +150,12 @@ export async function loadMarketData(): Promise<MarketData> {
     instruments,
     auctions,
     lastTrades: toTradeRows(last?.trades ?? []),
-    weekLeaders: toTradeRows(week?.trades ?? []).sort((a, b) => b.volume - a.volume).slice(0, 5),
+    weekLeaders: toTradeRows(week?.trades ?? []).sort((a, b) => b.volume - a.volume).slice(0, 12),
+    weekTotal: {
+      volume: (week?.trades ?? []).reduce((sum, row) => sum + (row.volume ?? 0), 0),
+      deals: (week?.trades ?? []).reduce((sum, row) => sum + (row.deals ?? 0), 0),
+      papers: new Set((week?.trades ?? []).map((row) => row.symbol)).size,
+    },
   };
 }
 

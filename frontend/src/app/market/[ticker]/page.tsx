@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
-import { WatchButton } from "@/components/WatchButton";
 import { formatChange, formatSom, getInstrument, instruments, typeLabel } from "@/data/catalog";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
+import { instrumentHref, loadMarketData } from "@/lib/market-data";
 
 export function generateStaticParams() {
   return instruments.map((item) => ({ ticker: item.ticker }));
@@ -19,6 +19,10 @@ export async function generateMetadata({ params }: { params: Promise<{ ticker: s
 
 export default async function InstrumentPage({ params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params;
+  // Карточка бумаги — из демо-каталога (цена и изменение условные). Когда есть живые данные kse.kg,
+  // ведём на настоящие котировки, чтобы не выдавать демо-цифры за биржевые.
+  const market = await loadMarketData();
+  if (market.live) redirect(instrumentHref(market, ticker));
   const item = getInstrument(ticker);
   if (!item) notFound();
 
@@ -38,9 +42,6 @@ export default async function InstrumentPage({ params }: { params: Promise<{ tic
           <h2>{formatSom(item.price)} сом</h2>
           <p className={item.change < 0 ? ui.down : ui.up}>{formatChange(item.change)}</p>
           <p>Объём {formatSom(item.volume)} · листинг {item.listing} · {typeLabel[item.type]}</p>
-          <div style={{ marginTop: 16 }}>
-            <WatchButton ticker={item.ticker} />
-          </div>
         </article>
         <article className={ui.card}>
           <h2>Об инструменте</h2>

@@ -64,21 +64,9 @@ function sliceHistory(indexHistory: MarketData["indexHistory"], days: number) {
   return sliced.length >= 2 ? sliced : indexHistory.slice(-2);
 }
 
-function smoothPath(points: { x: number; y: number }[]) {
-  if (points.length < 2) return "";
-  let path = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const p0 = points[i - 1] ?? points[i];
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const p3 = points[i + 2] ?? p2;
-    const c1x = p1.x + (p2.x - p0.x) / 6;
-    const c1y = p1.y + (p2.y - p0.y) / 6;
-    const c2x = p2.x - (p3.x - p1.x) / 6;
-    const c2y = p2.y - (p3.y - p1.y) / 6;
-    path += ` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
-  }
-  return path;
+/** Ломаная по реальным точкам: сглаживание сплайном рисовало бы между днями значения индекса, которых не было. */
+function linePath(points: { x: number; y: number }[]) {
+  return points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
 }
 
 function lineGeometry(values: number[], width: number, height: number, pad = 10) {
@@ -134,7 +122,7 @@ function indexChart(series: { date: string; value: number }[]) {
     x: box.left + (index / Math.max(series.length - 1, 1)) * innerW,
     y: box.top + innerH - ((item.value - yMin) / ySpan) * innerH,
   }));
-  const line = smoothPath(points);
+  const line = linePath(points);
   const base = box.top + innerH;
   const last = points[points.length - 1];
   const area = `${line} L${last.x.toFixed(1)},${base} L${points[0].x.toFixed(1)},${base} Z`;
@@ -171,27 +159,33 @@ function moversOf(market: MarketData) {
     })),
   ];
   return {
-    gainers: movers.filter((item) => item.change > 0).sort((a, b) => b.change - a.change).slice(0, 5),
-    losers: movers.filter((item) => item.change < 0).sort((a, b) => a.change - b.change).slice(0, 5),
+    gainers: movers.filter((item) => item.change > 0).sort((a, b) => b.change - a.change).slice(0, 8),
+    losers: movers.filter((item) => item.change < 0).sort((a, b) => a.change - b.change).slice(0, 8),
   };
 }
 
-/** Сделки с kse.kg (последняя сессия или лидеры недели): тикер и цена или объём. */
+/**
+ * Сделки с kse.kg (последняя сессия или лидеры недели): тикер и цена или объём.
+ * Для объёма под строкой — полоса доли от лидера, внизу — итоги недели по всем сделкам.
+ */
 function TradeList({
   title,
   rows,
   href,
   metric,
   fill,
+  total,
 }: {
   title: string;
   rows: TradeRow[];
   href: string;
   metric: "price" | "volume";
   fill?: boolean;
+  total?: MarketData["weekTotal"];
 }) {
   const tr = useTr();
   const market = useMarketData();
+  const top = Math.max(...rows.map((item) => item.volume), 1);
   return (
     <article className={fill ? `${styles.card} ${styles.fill}` : styles.card}>
       <header className={styles.cardHead}>
@@ -209,6 +203,12 @@ function TradeList({
                 <span>{item.ticker}</span>
                 {/* Объём недели у kse.kg — в тысячах сомов. */}
                 <em>{metric === "price" ? `${formatSom(item.price)} ${tr("сом")}` : formatSom(item.volume)}</em>
+                {metric === "volume" ? (
+                  <i className={styles.share} aria-hidden="true">
+                    {/* Доля от лидера; совсем малые объёмы всё равно видны тонкой чертой. */}
+                    <i style={{ width: `${Math.max((item.volume / top) * 100, 1.5)}%` }} />
+                  </i>
+                ) : null}
               </Link>
             </li>
           ))}
@@ -216,6 +216,22 @@ function TradeList({
       ) : (
         <p className={styles.empty}>{tr("Сделок не было")}</p>
       )}
+      {total && total.deals ? (
+        <dl className={`${styles.totals} ${styles.facts}`}>
+          <div>
+            <dt>{tr("Итого за неделю, тыс. сом")}</dt>
+            <dd>{formatSom(total.volume)}</dd>
+          </div>
+          <div>
+            <dt>{tr("Сделок")}</dt>
+            <dd>{total.deals.toLocaleString("ru-KG")}</dd>
+          </div>
+          <div>
+            <dt>{tr("Бумаг с объёмом")}</dt>
+            <dd>{total.papers}</dd>
+          </div>
+        </dl>
+      ) : null}
     </article>
   );
 }
@@ -259,65 +275,6 @@ function MoverList({ title, list, href, fill }: { title: string; list: Mover[]; 
   );
 }
 
-/** Под топами: ширина рынка (растут / падают / без изменений) и лидеры по объёму торгов. */
-function MarketOverviewCard() {
-  const tr = useTr();
-  const market = useMarketData();
-  const { instruments } = market;
-  const breadth = {
-    up: instruments.filter((item) => item.change > 0).length,
-    down: instruments.filter((item) => item.change < 0).length,
-    flat: instruments.filter((item) => item.change === 0).length,
-  };
-  const volumeLeaders = [...instruments].sort((a, b) => b.volume - a.volume).slice(0, 4);
-  const total = breadth.up + breadth.down + breadth.flat || 1;
-  const share = (value: number) => `${(value / total) * 100}%`;
-  return (
-    <article className={`${styles.card} ${styles.fill}`}>
-      <header className={styles.cardHead}>
-        <h3>{tr("Обзор рынка")}</h3>
-        <Link href="/market/quotes" aria-label={tr("Обзор рынка")}>
-          <Arrow />
-        </Link>
-      </header>
-
-      <p className={styles.overviewLabel}>{tr("Ширина рынка")}</p>
-      <div className={styles.breadthBar} aria-hidden="true">
-        <i className={styles.breadthUp} style={{ width: share(breadth.up) }} />
-        <i className={styles.breadthFlat} style={{ width: share(breadth.flat) }} />
-        <i className={styles.breadthDown} style={{ width: share(breadth.down) }} />
-      </div>
-      <dl className={styles.breadth}>
-        <div>
-          <dt>{tr("Растут")}</dt>
-          <dd className={styles.up}>{breadth.up}</dd>
-        </div>
-        <div>
-          <dt>{tr("Без изменений")}</dt>
-          <dd>{breadth.flat}</dd>
-        </div>
-        <div>
-          <dt>{tr("Падают")}</dt>
-          <dd className={styles.down}>{breadth.down}</dd>
-        </div>
-      </dl>
-
-      <p className={styles.overviewLabel}>{tr("Лидеры по объёму")}</p>
-      <ul className={styles.movers}>
-        {volumeLeaders.map((item) => (
-          <li key={item.ticker}>
-            <Link href={instrumentHref(market, item.ticker)}>
-              <Badge item={item} />
-              <span>{item.ticker}</span>
-              <em>{formatSom(item.volume)}</em>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </article>
-  );
-}
-
 function Arrow() {
   return (
     <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -326,10 +283,13 @@ function Arrow() {
   );
 }
 
-/** Итоги последней торговой сессии: объём по сегментам рынка и изменение к прошлой сессии. */
+/**
+ * Итоги последней торговой сессии: объём по сегментам рынка и изменение к прошлой сессии;
+ * внизу — индекс KSE с графиком за период, капитализация и число сделок.
+ */
 function SessionCard() {
   const tr = useTr();
-  const { sessionDate, sessionHours, tradingRows } = useMarketData();
+  const { sessionDate, sessionHours, tradingRows, index: indexKse, indexHistory, stats } = useMarketData();
   return (
     <article className={`${styles.card} ${styles.fill}`}>
       <header className={styles.cardHead}>
@@ -355,6 +315,31 @@ function SessionCard() {
         ))}
       </dl>
       <p className={styles.sessionMeta}>{tr("Объём, млн сом")}</p>
+
+      <div className={styles.totals}>
+        <Link href="/market/index" className={styles.sessionIndex}>
+          <span>{tr("Индекс KSE")}</span>
+          <b>{indexKse.value.toLocaleString("ru-KG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
+          <em className={indexKse.change < 0 ? styles.down : indexKse.change > 0 ? styles.up : undefined}>
+            {formatChange(indexKse.change)}
+          </em>
+        </Link>
+        {indexHistory.length > 1 ? (
+          <Sparkline values={indexHistory.map((item) => item.index)} className={styles.sessionSpark} />
+        ) : null}
+        <dl className={styles.facts}>
+          <div>
+            <dt>{tr("Капитализация")}</dt>
+            <dd>
+              {indexKse.capitalization.toLocaleString("ru-KG")} <small>{tr("млрд сом")}</small>
+            </dd>
+          </div>
+          <div>
+            <dt>{tr("Сделок за сессию")}</dt>
+            <dd>{stats.trades.toLocaleString("ru-KG")}</dd>
+          </div>
+        </dl>
+      </div>
     </article>
   );
 }
@@ -711,13 +696,12 @@ export function MarketPulse() {
         {market.live ? (
           <>
             <TradeList title={`Сделки ${market.sessionDate}`} rows={market.lastTrades} href="/market" metric="price" />
-            <TradeList title="Лидеры недели по объёму, тыс. сом" rows={market.weekLeaders} href="/market" metric="volume" fill />
+            <TradeList title="Лидеры недели по объёму, тыс. сом" rows={market.weekLeaders} href="/market" metric="volume" fill total={market.weekTotal} />
           </>
         ) : (
           <>
-            <MoverList title="Топ роста" list={gainers} href="/market" />
-            <MoverList title="Топ падения" list={losers} href="/market" />
-            <MarketOverviewCard />
+            <MoverList title="Топ роста" list={gainers} href="/market" fill />
+            <MoverList title="Топ падения" list={losers} href="/market" fill />
           </>
         )}
       </aside>

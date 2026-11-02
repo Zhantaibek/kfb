@@ -53,7 +53,12 @@ function SeriesChart({ data, label, unit }: { data: { date: string; value: numbe
 export function TradeResultsView({ data }: { data: TradeResults }) {
   const [periodId, setPeriodId] = useState(data.periods[0]?.id ?? "");
   const period = data.periods.find((item) => item.id === periodId) ?? data.periods[0];
-  const label = (title: string) => title.replace(/^Торги за /, "").replace(/\s*\(.*\)$/, "");
+  // «За Сентябрь месяц» с kse.kg → «За сентябрь».
+  const label = (title: string) =>
+    title
+      .replace(/^Торги за /, "")
+      .replace(/\s*\(.*\)$/, "")
+      .replace(/^За ([А-ЯЁ][а-яё]+) месяц$/, (_, month: string) => `За ${month.toLowerCase()}`);
   return (
     <div className={css.stack}>
       <div className={css.tabs} role="tablist" aria-label="Период">

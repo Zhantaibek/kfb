@@ -5,6 +5,7 @@ import type { CmsGcbParticipant, CmsLandingSection } from "@/lib/cms/types";
 import { useTr } from "@/lib/use-tr";
 import { lines } from "./landing-data";
 import css from "./landing.module.css";
+import { toggleDetails } from "@/lib/animate-details";
 
 /** «Как купить ГКВ-12 и ГКО-2?»: участники торгов ГЦБ с переключателем «Брокеры / Банки». */
 export function GcbCompanies({ companies }: { companies: CmsGcbParticipant[] }) {
@@ -24,7 +25,7 @@ export function GcbCompanies({ companies }: { companies: CmsGcbParticipant[] }) 
           .filter((item) => item.type === type)
           .map((item) => (
             <details key={item.id} className={css.company}>
-              <summary>{item.title}</summary>
+              <summary onClick={toggleDetails}>{item.title}</summary>
               <div>
                 {item.address ? <span>{item.address}</span> : null}
                 {lines(item.phones).map((phone) => (

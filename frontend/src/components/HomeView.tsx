@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import type { HeroSlide } from "@/components/HeroSlider";
 import { HomeHero } from "@/components/HomeHero";
 import { MarketPulse } from "@/components/MarketPulse";
 import { QuoteBoard } from "@/components/QuoteBoard";
@@ -115,7 +114,6 @@ export type HomeNews = {
 };
 
 type Props = {
-  slides: HeroSlide[];
   news: HomeNews[];
   session: { open: boolean; clock: string; label: string; hours: string; date: string };
   index: { value: number; change: number; history: number[]; capitalization: number };
@@ -148,7 +146,7 @@ export function HomeView({ news, companyNews = [], urgent = [], index, volume, l
         <section className={styles.services} aria-labelledby="services-title">
           <header className={styles.servicesHead}>
             <h2 id="services-title">{tr("Наши услуги")}</h2>
-            <AdminEditButton href="/admin/hubs" />
+            <AdminEditButton href="/admin/menu?tab=home" />
           </header>
           <div className={styles.servicesGrid} data-stagger>
             {services.map((item) => (

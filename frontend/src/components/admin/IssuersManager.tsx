@@ -171,8 +171,9 @@ export function IssuersManager() {
       slug: (issuer.slug || suggestSlug(issuer.name)).trim(),
       order: Number(issuer.order) || issuers.length + 1,
     };
-    if (issuer.id) await mutate("update", "issuers", item, issuer.id);
-    else await mutate("create", "issuers", item);
+    // Новые эмитенты приходят только из API (ISSUERS_API_URL) — здесь правим существующих.
+    if (!issuer.id) return;
+    await mutate("update", "issuers", item, issuer.id);
     setIssuer(null);
   }
 
@@ -198,8 +199,9 @@ export function IssuersManager() {
       order: Number(entry.order) || sameCategory.length + 1,
       documents: (entry.documents ?? []).filter((doc) => doc.name || doc.url),
     };
-    if (entry.id) await mutate("update", "listing", item, entry.id);
-    else await mutate("create", "listing", item);
+    // Новые бумаги приходят только из API (LISTING_API_URL) — здесь правим существующие.
+    if (!entry.id) return;
+    await mutate("update", "listing", item, entry.id);
     setEntry(null);
   }
 
@@ -251,6 +253,11 @@ export function IssuersManager() {
         «Эмитенты» — карточки Центра раскрытия информации (/disclosure). «Листинг» — официальный список бумаг на странице
         /listing; бумага ссылается на карточку эмитента через выбранную компанию.
       </p>
+      <p className={css.note} style={{ marginBottom: 16 }}>
+        Новые эмитенты и бумаги добавляются не кнопкой, а через внешний API: адреса ISSUERS_API_URL и LISTING_API_URL в
+        файле .env, синхронизация раз в 15 минут. API обновляет только те поля, которые присылает, — остальные правки
+        здесь сохраняются. Запись, удалённая здесь, вернётся, если API продолжит её присылать.
+      </p>
 
       <div className={css.localeTabs} role="tablist" style={{ marginBottom: 18 }}>
         <button className={css.localeTab} type="button" data-on={tab === "issuers"} onClick={() => switchTab("issuers")}>
@@ -266,13 +273,6 @@ export function IssuersManager() {
       {tab === "issuers" ? (
         <>
           <div className={css.toolbar}>
-            <button
-              className={css.primary}
-              type="button"
-              onClick={() => setIssuer({ ...emptyIssuer, order: issuers.length + 1 })}
-            >
-              + Добавить эмитента
-            </button>
             <label className={css.field} style={{ minWidth: 280 }}>
               <input
                 type="search"
@@ -411,12 +411,6 @@ export function IssuersManager() {
         </>
       ) : (
         <>
-          <div className={css.toolbar}>
-            <button className={css.primary} type="button" onClick={() => setEntry({ ...emptyListing })}>
-              + Добавить бумагу
-            </button>
-          </div>
-
           {entry ? (
             <form
               ref={formRef}

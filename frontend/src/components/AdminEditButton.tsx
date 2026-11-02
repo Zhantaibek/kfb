@@ -7,7 +7,7 @@ import ui from "@/app/ui.module.css";
 
 /** Раздел админки, в котором редактируется публичная страница. */
 export function adminEditHref(pathname: string): string {
-  if (pathname === "/") return "/admin/hubs";
+  if (pathname === "/") return "/admin/menu?tab=home";
   if (pathname === "/about/management") return "/admin/management";
   if (pathname === "/news" || pathname.startsWith("/news/")) return "/admin/news";
   if (pathname === "/contacts") return "/admin/settings";

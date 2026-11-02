@@ -59,8 +59,11 @@ export function SettingsManager() {
   return (
     <>
       <p className={css.kicker}>CMS · КФБ</p>
-      <h1>Настройки сайта</h1>
-      <p className={css.lead}>Тексты подвала обязательны на русском, кыргызском и английском. Телефоны и почта — общие.</p>
+      <h1>Контакты и подвал</h1>
+      <p className={css.lead}>
+        Контакты, тексты и ссылки подвала в одном месте. Тексты обязательны на русском, кыргызском и английском, телефоны и почта —
+        общие. Ссылки подвала — ниже формы.
+      </p>
       {error ? <p className={css.error}>{error}</p> : null}
       <form
         className={css.form}

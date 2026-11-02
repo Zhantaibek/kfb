@@ -10,11 +10,19 @@ type TapeItem = { ticker: string; price: string; volume: string; href: string };
 
 function TapeRow({ items }: { items: TapeItem[] }) {
   // Лента повторяется трижды, чтобы бесшовно прокручиваться на широких экранах.
+  // Повторы скрыты от скринридеров, а вся лента — от Tab: иначе клавиатура проходила бы ~100 ссылок
+  // до меню. Те же котировки доступны на странице «Котировки».
   const lane = [...items, ...items, ...items];
   return (
     <>
       {lane.map((item, index) => (
-        <Link className={ui.tickerItem} href={item.href} key={`${item.ticker}-${index}`}>
+        <Link
+          className={ui.tickerItem}
+          href={item.href}
+          key={`${item.ticker}-${index}`}
+          tabIndex={-1}
+          aria-hidden={index >= items.length || undefined}
+        >
           <span>{item.ticker}</span>
           <b>{item.price}</b>
           {item.volume ? <small>{item.volume}</small> : null}

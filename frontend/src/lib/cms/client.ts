@@ -6,18 +6,31 @@ import type { CmsStore, CmsUser } from "@/lib/cms/types";
 export type AdminStore = Omit<CmsStore, "users"> & { users: Omit<CmsUser, "password">[] };
 
 export async function adminJson<T>(input: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(input, {
-    credentials: "include",
-    ...init,
-    headers: {
-      ...(init?.body instanceof FormData ? {} : { "content-type": "application/json" }),
-      ...init?.headers,
-    },
-  });
-  const data = (await response.json()) as T & { error?: string };
+  let response: Response;
+  try {
+    response = await fetch(input, {
+      credentials: "include",
+      ...init,
+      headers: {
+        ...(init?.body instanceof FormData ? {} : { "content-type": "application/json" }),
+        ...init?.headers,
+      },
+    });
+  } catch {
+    // Нет сети или сервер недоступен: понятное сообщение вместо «Failed to fetch»; введённое в форме остаётся.
+    throw new Error("Нет связи с сервером — изменения не сохранены. Проверьте интернет и повторите.");
+  }
+  // Прокси при сбое API может вернуть не JSON — тогда общий текст ошибки.
+  const data = (await response.json().catch(() => ({}))) as T & { error?: string };
   if (response.status === 401) {
-    window.location.href = "/admin/login";
+    // replace: страница с истекшей сессией не остаётся в истории — «Назад» не вернёт на неё.
+    window.location.replace("/admin/login");
     throw new Error("unauthorized");
+  }
+  if (response.status === 403 && data.error === "mfa_setup_required") {
+    // Сотрудник без 2FA при обязательном 2FA — на страницу настройки.
+    window.location.replace("/admin/profile");
+    throw new Error("mfa_setup_required");
   }
   if (!response.ok) throw new Error(data.error ?? "Ошибка запроса");
   return data;

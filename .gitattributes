@@ -1,0 +1,2 @@
+# Скрипты для Linux-контейнеров — всегда с LF, иначе sh не запустит их после checkout на Windows.
+*.sh text eol=lf

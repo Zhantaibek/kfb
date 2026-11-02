@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../../middleware/error";
 import { validateBody } from "../../middleware/validate";
-import { loginSchema, publicRequestSchema, registerSchema } from "../../validation/cms";
+import { loginSchema, publicRequestSchema } from "../../validation/cms";
 import { postVisit } from "../analytics/analytics.routes";
 import { getSearch } from "../search/search.routes";
 import { getMarketSnapshot } from "../kse-sync/kse-sync.routes";
@@ -55,4 +55,4 @@ publicCmsRoutes.post("/request", validateBody(publicRequestSchema), asyncHandler
 // Счётчик посещений с id посетителя, IP и устройством — см. modules/analytics.
 publicCmsRoutes.post("/visit", asyncHandler(postVisit));
 
-export { loginSchema, registerSchema };
+export { loginSchema };

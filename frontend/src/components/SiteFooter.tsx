@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useApp } from "@/components/AppProviders";
 import { formatChange, formatSom, type Instrument } from "@/data/catalog";
 import { useMarketData } from "@/components/MarketDataProvider";
@@ -185,7 +184,6 @@ export function SiteFooter() {
 
       <div className={ui.footerBottom}>
         <span>{tr(settings.copyright || "© 2004–2026 ЗАО «Кыргызская фондовая биржа»")}</span>
-        <Link href="/admin">{tr("Админ-панель")}</Link>
       </div>
     </footer>
   );

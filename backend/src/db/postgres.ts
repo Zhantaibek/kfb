@@ -15,6 +15,7 @@ import { ksePageSeed } from "../../../shared/kse-pages-seed";
 import { sanitizeRichHtml } from "../utils/sanitize-html";
 import type { CmsStore } from "../../../shared/cms";
 import { prisma } from "./prisma";
+import { ensureDisclosureSeed } from "../modules/disclosure/disclosure.service";
 import { issuerCreateData, listingCreateData, partnerCreateData, seedDatabase } from "./seed";
 
 function resolveBackendRoot() {
@@ -115,6 +116,8 @@ export async function initDb() {
   await ensureDefaultPartners();
   await ensureDefaultLandings();
   await ensureKsePages();
+  // После эмитентов: события ссылаются на issuers.slug.
+  await ensureDisclosureSeed();
 }
 
 const legacyHeaderLabels = new Set(["Частным лицам", "Бизнесу", "Исламские финансы", "О бирже"]);

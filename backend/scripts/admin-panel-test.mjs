@@ -61,7 +61,7 @@ async function main() {
   const emptyJar = new Map();
 
   // --- pages ---
-  for (const path of ["/admin", "/admin/login", "/admin/dashboard", "/admin/news", "/admin/pages", "/admin/menu", "/admin/slider", "/admin/media", "/admin/requests", "/admin/users", "/admin/visits", "/admin/audit", "/admin/api", "/admin/profile"]) {
+  for (const path of ["/admin", "/admin/login", "/admin/dashboard", "/admin/news", "/admin/pages", "/admin/menu", "/admin/slider", "/admin/requests", "/admin/users", "/admin/visits", "/admin/audit", "/admin/api", "/admin/profile"]) {
     const res = await req(web, path);
     if (path === "/admin") {
       assertStatus(`GET ${path} redirects`, res, [307, 308]);

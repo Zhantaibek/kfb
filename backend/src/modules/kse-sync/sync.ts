@@ -110,6 +110,36 @@ export function startKseSync() {
   setInterval(() => void syncAll(), INTERVAL_MS).unref();
 }
 
+/** Снимок считается устаревшим, если 2 часа (8 циклов подряд) не удаётся его обновить. */
+const STALE_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * Свежесть данных торгов для мониторинга (/api/health/market): при поломке парсера или недоступности kse.kg
+ * снимки перестают обновляться, а сайт продолжает показывать последние — без этой проверки никто не заметит.
+ */
+export async function marketDataHealth() {
+  if (process.env.KSE_SYNC === "off") return { status: "off" as const, stale: [] };
+  const rows = await prisma.kseSnapshot.findMany({ select: { key: true, fetchedAt: true, error: true } });
+  const now = Date.now();
+  const stale = snapshotKeys
+    .map((key) => {
+      const row = rows.find((item) => item.key === key);
+      if (!row) return { key, fetchedAt: null, error: "снимка нет" };
+      if (now - row.fetchedAt.getTime() > STALE_MS) return { key, fetchedAt: row.fetchedAt.toISOString(), error: row.error };
+      return null;
+    })
+    .filter((item) => item !== null);
+  // Раскрытие информации обходится раз в 6 часов: устаревшим считаем после двух пропущенных прогонов.
+  // Строки ещё нет — первый прогон не закончился (идёт ~4 минуты после старта), это не сбой.
+  const disclosure = rows.find((item) => item.key === "disclosure");
+  if (process.env.DISCLOSURE_SYNC !== "off" && disclosure && now - disclosure.fetchedAt.getTime() > DISCLOSURE_STALE_MS) {
+    stale.push({ key: "disclosure", fetchedAt: disclosure.fetchedAt.toISOString(), error: disclosure.error });
+  }
+  return { status: stale.length ? ("stale" as const) : ("ok" as const), stale };
+}
+
+const DISCLOSURE_STALE_MS = 13 * 60 * 60 * 1000;
+
 export async function readSnapshot(key: string) {
   return prisma.kseSnapshot.findUnique({ where: { key } });
 }

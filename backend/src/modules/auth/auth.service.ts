@@ -1,15 +1,11 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { Request } from "express";
 import { config } from "../../config";
-import {
-  findUserByEmail,
-  insertUser,
-  updateUserPassword,
-} from "../../db/repositories/cms.repository";
+import { findUserByEmail, updateUserPassword } from "../../db/repositories/cms.repository";
 import { prisma } from "../../db/prisma";
 import { hashPassword, isHashed, verifyPassword } from "./password";
 import type { AdminSession, AuthSession, UserRole } from "../../../../shared/cms";
-import { isPublicRole, isStaffRole } from "../../../../shared/cms";
+import { isStaffRole } from "../../../../shared/cms";
 
 function signToken(payload: string) {
   const signature = createHmac("sha256", config.sessionSecret).update(payload).digest("base64url");
@@ -28,7 +24,8 @@ function readToken(token: string): AuthSession | null {
   try {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as AuthSession & { exp?: number };
     if (!session.email || !session.role || (session.exp && session.exp < Date.now())) return null;
-    return { id: session.id, email: session.email, name: session.name, role: session.role };
+    // mfa — только true: у обычной cookie поля нет, сессии без 2FA выглядят как прежде.
+    return { id: session.id, email: session.email, name: session.name, role: session.role, ...(session.mfa === true ? { mfa: true } : {}) };
   } catch {
     return null;
   }
@@ -53,23 +50,18 @@ export function readSession(req: Request): AdminSession | null {
   return session as AdminSession;
 }
 
-export function readUserSession(req: Request): AuthSession | null {
-  const session = readCookieSession(req, config.userCookieName);
-  if (!session || !isPublicRole(session.role)) return null;
-  return session;
-}
-
 function toSession(user: { id: string; email: string; name: string; role: UserRole }): AuthSession {
   return { id: user.id, email: user.email, name: user.name, role: user.role };
 }
 
-export async function authenticate(email: string, password: string): Promise<AuthSession | null> {
+/** Проверка пароля. totpEnabled — нужен ли второй шаг (код из приложения) до выдачи сессии. */
+export async function authenticate(email: string, password: string): Promise<{ session: AuthSession; totpEnabled: boolean } | null> {
   const user = await findUserByEmail(email);
   if (!user || !(await verifyPassword(password, user.password))) return null;
   if (!isHashed(user.password)) {
     await updateUserPassword(user.id, await hashPassword(password));
   }
-  return toSession(user);
+  return { session: toSession(user), totpEnabled: Boolean(user.totpEnabled) };
 }
 
 export async function ensureAuthAccounts() {
@@ -79,15 +71,6 @@ export async function ensureAuthAccounts() {
       await updateUserPassword(row.id, await hashPassword(row.password));
     }
   }
-  const emails = new Set(rows.map((row: { email: string }) => row.email.toLowerCase()));
-  const extras = [
-    { id: "user-investor", name: "Инвестор", email: "investor@kse.kg", role: "investor" as const, password: "kse" },
-    { id: "user-issuer", name: "Эмитент", email: "issuer@kse.kg", role: "issuer" as const, password: "kse" },
-  ];
-  for (const user of extras) {
-    if (emails.has(user.email)) continue;
-    await insertUser({ ...user, password: await hashPassword(user.password) });
-  }
 }
 
 function fail(name: "Unauthorized" | "Forbidden", message: string): never {
@@ -96,14 +79,40 @@ function fail(name: "Unauthorized" | "Forbidden", message: string): never {
   throw error;
 }
 
-export function requireSession(req: Request): AdminSession {
+/**
+ * Сессия, подтверждённая базой: пользователь ещё существует, e-mail и роль совпадают с подписанной cookie.
+ * Без этого удалённый или пониженный сотрудник сохранял бы права до истечения cookie (7 дней).
+ */
+type StaffLookup = (id: string) => Promise<{ email: string; role: string; totpEnabled?: boolean } | null>;
+const findStaff: StaffLookup = (id) =>
+  prisma.user.findUnique({ where: { id }, select: { email: true, role: true, totpEnabled: true } });
+
+export async function verifiedSession(req: Request, lookup: StaffLookup = findStaff): Promise<AdminSession | null> {
   const session = readSession(req);
+  if (!session) return null;
+  const user = await lookup(session.id);
+  if (!user || user.role !== session.role || user.email.toLowerCase() !== session.email.toLowerCase()) return null;
+  // У сотрудника включён 2FA, а cookie получена без кода (выдана до включения) — нужен новый вход.
+  if (user.totpEnabled && !session.mfa) return null;
+  return session;
+}
+
+/** Сессия без требования 2FA — только для страницы его настройки (/api/admin/mfa). */
+export async function requireSessionForSetup(req: Request): Promise<AdminSession> {
+  const session = await verifiedSession(req);
   if (!session) fail("Unauthorized", "unauthorized");
   return session;
 }
 
-export function requireAdmin(req: Request): AdminSession {
-  const session = requireSession(req);
+/** Сессия для админки. При обязательном 2FA сотрудник без него получает 403 mfa_setup_required. */
+export async function requireSession(req: Request): Promise<AdminSession> {
+  const session = await requireSessionForSetup(req);
+  if (config.mfaRequired && !session.mfa) fail("Forbidden", "mfa_setup_required");
+  return session;
+}
+
+export async function requireAdmin(req: Request): Promise<AdminSession> {
+  const session = await requireSession(req);
   if (session.role !== "admin") fail("Forbidden", "Только администратор может управлять пользователями");
   return session;
 }

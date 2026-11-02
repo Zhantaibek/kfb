@@ -25,6 +25,26 @@ const photos = [
   "/carousel/trading.jpg",
 ];
 
+/**
+ * Первые учётные записи. В разработке — демо admin/admin и editor/editor.
+ * В production демо-паролей нет: админ создаётся только из ADMIN_EMAIL и ADMIN_PASSWORD (env).
+ */
+function seedUsers(): CmsStore["users"] {
+  if (process.env.NODE_ENV !== "production") {
+    return [
+      { id: "user-admin", name: "Администратор", email: "admin@kse.kg", role: "admin", password: "admin" },
+      { id: "user-editor", name: "Редактор", email: "editor@kse.kg", role: "editor", password: "editor" },
+    ];
+  }
+  const email = process.env.ADMIN_EMAIL?.trim();
+  const password = process.env.ADMIN_PASSWORD ?? "";
+  if (!email || password.length < 12) {
+    console.warn("Админ не создан: задайте ADMIN_EMAIL и ADMIN_PASSWORD (от 12 символов) и перезапустите API.");
+    return [];
+  }
+  return [{ id: "user-admin", name: "Администратор", email, role: "admin", password }];
+}
+
 export function createSeedStore(): CmsStore {
   return {
     news: seedNews.map((item, index) => ({
@@ -122,12 +142,7 @@ export function createSeedStore(): CmsStore {
     listing: listingSeedRows(now),
     settings: [{ ...defaultSiteSettings, updatedAt: now }],
     requests: [],
-    users: [
-      { id: "user-admin", name: "Администратор", email: "admin@kse.kg", role: "admin", password: "admin" },
-      { id: "user-editor", name: "Редактор", email: "editor@kse.kg", role: "editor", password: "editor" },
-      { id: "user-investor", name: "Инвестор", email: "investor@kse.kg", role: "investor", password: "kse" },
-      { id: "user-issuer", name: "Эмитент", email: "issuer@kse.kg", role: "issuer", password: "kse" },
-    ],
+    users: seedUsers(),
     visits: [],
     audit: [
       {

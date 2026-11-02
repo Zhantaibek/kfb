@@ -1,0 +1,78 @@
+# Проверка безопасности pull request с помощью Strix (https://github.com/usestrix/strix).
+# Сканируются только файлы, изменённые в PR (режим quick), с жёстким лимитом расходов на LLM.
+#
+# Включение: добавьте в Settings → Secrets and variables → Actions два секрета:
+#   STRIX_LLM    — модель, например anthropic/claude-sonnet-4-6
+#   LLM_API_KEY  — ключ провайдера (лучше отдельный, с месячным лимитом расходов у провайдера)
+# Пока секретов нет, job пропускается и ничего не тратит.
+# Код изменённых файлов уходит провайдеру модели (Anthropic) — так же, как при работе с ИИ-агентом.
+
+name: Security scan (Strix)
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: strix-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  strix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      STRIX_LLM: ${{ secrets.STRIX_LLM }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+    steps:
+      - name: Skip when the scan is not configured
+        id: gate
+        run: |
+          if [ -z "$STRIX_LLM" ] || [ -z "$LLM_API_KEY" ]; then
+            echo "Секреты STRIX_LLM / LLM_API_KEY не заданы — скан пропущен (ничего не потрачено)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          fetch-depth: 0 # нужно Strix для определения изменённых файлов
+
+      - name: Install Strix (pinned version)
+        if: steps.gate.outputs.enabled == 'true'
+        run: pipx install strix-agent==1.7.0
+
+      - name: Run Strix on changed files
+        if: steps.gate.outputs.enabled == 'true'
+        run: >
+          strix -n -t ./ --scan-mode quick
+          --scope-mode diff --diff-base "origin/${{ github.base_ref || 'main' }}"
+          --max-budget 5 --fail-on high
+          --instruction-file security/strix-instructions.md
+
+      # Strix выходит с 0 и при исчерпании бюджета — не считаем такой прогон успешным.
+      - name: Fail unless the scan completed
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          run_json=$(ls -t strix_runs/*/run.json | head -1)
+          status=$(jq -r .status "$run_json")
+          cost=$(jq -r '.llm_usage.cost // "?"' "$run_json")
+          echo "Статус: $status, расход: $cost USD"
+          if [ "$status" != "completed" ]; then
+            echo "Скан не завершён (вероятно, исчерпан бюджет) — увеличьте --max-budget." >&2
+            exit 1
+          fi
+
+      - name: Upload report
+        if: always() && steps.gate.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: strix-report
+          path: strix_runs/
+          retention-days: 14

@@ -1,9 +1,8 @@
 export type NewsKind = "exchange" | "company" | "urgent";
 export type PublishStatus = "draft" | "published";
 export type AdminRole = "admin" | "editor";
-/** student / teacher — аккаунты учебного центра (схема edu), входят через общий /login. */
-export type PublicRole = "investor" | "issuer" | "student" | "teacher";
-export type UserRole = AdminRole | PublicRole;
+/** На сайт входят только сотрудники биржи: ролей инвестора и эмитента нет. */
+export type UserRole = AdminRole;
 export type RequestStatus = "new" | "done";
 export type LocaleCode = "ky" | "en";
 export type CmsI18n = Partial<Record<LocaleCode, Record<string, string>>>;
@@ -28,9 +27,8 @@ export function isStaffRole(role: string): role is AdminRole {
   return role === "admin" || role === "editor";
 }
 
-export function isPublicRole(role: string): role is PublicRole {
-  return role === "investor" || role === "issuer" || role === "student" || role === "teacher";
-}
+/** Документ, прикреплённый к новости (файл загружен через /api/admin/upload). */
+export type CmsNewsAttachment = { name: string; url: string; ext: string; size: number };
 
 export type CmsNews = {
   id: string;
@@ -44,6 +42,7 @@ export type CmsNews = {
   body: string;
   photo: string;
   issuerSlug: string;
+  attachments?: CmsNewsAttachment[];
   i18n?: CmsI18n;
   createdAt: string;
   updatedAt: string;
@@ -372,6 +371,8 @@ export type CmsUser = {
   email: string;
   role: UserRole;
   password: string;
+  /** Включён ли двухфакторный вход (сам секрет наружу не отдаётся). */
+  totpEnabled?: boolean;
 };
 
 export type CmsVisit = {
@@ -414,8 +415,9 @@ export type CmsStore = {
 
 export type CmsCollection = keyof CmsStore;
 
-export type AuthSession = { id: string; email: string; name: string; role: UserRole };
-export type AdminSession = { id: string; email: string; name: string; role: AdminRole };
+/** mfa: вход подтверждён кодом двухфакторной аутентификации (у cookie без него — только пароль). */
+export type AuthSession = { id: string; email: string; name: string; role: UserRole; mfa?: boolean };
+export type AdminSession = { id: string; email: string; name: string; role: AdminRole; mfa?: boolean };
 
 export type PublicContent = {
   news: CmsNews[];

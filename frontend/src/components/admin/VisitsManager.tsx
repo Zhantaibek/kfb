@@ -89,7 +89,8 @@ function pageNumbers(current: number, total: number): (number | "gap")[] {
 async function getJson<T>(url: string): Promise<T> {
   const response = await fetch(url, { credentials: "include" });
   if (response.status === 401) {
-    window.location.href = "/admin/login";
+    // replace: страница с истекшей сессией не остаётся в истории — «Назад» не вернёт на неё.
+    window.location.replace("/admin/login");
     throw new Error("unauthorized");
   }
   if (!response.ok) throw new Error(`Не удалось загрузить статистику (${response.status})`);

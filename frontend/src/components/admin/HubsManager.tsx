@@ -1,5 +1,6 @@
 "use client";
 
+import { CmsImage } from "@/components/CmsImage";
 import { useState } from "react";
 import { useAdminStore } from "@/lib/cms/client";
 import { useContentLang } from "@/lib/cms/use-content-lang";
@@ -138,7 +139,7 @@ export function HubsManager() {
                   <div>{item.text}</div>
                 </td>
                 <td>{item.href}</td>
-                <td>{item.photo ? <img className={css.thumb} src={item.photo} alt="" /> : "—"}</td>
+                <td>{item.photo ? <CmsImage className={css.thumb} src={item.photo} alt="" /> : "—"}</td>
                 <td>
                   <div className={css.rowActions}>
                     <button className={css.ghost} type="button" onClick={() => setEditing(item)}>

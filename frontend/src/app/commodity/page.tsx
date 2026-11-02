@@ -30,7 +30,7 @@ export default function CommodityPage() {
             { name: "email", label: "E-mail", type: "email", required: true },
             { name: "goods", label: "Товар / сырьё", required: true },
           ]}
-          success="Заявка принята. Департамент товарного сектора свяжется с вами в рабочей модели КФБ."
+          success="Заявка принята. Департамент товарного сектора свяжется с вами в рабочее время."
         />
       </div>
     </PublicMain>

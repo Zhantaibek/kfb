@@ -43,7 +43,7 @@ export default async function ContactsPage() {
             { name: "email", label: "E-mail", type: "email", required: true },
             { name: "message", label: "Сообщение", type: "textarea", required: true },
           ]}
-          success="Сообщение принято. В этой версии сайта письмо не отправляется — для срочных вопросов звоните в офис."
+          success="Сообщение принято. Сотрудник биржи ответит в рабочее время; по срочным вопросам звоните в офис."
         />
       </div>
       <CmsSection page={departments} title="По подразделениям" />

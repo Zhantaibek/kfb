@@ -1,6 +1,9 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import ui from "@/app/ui.module.css";
 import { PublicMain } from "@/components/PublicMain";
+
+export const metadata: Metadata = { title: "Страница не найдена", robots: { index: false } };
 
 export default function NotFound() {
   return (

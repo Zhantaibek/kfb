@@ -929,7 +929,7 @@
 .chat summary {
   width: 58px;
   height: 58px;
-  background: var(--brand);
+  background: var(--brand-fill);
   color: #fff;
   border: 0;
   box-shadow: var(--shadow);
@@ -1044,7 +1044,7 @@
 .marketSplit,
 .feeds,
 .calendar {
-  width: min(1480px, calc(100% - 20px));
+  width: min(var(--page-max), calc(100% - 20px));
   margin: 0 auto;
 }
 
@@ -1052,7 +1052,7 @@
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0;
-  width: min(1480px, calc(100% - 20px));
+  width: min(var(--page-max), calc(100% - 20px));
   margin: 0 auto;
   position: relative;
   z-index: 5;
@@ -1579,7 +1579,7 @@
   display: grid;
   grid-template-columns: minmax(168px, 1.28fr) repeat(5, minmax(0, 1fr));
   gap: 0;
-  width: min(1480px, calc(100% - 48px));
+  width: min(var(--page-max), calc(100% - 48px));
   margin: 12px auto 0;
   position: relative;
   z-index: 5;
@@ -1832,7 +1832,7 @@
 
 .newsHome,
 .hub {
-  width: min(1480px, calc(100% - 48px));
+  width: min(var(--page-max), calc(100% - 48px));
   margin: 0 auto;
   padding: 40px 0 8px;
 }
@@ -1846,7 +1846,7 @@
 }
 
 .newsIntro p {
-  color: var(--brand);
+  color: var(--brand-text);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1895,7 +1895,7 @@
 
 .leadCard strong {
   margin-top: auto;
-  color: var(--brand);
+  color: var(--brand-text);
   font-size: 15px;
   font-weight: 700;
 }
@@ -2026,7 +2026,7 @@
 }
 
 .latestHead a {
-  color: var(--brand);
+  color: var(--brand-text);
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
@@ -2650,7 +2650,7 @@
 }
 
 .start {
-  width: min(1480px, calc(100% - 48px));
+  width: min(var(--page-max), calc(100% - 48px));
   margin: 40px auto 48px;
   padding: 52px 48px 48px;
   border-radius: 24px;
@@ -2890,7 +2890,7 @@
 }
 
 .services {
-  width: min(1480px, calc(100% - 48px));
+  width: min(var(--page-max), calc(100% - 48px));
   margin: 12px auto 0;
   overflow: hidden;
   border: 1px solid var(--card-border);
@@ -2967,7 +2967,7 @@
 }
 
 .serviceCard:hover .serviceIcon {
-  background: var(--brand);
+  background: var(--brand-fill);
   color: #fff;
 }
 
@@ -2993,7 +2993,7 @@
 }
 
 .serviceCard:hover .serviceMore {
-  color: var(--brand);
+  color: var(--brand-text);
   transform: translateX(3px);
 }
 
