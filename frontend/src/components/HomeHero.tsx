@@ -37,8 +37,8 @@ type Slide = {
 
 /**
  * Тексты — из разделов сайта (главная, «Инвесторам», «Итоги торгов», «Листинг»); цифр и обещаний не придумываем.
- * Фото — реальные снимки (Unsplash, авторы в public/hero/CREDITS.md): современное здание с вывеской КФБ
- * (логотип нанесён на фото), деловой раздел газеты, графики торгов, отчёт с графиками.
+ * Фото (источники в public/hero/CREDITS.md): вход в здание биржи — современный фасад нарисован нейросетью по реальному фото;
+ * Бишкек и хребет Ала-Тоо, графики торгов, подписание документов.
  */
 const SLIDES: Slide[] = [
   {
@@ -46,9 +46,9 @@ const SLIDES: Slide[] = [
     kicker: "Кыргызская фондовая биржа",
     title: "Инвестиции в стабильное будущее",
     text: "Кыргызская фондовая биржа — это прозрачный и надежный механизм для привлечения капитала, развития бизнеса и роста экономики страны.",
-    photo: "/hero/kse-front.jpg",
-    focus: "50% 0%",
-    focusMobile: "76% 50%",
+    photo: "/hero/kse-entrance-garden.jpg",
+    focus: "100% 50%",
+    focusMobile: "62% 50%",
     primary: { label: "Торговать", href: "/market" },
     secondary: { label: "Подробнее", href: "/about" },
   },
@@ -57,9 +57,9 @@ const SLIDES: Slide[] = [
     kicker: "Инвесторам",
     title: "Как начать инвестировать",
     text: "Частному инвестору нужен счёт у участника торгов. Дальше — выбор акций, облигаций, ГЦБ или драгоценных металлов.",
-    photo: "/hero/investor-news.jpg",
-    focus: "45% 55%",
-    focusMobile: "40% 60%",
+    photo: "/hero/bishkek-ala-too.jpg",
+    focus: "50% 50%",
+    focusMobile: "60% 50%",
     primary: { label: "Выбрать брокера", href: "/members" },
     secondary: { label: "Инвестируйте в ГЦБ", href: "/gcb" },
   },
@@ -79,9 +79,9 @@ const SLIDES: Slide[] = [
     kicker: "Эмитентам",
     title: "Листинг и раскрытие информации",
     text: "Официальный список ценных бумаг, допущенных к торгам на Кыргызской фондовой бирже.",
-    photo: "/hero/issuer-report.jpg",
-    focus: "55% 45%",
-    focusMobile: "55% 45%",
+    photo: "/hero/issuer-signing.jpg",
+    focus: "50% 55%",
+    focusMobile: "55% 60%",
     primary: { label: "Листинг", href: "/listing" },
     secondary: { label: "Центр раскрытия информации", href: "/disclosure" },
   },

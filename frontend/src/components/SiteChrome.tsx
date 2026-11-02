@@ -42,16 +42,18 @@ export function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const tr = useTr();
   const isAdmin = pathname.startsWith("/admin");
-  const bare = isAdmin;
+  // Макеты дизайна (design-concepts) — со своей шапкой и подвалом, в статистику посещений не идут.
+  const isConcept = pathname.startsWith("/design-concepts");
+  const bare = isAdmin || isConcept;
 
   useEffect(() => {
-    if (isAdmin) return;
+    if (bare) return;
     void fetch("/api/public/visit", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ path: pathname, visitorId: visitorId() }),
     });
-  }, [pathname, isAdmin]);
+  }, [pathname, bare]);
 
   useEffect(() => {
     if (bare) return;

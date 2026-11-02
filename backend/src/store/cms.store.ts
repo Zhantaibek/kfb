@@ -21,7 +21,7 @@ export async function readStore(): Promise<CmsStore> {
 export function publicUsers(store: CmsStore) {
   return store.users.map(({ password: _password, ...user }) => user);
 }
-
+  
 export function publishedNews(store: Pick<CmsStore, "news">) {
   return [...store.news]
     .filter((item) => item.status === "published")
@@ -36,7 +36,10 @@ export function orderedHubs(store: Pick<CmsStore, "hubs">) {
   return [...store.hubs].sort((a, b) => a.order - b.order);
 }
 
-export function publishedManagement(store: Pick<CmsStore, "management">) {
+export  
+
+ 
+ function publishedManagement(store: Pick<CmsStore, "management">) {
   return [...store.management]
     .filter((item) => item.status === "published")
     .sort((a, b) => a.order - b.order);

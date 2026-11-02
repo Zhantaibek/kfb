@@ -55,15 +55,6 @@ export default async function DisclosurePage({ searchParams }: Props) {
         }
         title="Центр раскрытия информации"
       />
-      <p className={css.note}>
-        Для публикации периодической отчетности и информации о существенных фактах эмитенты могут воспользоваться электронной системой ЗАО «Кыргызская фондовая биржа» по ссылке{" "}
-        <a href="https://oi.kse.kg/" target="_blank" rel="noreferrer">
-          oi.kse.kg
-        </a>
-        .
-        <br />
-        Получить доступ (Логин, Пароль) к личному кабинету эмитента можно в Департаменте раскрытия информации ЗАО «Кыргызская фондовая биржа» по телефону: (0312) 45-40-53
-      </p>
       <form className={css.search} action="/disclosure" role="search">
         <input name="q" type="search" defaultValue={q} placeholder="Поиск по эмитенту" aria-label="Поиск по эмитенту" />
         <button type="submit" aria-label="Найти">

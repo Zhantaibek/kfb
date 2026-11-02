@@ -5,6 +5,7 @@ import { SiteChrome } from "@/components/SiteChrome";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Manrope, Montserrat, Unbounded } from "next/font/google";
+import Script from "next/script";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -90,7 +91,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       suppressHydrationWarning
     >
       <body>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeScript}
+        </Script>
         <AppProviders>
           <MarketDataProvider value={market}>
             <SiteChrome>{children}</SiteChrome>
