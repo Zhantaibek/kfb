@@ -23,8 +23,9 @@ var SimpleDateFormat = Java.type("java.text.SimpleDateFormat");
 
 var env = System.getenv();
 var sql = env.get("ORACLE_SQL");
-// Только чтение: мост не должен ничего менять в Oracle.
-if (!sql || !/^\s*(select|with)\b/i.test(sql)) {
+// Только чтение: мост не должен ничего менять в Oracle. Драйвер 8i не поддерживает setReadOnly, поэтому
+// пропускаем ровно один SELECT без «;» (вторую команду через точку с запятой не приписать).
+if (!sql || !/^\s*(select|with)\b/i.test(sql) || sql.indexOf(";") >= 0) {
   System.err.println("ORACLE_SQL must be a single SELECT");
   System.exit(1);
 }
@@ -45,7 +46,6 @@ var out = new PrintStream(System.out, true, "UTF-8");
 Java.type("java.lang.Class").forName("oracle.jdbc.driver.OracleDriver");
 var conn = DriverManager.getConnection(env.get("ORACLE_URL"), env.get("ORACLE_USER"), env.get("ORACLE_PASSWORD"));
 try {
-  conn.setReadOnly(true);
   var ps = conn.prepareStatement(sql);
   if (maxRows > 0) ps.setMaxRows(maxRows);
   for (var p = 0; p < params.length; p++) ps.setString(p + 1, params[p] === null ? null : String(params[p]));
