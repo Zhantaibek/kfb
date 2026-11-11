@@ -28,6 +28,8 @@ type Slide = {
   title: string;
   text: string;
   photo: string;
+  /** Крошечное размытое превью фото: видно сразу, пока само фото загружается и декодируется (без тёмного кадра). */
+  blur: string;
   /** Кадрирование фото: на широком экране и на телефоне главный объект в разных местах. */
   focus: string;
   focusMobile: string;
@@ -47,6 +49,7 @@ const SLIDES: Slide[] = [
     title: "Инвестиции в стабильное будущее",
     text: "Кыргызская фондовая биржа — это прозрачный и надежный механизм для привлечения капитала, развития бизнеса и роста экономики страны.",
     photo: "/hero/kse-entrance-garden.jpg",
+    blur: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAJABgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwBs+t6reXjvaXM1rCeQjQqQo+vU0i6rrPlEy3gKh8biignjpgVpy/8AHs/4/wAqp2/+pm/4D/KpjUk3uVypdBLTVtRWYl3imBQ4TZtO7PHOaKq2/wDyEZf90fzoqZS1Ef/Z",
     focus: "100% 50%",
     focusMobile: "62% 50%",
     primary: { label: "Торговать", href: "/market" },
@@ -58,6 +61,7 @@ const SLIDES: Slide[] = [
     title: "Как начать инвестировать",
     text: "Частному инвестору нужен счёт у участника торгов. Дальше — выбор акций, облигаций, ГЦБ или драгоценных металлов.",
     photo: "/hero/bishkek-ala-too.jpg",
+    blur: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAOABgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDWitBbSpLbSrGMbSrDIb9alWJQGCxo/wA2Dj5QPauKfVYoiFmtizYzw+R+tRSa5E6+ULTA6g7q6JYmG93f0MIwknZxSXr/AMA712giG4KAT2xRXGTaskMUYSDCMcYDd+9FSsVStq2OUZp6JH//2Q==",
     focus: "50% 50%",
     focusMobile: "60% 50%",
     primary: { label: "Выбрать брокера", href: "/members" },
@@ -69,6 +73,7 @@ const SLIDES: Slide[] = [
     title: "Итоги торгов",
     text: "Объём торгов по рынкам и сделки по ценным бумагам: последний торговый день, неделя, месяц и год.",
     photo: "/hero/market-charts.jpg",
+    blur: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDlk2xvyYc5AyrZz6VCZTvOeprpdVgt4kgs7LSTHJO/liViP3jZ4I5pbXwPqQRWuZ7eBu/8ZH0x/jW1OpyrUVWntqc4ZQPXI60V16+EdOtxm4mlnb3O0f4/rRWnt0Zeykf/2Q==",
     focus: "50% 40%",
     focusMobile: "72% 45%",
     primary: { label: "Смотреть итоги", href: "/market" },
@@ -80,6 +85,7 @@ const SLIDES: Slide[] = [
     title: "Листинг и раскрытие информации",
     text: "Официальный список ценных бумаг, допущенных к торгам на Кыргызской фондовой бирже.",
     photo: "/hero/issuer-signing.jpg",
+    blur: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAQABgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDnfCjm4s9b01zmOSyaYZ7MhyDVvwhetpslvNdWspW8YRQMP4xnnA/L8q6zR/h/p+nXUFyby5mlibdhtoVvYjHSunTS7QKgMat5ZyhKjKfT0obuNaGc0FpaMtwkJUvkYPQA9cj8KK2I7WCFCqLwxyc85NFZtPozRTj1Vz//2Q==",
     focus: "50% 55%",
     focusMobile: "55% 60%",
     primary: { label: "Листинг", href: "/listing" },
@@ -222,6 +228,8 @@ export function HomeHero({ index, volume, listing }: Props) {
                       fill
                       sizes="100vw"
                       quality={90}
+                      placeholder="blur"
+                      blurDataURL={slide.blur}
                       preload={i === 0}
                       loading={i === 0 ? undefined : "eager"}
                       className={styles.photo}

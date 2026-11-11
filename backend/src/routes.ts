@@ -6,6 +6,7 @@ import { mediaRoutes } from "./modules/media/media.routes";
 import { adminAnalyticsRoutes } from "./modules/analytics/analytics.routes";
 import { marketDataHealth } from "./modules/kse-sync/sync";
 import { adminDisclosureRoutes, publicDisclosureRoutes } from "./modules/disclosure/disclosure.routes";
+import { adminOracleRoutes, publicOracleRoutes } from "./integrations/oracle/oracle.routes";
 
 export const api = Router();
 
@@ -34,5 +35,7 @@ api.use("/admin", mediaRoutes);
 api.use("/admin/analytics", adminAnalyticsRoutes);
 api.use("/admin/disclosures", adminDisclosureRoutes);
 api.use("/public/disclosure", publicDisclosureRoutes);
+api.use("/admin/oracle", adminOracleRoutes);
+api.use("/public/oracle", publicOracleRoutes);
 api.use("/auth", publicAuthRoutes);
 api.use("/public", publicCmsRoutes);

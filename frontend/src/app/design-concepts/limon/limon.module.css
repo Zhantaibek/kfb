@@ -1,0 +1,1278 @@
+/*
+ * Концепция 24 — «Лайм». Визуальный язык по снимкам wise.com: белый фон, лайм #9fe870, лесной зелёный #163300,
+ * серый #edefeb; заголовки — тяжёлый узкий капслок (Oswald 700), текст — Inter. Кнопки-«таблетки», радиусы 16/24/32.
+ */
+.page {
+  --lime: #9fe870;
+  --lime-2: #b3f08d;
+  --forest: #163300;
+  --ink: #0e0f0c;
+  --ink-2: #454745;
+  --ink-3: #6a6c6a;
+  --grey: #edefeb;
+  --line: #e2e4df;
+  --mint: #e2f6f5;
+
+  --wrap: min(1240px, calc(100% - 48px));
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-24: 96px;
+
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--lm-text), Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, h3, p, ul, ol, dl, dd) {
+  margin: 0;
+}
+
+.page :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+
+.page :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(h1, h2, h3) {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.page :where(a, button, input, select, summary):focus-visible {
+  outline: 3px solid var(--forest);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+.page svg {
+  width: 20px;
+  height: 20px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  top: -100px;
+  left: var(--s-4);
+  z-index: 100;
+  padding: var(--s-2) var(--s-4);
+  border-radius: 999px;
+  background: var(--lime);
+  color: var(--forest);
+}
+
+.skip:focus {
+  top: var(--s-4);
+}
+
+.underline {
+  color: var(--forest);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.underline:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Таблетки */
+.limeBtn,
+.limePill,
+.limePillSm,
+.forestPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.limeBtn {
+  min-height: 48px;
+  padding: 0 var(--s-12);
+  background: var(--lime);
+  color: var(--forest);
+}
+
+.limePill {
+  min-height: 32px;
+  padding: 0 var(--s-3);
+  background: var(--lime);
+  color: var(--forest);
+  font-size: 16px;
+}
+
+.limePillSm {
+  min-height: 40px;
+  padding: 0 var(--s-4);
+  background: var(--lime);
+  color: var(--forest);
+  font-size: 16px;
+}
+
+.forestPill {
+  min-height: 44px;
+  padding: 0 var(--s-6);
+  background: var(--forest);
+  color: var(--lime);
+  font-size: 16px;
+}
+
+.limeBtn:hover,
+.limePill:hover,
+.limePillSm:hover {
+  background: var(--lime-2);
+}
+
+.forestPill:hover {
+  background: #22480a;
+}
+
+.limeBtn:active,
+.limePill:active,
+.limePillSm:active,
+.forestPill:active {
+  transform: scale(0.97);
+}
+
+/* Шапка */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: var(--s-4) 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--forest);
+  font-family: var(--lm-display), sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.01em;
+}
+
+.nav {
+  display: flex;
+  gap: var(--s-6);
+  color: var(--forest);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.headRight {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  margin-left: auto;
+  color: var(--forest);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.nav a:hover,
+.headRight > a:not(.limePill):hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.lang {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.lang i {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffd400 0 30%, #e8112d 31%);
+}
+
+.menu {
+  display: none;
+  position: relative;
+  margin-left: auto;
+}
+
+.menu summary {
+  padding: var(--s-2) var(--s-4);
+  border-radius: 999px;
+  background: var(--lime);
+  color: var(--forest);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu nav {
+  position: absolute;
+  top: calc(100% + var(--s-2));
+  right: 0;
+  z-index: 20;
+  display: grid;
+  min-width: 240px;
+  padding: var(--s-2);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(14 15 12 / 0.16);
+}
+
+.menu nav a {
+  padding: var(--s-2) var(--s-3);
+  border-radius: 10px;
+  color: var(--forest);
+  font-weight: 600;
+}
+
+.menu nav a:hover {
+  background: var(--grey);
+}
+
+/* 1. Первый экран */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 520px;
+  align-items: center;
+  gap: var(--s-12);
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: var(--s-12) 0 var(--s-16);
+}
+
+.heroText {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-6);
+  padding-top: var(--s-24);
+}
+
+.heroText h1 {
+  max-width: 13ch;
+  font-size: clamp(40px, 4vw, 56px);
+}
+
+.heroText p {
+  max-width: 34ch;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.heroCard {
+  overflow: hidden;
+  border-radius: 32px;
+  box-shadow: 0 2px 30px rgb(14 15 12 / 0.12);
+}
+
+.cardTop {
+  position: relative;
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-8) var(--s-6) var(--s-12);
+  background: var(--forest);
+}
+
+.cardTop img {
+  object-fit: cover;
+  opacity: 0.45;
+  filter: saturate(1.6) hue-rotate(-20deg);
+}
+
+.cardShout,
+.cardSub {
+  position: relative;
+}
+
+.cardShout {
+  color: var(--lime);
+  font-family: var(--lm-display), sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.cardSub {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Калькулятор */
+.calc {
+  position: relative;
+  margin-top: -24px;
+  border-radius: 28px 28px 0 0;
+  background: #fff;
+}
+
+.calcBody {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-6);
+}
+
+.rate {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  justify-self: end;
+  padding: var(--s-2) var(--s-4);
+  border-radius: 999px;
+  background: var(--grey);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rate svg {
+  width: 16px;
+  height: 16px;
+}
+
+.calcLabel {
+  margin-top: var(--s-2);
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.calcRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+.currency {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-3) var(--s-1) var(--s-1);
+  border-radius: 999px;
+  background: var(--grey);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.currency i {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--forest);
+  color: var(--lime);
+  font-size: 14px;
+  font-style: normal;
+}
+
+.currency select {
+  padding: var(--s-1) var(--s-2);
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calcInput,
+.calcOut {
+  min-width: 0;
+  color: var(--forest);
+  font-family: var(--lm-display), sans-serif;
+  font-size: 44px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.calcInput {
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+}
+
+.calcInput:focus-visible {
+  border-bottom-color: var(--lime);
+  outline: none;
+}
+
+.calcHint {
+  padding: var(--s-2) var(--s-3);
+  border-radius: 12px;
+  background: var(--mint);
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.calcFacts {
+  display: grid;
+  gap: var(--s-3);
+  margin: var(--s-3) 0 !important;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+}
+
+.calcFacts li {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.calcFacts li > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+}
+
+.calcFacts small {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.calcFacts b {
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.factIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+
+.factLink {
+  color: var(--forest);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.calcBody .limeBtn {
+  width: 100%;
+}
+
+/* 2. Три преимущества */
+.trio {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-12);
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: var(--s-8) 0 var(--s-16);
+  border-top: 1px solid var(--line);
+}
+
+.trio > div {
+  display: grid;
+  align-content: start;
+  gap: var(--s-2);
+}
+
+.trio b {
+  margin-top: var(--s-2);
+  font-size: 18px;
+}
+
+.trio p {
+  color: var(--ink-2);
+  font-size: 16px;
+}
+
+.roundIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--grey);
+  color: var(--forest);
+}
+
+/* Заголовки капслоком */
+.shout,
+.shoutLime {
+  font-family: var(--lm-display), sans-serif;
+  font-size: clamp(44px, 6vw, 88px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.shout {
+  color: var(--forest);
+}
+
+.shoutLime {
+  color: var(--lime);
+}
+
+/* 3. Лаймовая секция */
+.lime {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-6);
+  padding: var(--s-24) var(--s-6);
+  background: var(--lime);
+  color: var(--forest);
+  text-align: center;
+}
+
+.limeText {
+  max-width: 46ch;
+  font-weight: 500;
+}
+
+.limeActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-6);
+}
+
+.compare {
+  display: grid;
+  gap: var(--s-4);
+  width: min(1040px, 100%);
+  margin-top: var(--s-12);
+  padding: var(--s-6);
+  border-radius: 32px;
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+}
+
+.compareHead {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: 0 var(--s-2);
+}
+
+.compareHead > span {
+  display: grid;
+}
+
+.compareHead small {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.compareHead b {
+  font-size: 16px;
+}
+
+.compareRows {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.compareRows li {
+  width: var(--w);
+}
+
+.compareRows a {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-6) var(--s-2) var(--s-2);
+  border-radius: 999px;
+  background: var(--grey);
+  transition: background-color 0.15s ease;
+}
+
+.compareRows a:hover {
+  background: #e2e6de;
+}
+
+.compareRows li[data-first] a {
+  background: var(--lime);
+}
+
+.compareRows a > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+}
+
+.compareRows small {
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowLogo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--forest);
+  color: var(--lime);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.rowVal {
+  font-family: var(--lm-display), sans-serif;
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.compare .underline {
+  justify-self: center;
+  font-size: 15px;
+}
+
+/* Анимация: полосы сравнения вырастают слева. */
+@media (prefers-reduced-motion: no-preference) {
+  .compareRows li {
+    transition: width 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: calc(var(--kc-i, 0) * 90ms + 150ms);
+  }
+
+  .compareRows:not(:global(.kc-in)) li {
+    width: 30%;
+  }
+}
+
+/* 4. Защита */
+.safe {
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: var(--s-24) 0;
+}
+
+.safeTop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  align-items: center;
+  gap: var(--s-12);
+}
+
+.safeTop > div {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-5);
+}
+
+.safeTop h2 {
+  font-size: clamp(36px, 4vw, 54px);
+}
+
+.safeTop p {
+  max-width: 48ch;
+  color: var(--ink-2);
+}
+
+.safeArt {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 50%;
+  rotate: -6deg;
+  box-shadow: 0 20px 40px -20px rgb(14 15 12 / 0.4);
+}
+
+.safeArt img {
+  object-fit: cover;
+}
+
+.safeList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-8);
+  margin-top: var(--s-16) !important;
+}
+
+.safeList li {
+  display: grid;
+  align-content: start;
+  gap: var(--s-4);
+}
+
+.safeList p {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 5. Круглые «флаги» */
+.flags {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: 0 0 var(--s-24) max(24px, calc((100% - 1240px) / 2));
+  overflow: hidden;
+}
+
+.flagArrow {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--forest);
+  box-shadow: 0 0 0 6px var(--lime);
+  color: var(--lime);
+  transition: transform 0.2s ease;
+}
+
+.flagArrow svg {
+  width: 36px;
+  height: 36px;
+}
+
+.flagArrow:hover {
+  transform: translateX(4px);
+}
+
+.flags ul {
+  display: flex;
+  gap: var(--s-4);
+  animation: lm-flags 40s linear infinite alternate;
+}
+
+.flags li a {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.flags img {
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.flags li a:hover img {
+  transform: scale(1.1);
+}
+
+.flags:hover ul {
+  animation-play-state: paused;
+}
+
+@keyframes lm-flags {
+  to {
+    transform: translateX(-20%);
+  }
+}
+
+/* 6. Карточки аудиторий */
+.far {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--s-8);
+  width: var(--wrap);
+  margin: 0 auto;
+  padding-bottom: var(--s-24);
+}
+
+.farCards {
+  display: grid;
+  grid-auto-columns: 300px;
+  grid-auto-flow: column;
+  gap: var(--s-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.farCards li {
+  display: grid;
+  align-content: start;
+  gap: var(--s-3);
+  min-height: 300px;
+  padding: var(--s-6);
+  border-radius: 24px;
+  scroll-snap-align: start;
+}
+
+.farCards li[data-tone="lime"] {
+  background: var(--lime);
+  color: var(--forest);
+}
+
+.farCards li[data-tone="forest"] {
+  background: var(--forest);
+  color: var(--lime);
+}
+
+.farCards b {
+  font-family: var(--lm-display), sans-serif;
+  font-size: 30px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.farCards p {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.farCards a {
+  justify-self: start;
+  align-self: end;
+  margin-top: auto;
+  padding: var(--s-2) var(--s-4);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.farCards li[data-tone="lime"] a {
+  background: var(--forest);
+  color: var(--lime);
+}
+
+.farCards li[data-tone="forest"] a {
+  background: var(--lime);
+  color: var(--forest);
+}
+
+/* 7. Тёмно-зелёный блок */
+.forest {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-6);
+  width: var(--wrap);
+  margin: 0 auto var(--s-16);
+  padding: var(--s-24) var(--s-6);
+  border-radius: 32px;
+  background: var(--forest);
+  color: #fff;
+  text-align: center;
+}
+
+.forest p {
+  max-width: 50ch;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 8. Красочный фон с карточкой */
+.paint {
+  position: relative;
+  padding: var(--s-24) var(--s-6);
+  overflow: hidden;
+}
+
+.paintBg {
+  position: absolute;
+  inset: 0;
+}
+
+.paintBg img {
+  object-fit: cover;
+  filter: saturate(2.2) hue-rotate(40deg) contrast(1.1) blur(2px);
+  transform: scale(1.05);
+}
+
+.paintCard {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--s-6);
+  width: min(880px, 100%);
+  margin: 0 auto;
+  padding: var(--s-16) var(--s-8);
+  border-radius: 32px;
+  background: #fff;
+  text-align: center;
+}
+
+.paintCard .shout {
+  color: var(--ink);
+}
+
+.paintCard p {
+  max-width: 40ch;
+  color: var(--ink-2);
+  font-size: 16px;
+}
+
+/* 9. Серый список эмитентов */
+.everywhere {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-6);
+  padding: var(--s-16) max(24px, calc((100% - 1240px) / 2));
+  background: var(--grey);
+}
+
+.everywhere h2 {
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.tag {
+  padding: 2px var(--s-3);
+  border-radius: 999px;
+  background: var(--lime);
+  color: var(--forest);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.issuers {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--s-6) var(--s-6);
+  width: 100%;
+}
+
+.issuers a {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-2);
+  color: var(--forest);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.issuers a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.issuerDot {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--forest);
+  color: var(--lime);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+/* Подвал */
+.footer {
+  padding: var(--s-12) max(24px, calc((100% - 1240px) / 2)) var(--s-24);
+  border-top: 1px solid var(--line);
+  background: var(--grey);
+  color: var(--forest);
+  font-size: 15px;
+}
+
+.footCols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-8);
+}
+
+.footCols nav {
+  display: grid;
+  align-content: start;
+  gap: var(--s-3);
+}
+
+.footCols b {
+  color: var(--ink);
+}
+
+.footCols a:hover {
+  text-decoration: underline;
+}
+
+.footLogo {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: var(--s-12);
+  padding-top: var(--s-8);
+  border-top: 1px solid #d5d8d1;
+  font-family: var(--lm-display), sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.legal {
+  margin-top: var(--s-6) !important;
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+/* Адаптив */
+@media (max-width: 1099px) {
+  .nav,
+  .headRight {
+    display: none;
+  }
+
+  .menu {
+    display: block;
+  }
+
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .heroText {
+    padding-top: var(--s-6);
+  }
+
+  .heroCard {
+    width: min(520px, 100%);
+  }
+
+  .far {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .issuers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    --wrap: calc(100% - 32px);
+    font-size: 16px;
+  }
+
+  .trio,
+  .safeList,
+  .footCols {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-6);
+  }
+
+  .safeTop {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .safeArt {
+    width: 160px;
+  }
+
+  .compare {
+    padding: var(--s-3);
+    border-radius: 20px;
+  }
+
+  .compareRows li,
+  .compareRows:not(:global(.kc-in)) li {
+    width: 100%;
+  }
+
+  .rowVal {
+    font-size: 18px;
+  }
+
+  .flagArrow,
+  .flags li a {
+    width: 64px;
+    height: 64px;
+  }
+
+  .cardShout {
+    font-size: 30px;
+  }
+
+  .calcInput,
+  .calcOut {
+    font-size: 32px;
+  }
+
+  .issuers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .paintCard {
+    padding: var(--s-8) var(--s-4);
+  }
+
+  .forest {
+    padding: var(--s-16) var(--s-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flags ul {
+    animation: none;
+  }
+
+  .flags {
+    overflow-x: auto;
+  }
+}
+
+/* ---------- Эффекты ---------- */
+
+/* Строки заголовков капслоком — блоки: общий data-stagger выводит их по очереди. */
+.line {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Пересчёт в калькуляторе: число «подпрыгивает». */
+  .pop {
+    display: inline-block;
+    animation: lm-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  }
+
+  @keyframes lm-pop {
+    from {
+      opacity: 0.4;
+      transform: translateY(6px) scale(0.96);
+    }
+  }
+
+  /* Фото в шапке калькулятора медленно «дышит». */
+  .cardTop img {
+    animation: lm-breathe 14s ease-in-out infinite alternate;
+  }
+
+  @keyframes lm-breathe {
+    to {
+      transform: scale(1.12) translateX(-2%);
+    }
+  }
+
+  /* Красочный фон медленно плывёт. */
+  .paintBg img {
+    animation: lm-pan 30s ease-in-out infinite alternate;
+  }
+
+  @keyframes lm-pan {
+    to {
+      transform: scale(1.18) translate(-3%, 2%);
+    }
+  }
+
+  /* Круглое фото в блоке защиты покачивается. */
+  .safeArt {
+    animation: lm-wobble 6s ease-in-out infinite alternate;
+  }
+
+  @keyframes lm-wobble {
+    to {
+      rotate: 6deg;
+      translate: 0 -8px;
+    }
+  }
+
+  /* Кнопки-«таблетки» приподнимаются при наведении. */
+  .limeBtn:hover,
+  .limePillSm:hover,
+  .forestPill:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Иконки преимуществ: поворот и заливка лаймом. */
+  .roundIcon {
+    transition:
+      background-color 0.25s ease,
+      transform 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  .trio > div:hover .roundIcon,
+  .safeList li:hover .roundIcon {
+    background: var(--lime);
+    transform: rotate(-12deg) scale(1.08);
+  }
+
+  /* Карточки аудиторий: подъём и лёгкий наклон. */
+  .farCards li {
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .farCards li:hover {
+    transform: translateY(-6px) rotate(-1deg);
+  }
+
+  /* Строки сравнения: значок-кружок прокатывается. */
+  .rowLogo {
+    transition: transform 0.4s ease;
+  }
+
+  .compareRows a:hover .rowLogo {
+    transform: rotate(-360deg);
+  }
+
+  /* Эмитенты: кружок с буквой становится лаймовым. */
+  .issuerDot {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .issuers a:hover .issuerDot {
+    background: var(--lime);
+    color: var(--forest);
+  }
+
+  /* Стрелка у «флагов» мягко пульсирует обводкой. */
+  .flagArrow {
+    animation: lm-ring 2.4s ease-in-out infinite;
+  }
+
+  @keyframes lm-ring {
+    50% {
+      box-shadow: 0 0 0 12px rgb(159 232 112 / 0.55);
+    }
+  }
+}
+
+.far .shout {
+  font-size: clamp(40px, 4.4vw, 64px);
+}

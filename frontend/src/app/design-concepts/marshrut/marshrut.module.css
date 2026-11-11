@@ -1,0 +1,906 @@
+/*
+ * Концепция 28 — «Маршрут». Линия метро: оранжевый #ff5a1f, графит #14161c, кремовый #f6f3ec, белый.
+ * Каждая станция — экран 100vw × 100vh внутри sticky-окна; лента едет вбок от прокрутки (Track.tsx).
+ * Шрифт Manrope. Ниже 900px и при «уменьшить движение» — обычный вертикальный столбик.
+ */
+.page {
+  --orange: #ff5a1f;
+  --orange-2: #ffe3d6;
+  --ink: #14161c;
+  --ink-2: #4b4f5a;
+  --ink-3: #868b96;
+  --cream: #f6f3ec;
+  --line: #e4e1d9;
+  --green: #0d8a55;
+  --red: #d63a2f;
+
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--mr-font), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, p, ul, ol, dl, dd, figure) {
+  margin: 0;
+  padding: 0;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+/* У сайта свой шрифт заголовков — здесь всё набрано Manrope. */
+.page :where(h1, h2) {
+  font-family: inherit;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a, button):focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 60;
+  padding: 10px 16px;
+  background: var(--ink);
+  color: #fff !important;
+  border-radius: 10px;
+}
+
+/* ---------- Шапка ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 20px clamp(16px, 4vw, 56px);
+  background: var(--cream);
+  font-size: 15px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  gap: 22px;
+  color: var(--ink-2);
+  overflow-x: auto;
+}
+
+.nav a {
+  white-space: nowrap;
+}
+
+.nav a:hover {
+  color: var(--orange);
+}
+
+/* ---------- Лента станций ---------- */
+.outer {
+  position: relative;
+}
+
+.window {
+  position: relative;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 64px clamp(16px, 5vw, 80px);
+  background: var(--cream);
+}
+
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .outer {
+    height: calc(var(--n) * 100vh);
+  }
+
+  .window {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .track {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    will-change: transform;
+  }
+
+  .panel {
+    flex: none;
+    width: 100vw;
+    height: 100%;
+    padding: clamp(112px, 15vh, 140px) clamp(40px, 6vw, 96px) 80px;
+    overflow: hidden;
+  }
+
+  /* Шпалы: тонкий пунктир по низу каждого экрана продолжает линию между станциями. */
+  .panel::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, currentColor 0 10px, transparent 10px 22px);
+    opacity: 0.12;
+  }
+}
+
+.panelHead {
+  display: grid;
+  gap: 10px;
+}
+
+.stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-3);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stop i {
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--orange);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.panel h2 {
+  font-size: clamp(36px, 4.6vw, 64px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+
+.lead {
+  max-width: 620px;
+  color: var(--ink-2);
+  font-size: 19px;
+}
+
+.muted {
+  color: var(--ink-3);
+  font-size: 15px;
+}
+
+.up {
+  color: var(--green);
+}
+
+.down {
+  color: var(--red);
+}
+
+.btn,
+.btnDark {
+  align-self: flex-start;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 16px;
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.btn {
+  background: var(--orange);
+  color: #fff !important;
+}
+
+.btnDark {
+  background: var(--ink);
+  color: #fff !important;
+}
+
+.btn:hover,
+.btnDark:hover {
+  transform: translateY(-2px);
+}
+
+.btn::after,
+.btnDark::after {
+  content: "→";
+}
+
+/* 1. Старт */
+.start {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 64px);
+}
+
+.startText {
+  display: grid;
+  gap: 22px;
+}
+
+.start h1 {
+  font-size: clamp(48px, 7vw, 108px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+}
+
+.start h1 + p {
+  max-width: 460px;
+  color: var(--ink-2);
+  font-size: 20px;
+}
+
+.hint {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--ink-3);
+  font-size: 15px;
+}
+
+.hint span {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  font-weight: 700;
+  animation: mr-nudge 1.8s ease-in-out infinite;
+}
+
+.hint span + span {
+  animation-name: mr-nudge-x;
+}
+
+@keyframes mr-nudge {
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes mr-nudge-x {
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.startPhoto {
+  position: relative;
+  height: min(62vh, 560px);
+  min-height: 300px;
+  border-radius: 36px 36px 36px 160px;
+  overflow: hidden;
+}
+
+.startPhoto img {
+  object-fit: cover;
+}
+
+/* 2. Индекс */
+.indexPanel {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.4fr);
+  grid-template-rows: auto 1fr;
+  gap: 24px 56px;
+  background: #fff;
+}
+
+.indexPanel .panelHead {
+  grid-column: 1 / -1;
+}
+
+.indexBody {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.indexBody .btn {
+  margin-top: 16px;
+}
+
+.huge {
+  font-size: clamp(48px, 6vw, 92px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.indexBody .up,
+.indexBody .down {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.chart {
+  display: grid;
+  align-content: end;
+  min-height: 220px;
+}
+
+.chart svg {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  max-height: 46vh;
+  overflow: visible;
+}
+
+.area {
+  fill: var(--orange-2);
+}
+
+.line {
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 4;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart figcaption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+/* 3. Сессия — тёмная станция */
+.dark {
+  background: var(--ink);
+  color: #fff;
+}
+
+.dark .stop,
+.dark .muted {
+  color: rgb(255 255 255 / 0.55);
+}
+
+.dark .stop i {
+  background: var(--ink);
+}
+
+.sessionGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 24px 64px;
+  align-items: end;
+}
+
+.clock {
+  display: grid;
+  gap: 8px;
+}
+
+.clock b {
+  font-size: clamp(80px, 11vw, 168px);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock > span:last-child {
+  color: rgb(255 255 255 / 0.65);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  font-weight: 600;
+}
+
+.status i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.5);
+}
+
+.status[data-open] i {
+  background: #3ddc84;
+  box-shadow: 0 0 0 5px rgb(61 220 132 / 0.2);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  border-radius: 24px;
+  background: rgb(255 255 255 / 0.12);
+  overflow: hidden;
+}
+
+.stats div {
+  display: grid;
+  gap: 4px;
+  padding: 22px 24px;
+  background: #1c1f27;
+}
+
+.stats dt {
+  color: rgb(255 255 255 / 0.55);
+  font-size: 14px;
+}
+
+.stats dd {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats small {
+  color: rgb(255 255 255 / 0.55);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.sessionGrid > .muted {
+  grid-column: 1 / -1;
+}
+
+/* 4. Котировки */
+.quotesPanel {
+  background: var(--cream);
+}
+
+.quotes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.quotes a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #fff;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.quotes a:hover {
+  border-color: var(--orange);
+  transform: translateY(-3px);
+}
+
+.quotes b {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.quotes span {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quotes strong {
+  grid-row: 3;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.quotes em {
+  grid-row: 3;
+  align-self: end;
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* 5. ГЦБ — табло */
+.orange {
+  background: var(--orange);
+  color: #fff;
+}
+
+.orange .stop {
+  color: rgb(255 255 255 / 0.8);
+}
+
+.orange .stop i {
+  border-color: #fff;
+  background: var(--orange);
+}
+
+.orange .lead {
+  color: rgb(255 255 255 / 0.85);
+}
+
+.board {
+  width: 100%;
+  max-width: 980px;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.board th {
+  padding: 0 18px 4px;
+  color: rgb(255 255 255 / 0.75);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.board td {
+  padding: 16px 18px;
+  background: var(--ink);
+  color: #ffd27a;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.board td:first-child {
+  border-radius: 14px 0 0 14px;
+}
+
+.board td:last-child {
+  border-radius: 0 14px 14px 0;
+  color: #fff;
+}
+
+/* 6. Новости */
+.newsPanel {
+  background: #fff;
+}
+
+.news {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.news a {
+  display: grid;
+  gap: 8px;
+}
+
+.newsPhoto {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  max-height: 34vh;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+.newsPhoto img {
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.news a:hover img {
+  transform: scale(1.04);
+}
+
+.news small {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.news b {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.news a:hover b {
+  color: var(--orange);
+}
+
+/* 7. Конечная */
+.finish {
+  background: var(--orange-2);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.steps a {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  height: 100%;
+  padding: 24px;
+  border-radius: 24px;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+
+.steps a:hover {
+  transform: translateY(-3px);
+}
+
+.steps span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.steps b {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.steps small {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.finishActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ---------- Схема линии ---------- */
+.rail {
+  display: none;
+}
+
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  /* Схема линии сверху, как табло над дверями вагона: внизу угол занят переключателем концепций. */
+  .rail {
+    position: absolute;
+    left: 50%;
+    top: 22px;
+    z-index: 5;
+    display: block;
+    padding: 12px 26px 10px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.92);
+    box-shadow: 0 14px 40px -16px rgb(20 22 28 / 0.45);
+    backdrop-filter: blur(8px);
+    transform: translateX(-50%);
+  }
+
+  .rail ol {
+    position: relative;
+    display: flex;
+    gap: clamp(28px, 4vw, 64px);
+  }
+
+  /* Сама линия: серая подложка и оранжевый пройденный путь. */
+  .rail ol::before,
+  .rail ol::after {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    right: 7px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+  }
+
+  .rail ol::after {
+    background: var(--orange);
+    transform: scaleX(var(--p));
+    transform-origin: left center;
+    transition: transform 0.3s ease;
+  }
+
+  .rail button {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-3);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .rail i {
+    width: 18px;
+    height: 18px;
+    border: 4px solid var(--line);
+    border-radius: 50%;
+    background: #fff;
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .rail button[data-passed] i {
+    border-color: var(--orange);
+  }
+
+  .rail button[aria-current] {
+    color: var(--ink);
+  }
+
+  .rail button[aria-current] i {
+    border-color: var(--orange);
+    background: var(--orange);
+    transform: scale(1.25);
+  }
+
+  .rail button:hover {
+    color: var(--orange);
+  }
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px 40px;
+  padding: 48px clamp(16px, 5vw, 80px) 110px;
+  background: var(--ink);
+  color: rgb(255 255 255 / 0.75);
+  font-size: 15px;
+}
+
+.footer b {
+  color: #fff;
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+}
+
+.footer a:hover {
+  color: var(--orange);
+}
+
+.legal {
+  grid-column: 1 / -1;
+  color: rgb(255 255 255 / 0.45);
+  font-size: 13px;
+}
+
+/* ---------- Столбик (телефон, планшет) ---------- */
+@media (max-width: 899px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .nav {
+    width: 100%;
+  }
+
+  .start,
+  .indexPanel,
+  .sessionGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* В столбике страница едет вниз, подсказка про движение вбок не нужна. */
+  .hint {
+    display: none;
+  }
+
+  .startPhoto {
+    height: 300px;
+    border-radius: 28px 28px 28px 90px;
+  }
+
+  .quotes,
+  .news {
+    grid-template-columns: 1fr;
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .board {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .stats dd {
+    font-size: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hint span {
+    animation: none;
+  }
+
+  .btn,
+  .btnDark,
+  .quotes a,
+  .steps a,
+  .newsPhoto img {
+    transition: none;
+  }
+}

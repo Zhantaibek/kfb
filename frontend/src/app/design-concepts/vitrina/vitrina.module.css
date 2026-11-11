@@ -1,0 +1,578 @@
+/*
+ * Концепция 34 — «Витрина». Презентационный стиль: белый фон, светло-серый #f5f5f7 для плиток, текст #1d1d1f,
+ * ссылки — фирменная бирюза #2c7e87, крупные центрированные заголовки, чёрный экран с цифрой. Inter Tight.
+ */
+.page {
+  --ink: #1d1d1f;
+  --ink-2: #6e6e73;
+  --ink-3: #86868b;
+  --grey: #f5f5f7;
+  --line: #d2d2d7;
+  --link: #2c7e87;
+  --brand: #57b6c0;
+  --brand-2: #7fd0d8;
+
+  --wrap: min(1200px, calc(100% - 48px));
+
+  min-height: 100vh;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--vt-font), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.47;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, p, ul, ol, dl, dd) {
+  margin: 0;
+  padding: 0;
+}
+
+/* У сайта свой шрифт заголовков — здесь всё набрано Inter Tight. */
+.page :where(h1, h2) {
+  font-family: inherit;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a):focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 50;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #fff !important;
+}
+
+/* ---------- Шапка ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgb(251 251 253 / 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgb(0 0 0 / 0.06);
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(1000px, calc(100% - 32px));
+  height: 48px;
+  margin: 0 auto;
+  font-size: 13px;
+  color: rgb(29 29 31 / 0.8);
+}
+
+.nav a:hover {
+  color: var(--ink);
+}
+
+.brand {
+  display: grid;
+  place-items: center;
+}
+
+/* ---------- Ссылки-кнопки ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 11px 22px;
+  border-radius: 980px;
+  background: var(--link);
+  color: #fff !important;
+  font-size: 17px;
+}
+
+.btn:hover {
+  background: #246971;
+}
+
+.more,
+.moreDark,
+.moreLight {
+  font-size: 17px;
+}
+
+.more {
+  color: var(--link) !important;
+}
+
+.moreDark {
+  color: var(--brand-2) !important;
+}
+
+.moreLight {
+  color: #fff !important;
+}
+
+.more::after,
+.moreDark::after,
+.moreLight::after {
+  content: " ›";
+}
+
+.more:hover,
+.moreDark:hover,
+.moreLight:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Первый экран ---------- */
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 72px 0 0;
+  text-align: center;
+}
+
+.eyebrow {
+  color: var(--link);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.hero h1 {
+  max-width: 900px;
+  padding: 0 16px;
+  font-size: clamp(44px, 7vw, 88px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+}
+
+.lead {
+  max-width: 640px;
+  padding: 0 16px;
+  color: var(--ink-2);
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.35;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px 28px;
+  margin-top: 10px;
+}
+
+.heroPhoto {
+  position: relative;
+  width: var(--wrap);
+  aspect-ratio: 16 / 7;
+  margin-top: 48px;
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+.heroPhoto img {
+  object-fit: cover;
+}
+
+/* ---------- Чёрный экран ---------- */
+.black {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 96px;
+  padding: 120px 24px;
+  background: #000;
+  color: #f5f5f7;
+  text-align: center;
+}
+
+.eyebrowDark {
+  color: var(--brand-2);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.giant {
+  background: linear-gradient(180deg, #ffffff 10%, var(--brand-2) 60%, var(--link));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(120px, 22vw, 280px);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+}
+
+.giantText {
+  max-width: 560px;
+  color: #a1a1a6;
+  font-size: clamp(21px, 2.4vw, 28px);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  gap: 40px;
+  margin: 64px 0 40px;
+}
+
+.facts div {
+  display: grid;
+  gap: 4px;
+}
+
+.facts dd {
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.facts dt {
+  color: #a1a1a6;
+  font-size: 15px;
+}
+
+/* ---------- Плитки ---------- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: calc(100% - 24px);
+  margin: 12px auto 0;
+}
+
+.tile {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  min-height: 580px;
+  padding: 52px 24px 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--grey);
+  text-align: center;
+}
+
+.tileText {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.tile b {
+  font-size: clamp(32px, 3.4vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.tileText > span {
+  max-width: 420px;
+  color: var(--ink-2);
+  font-size: 19px;
+}
+
+.tile em {
+  margin-top: 8px;
+  color: var(--link);
+  font-size: 17px;
+  font-style: normal;
+}
+
+.tile em::after {
+  content: " ›";
+}
+
+.tile:hover em {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Плитка с графиком: график стоит внизу на всю ширину. */
+.tileChart svg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 58%;
+  overflow: visible;
+}
+
+.line {
+  fill: none;
+  stroke: var(--link);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Плитки с фото: текст сверху на светлой вуали, фото уходит вниз. */
+.tilePhoto img {
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.tilePhoto::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgb(245 245 247 / 0.98) 0%, rgb(245 245 247 / 0.95) 30%, rgb(245 245 247 / 0.6) 42%, rgb(245 245 247 / 0) 60%);
+}
+
+.tilePhoto .tileText {
+  z-index: 2;
+}
+
+.tilePhoto:hover img {
+  transform: scale(1.03);
+}
+
+/* ---------- Полноэкранное фото ---------- */
+.full {
+  position: relative;
+  display: grid;
+  align-items: end;
+  min-height: 86vh;
+  margin-top: 12px;
+  overflow: hidden;
+  color: #fff;
+}
+
+.full img {
+  object-fit: cover;
+}
+
+.full::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgb(0 0 0 / 0.65) 0%, rgb(0 0 0 / 0.15) 50%, transparent 70%);
+}
+
+.fullText {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(820px, calc(100% - 32px));
+  margin: 0 auto;
+  padding-bottom: 80px;
+  text-align: center;
+}
+
+.fullText h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.fullText p {
+  max-width: 600px;
+  color: rgb(255 255 255 / 0.85);
+  font-size: 21px;
+}
+
+/* ---------- Новости ---------- */
+.news {
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 100px 0 60px;
+}
+
+.h2 {
+  margin-bottom: 32px !important;
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.news ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.news a {
+  display: grid;
+  height: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--grey);
+  transition: box-shadow 0.3s ease;
+}
+
+.news a:hover {
+  box-shadow: 0 8px 30px rgb(0 0 0 / 0.12);
+}
+
+.newsPhoto {
+  position: relative;
+  aspect-ratio: 16 / 10;
+}
+
+.newsPhoto img {
+  object-fit: cover;
+}
+
+.newsText {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 20px 22px 26px;
+}
+
+.newsText small {
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.newsText b {
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.newsText time {
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.newsMore {
+  margin-top: 28px !important;
+  text-align: center;
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  padding: 24px max(24px, calc((100% - 1000px) / 2)) 100px;
+  background: var(--grey);
+  color: var(--ink-2);
+  font-size: 12px;
+}
+
+.footNote {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.footCols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.footCols nav {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.footCols b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.footCols a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.copy {
+  padding-top: 16px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 900px) {
+  .nav a:not(.brand):nth-child(n + 6) {
+    display: none;
+  }
+
+  .tiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tile {
+    min-height: 480px;
+  }
+
+  .news ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footCols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    --wrap: calc(100% - 32px);
+  }
+
+  .nav {
+    gap: 14px;
+    overflow-x: auto;
+  }
+
+  .heroPhoto {
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+  }
+
+  .black {
+    padding: 80px 20px;
+  }
+
+  .facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    margin: 40px 0 28px;
+  }
+
+  .tiles {
+    width: 100%;
+  }
+
+  .full {
+    min-height: 70vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilePhoto img,
+  .news a {
+    transition: none;
+  }
+}

@@ -26,6 +26,7 @@ import { parseI18n, type AdminSession, type CmsI18n } from "../../../../shared/c
 import { languageError } from "../../../../shared/lang-check";
 import { defaultSiteSettings } from "../../../../shared/site-defaults";
 import { hashPassword } from "../auth/password";
+import { revokeSessions } from "../auth/auth.service";
 import { sanitizeRichHtml } from "../../utils/sanitize-html";
 import { AppError } from "../../middleware/error";
 import { itemSchemas, mutateSchema, type MutableCollection } from "../../validation/cms";
@@ -282,6 +283,8 @@ async function applyMutation(session: AdminSession, body: unknown, removedFiles:
     }
     // Смена slug эмитента сама переносится в listing и news: внешний ключ ON UPDATE CASCADE.
     await updateItem(collection, id, item);
+    // Новый пароль сотрудника — все его прежние входы отзываются.
+    if (collection === "users" && rawItem.password) await revokeSessions(id);
     await insertAudit({
       action: "update",
       entity: collection,

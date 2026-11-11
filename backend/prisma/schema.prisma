@@ -122,6 +122,9 @@ model User {
   totpSecret   String?  @map("totp_secret")
   totpEnabled  Boolean  @default(false) @map("totp_enabled")
   totpLastStep Int?     @map("totp_last_step")
+  /// Версия сессий: записывается в cookie при входе. Выход, смена пароля и сброс 2FA увеличивают её —
+  /// все выданные раньше cookie сотрудника перестают действовать.
+  sessionVersion Int    @default(0) @map("session_version")
 
   @@map("users")
 }

@@ -1,0 +1,669 @@
+/*
+ * Концепция 38 — «Слои». Смелый продуктовый стиль в фирменной бирюзе: белый, бирюзовый #2c7e87, тёмный #0d2a2e,
+ * мятный #e3f4f6. Rubik 700–800, огромные заголовки, радиусы 24–44px, макет телефона на реальных данных.
+ */
+.page {
+  --teal: #2c7e87;
+  --teal-2: #57b6c0;
+  --dark: #0d2a2e;
+  --mint: #e3f4f6;
+  --ink: #0f1d1f;
+  --ink-2: #4a5d60;
+  --ink-3: #85989a;
+  --line: #e4ecee;
+  --up: #12865a;
+  --down: #d23a33;
+
+  --wrap: min(1220px, calc(100% - 48px));
+
+  min-height: 100vh;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--sl-font), system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, p, ul, ol, dl, dd) {
+  margin: 0;
+  padding: 0;
+}
+
+/* У сайта свой шрифт заголовков — здесь всё набрано Rubik. */
+.page :where(h1, h2) {
+  font-family: inherit;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a):focus-visible {
+  outline: 3px solid var(--teal-2);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 50;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff !important;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+/* ---------- Кнопки ---------- */
+.btnDark,
+.btnSoft,
+.btnLight {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  padding: 15px 28px;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 600;
+  transition: transform 0.15s ease;
+}
+
+.btnDark {
+  background: var(--ink);
+  color: #fff !important;
+}
+
+.btnSoft {
+  background: var(--mint);
+  color: var(--ink) !important;
+}
+
+.btnLight {
+  background: #fff;
+  color: var(--ink) !important;
+}
+
+.btnDark:hover,
+.btnSoft:hover,
+.btnLight:hover {
+  transform: scale(1.03);
+}
+
+/* ---------- Шапка ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 20px 0;
+  font-size: 16px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.nav {
+  display: flex;
+  gap: 28px;
+  margin-left: 12px;
+  font-weight: 500;
+}
+
+.nav a:hover {
+  color: var(--teal);
+}
+
+.headCta {
+  margin-left: auto;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* ---------- Первый экран ---------- */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: 40px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 48px 0 96px;
+}
+
+.heroText {
+  display: grid;
+  gap: 24px;
+}
+
+.hero h1 {
+  font-size: clamp(48px, 7.4vw, 104px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+}
+
+.hero h1 span {
+  display: block;
+  color: var(--teal);
+}
+
+.heroText > p {
+  max-width: 540px;
+  color: var(--ink-2);
+  font-size: 20px;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Телефон */
+.phoneWrap {
+  position: relative;
+  display: grid;
+  justify-items: center;
+}
+
+/* Бирюзовый круг за телефоном. */
+.phoneWrap::before {
+  content: "";
+  position: absolute;
+  top: 8%;
+  width: min(440px, 100%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--teal-2), var(--teal));
+}
+
+.phone {
+  position: relative;
+  width: 300px;
+  padding: 12px;
+  border-radius: 46px;
+  background: #0b1214;
+  box-shadow:
+    0 40px 80px -30px rgb(13 42 46 / 0.6),
+    inset 0 0 0 2px #2a3436;
+}
+
+.notch {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  z-index: 2;
+  width: 90px;
+  height: 24px;
+  border-radius: 999px;
+  background: #0b1214;
+  transform: translateX(-50%);
+}
+
+.screen {
+  display: grid;
+  gap: 12px;
+  min-height: 560px;
+  padding: 52px 14px 16px;
+  border-radius: 36px;
+  background: #f4f8f8;
+}
+
+.screenTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.screenTop b {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.screenTop span {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e8eeee;
+  color: var(--ink-2);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.screenTop span[data-open] {
+  background: #d8f3e6;
+  color: var(--up);
+}
+
+.screenIndex {
+  display: grid;
+  gap: 0;
+  padding: 14px 16px 10px;
+  border-radius: 20px;
+  background: var(--teal);
+  color: #fff;
+}
+
+.screenIndex small {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.screenIndex b {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.screenIndex > span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.screenIndex .up,
+.screenIndex .down {
+  color: #c8f5e2;
+}
+
+.screenIndex svg {
+  width: 100%;
+  height: 46px;
+  margin-top: 4px;
+  overflow: visible;
+}
+
+.screenIndex path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.screen ul {
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.screen li a {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 14px;
+}
+
+.screen li a:hover {
+  background: #f4f8f8;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.paper,
+.price {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.paper b,
+.price b {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.paper small,
+.price small {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.price {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Слои ---------- */
+.layer {
+  margin: 0 12px 12px;
+  border-radius: 44px;
+}
+
+.layerInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 48px;
+  width: min(1180px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 96px 0;
+}
+
+.layerInner > div {
+  display: grid;
+  gap: 22px;
+}
+
+.layerInner > div > p {
+  max-width: 500px;
+  font-size: 20px;
+}
+
+.big {
+  font-size: clamp(40px, 5vw, 68px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.teal {
+  background: var(--teal);
+  color: #fff;
+}
+
+.teal p {
+  color: rgb(255 255 255 / 0.85);
+}
+
+.dark {
+  background: var(--dark);
+  color: #fff;
+}
+
+.dark p {
+  color: rgb(255 255 255 / 0.75);
+}
+
+.mint {
+  background: var(--mint);
+}
+
+.mint p {
+  color: var(--ink-2);
+}
+
+/* Цифры в бирюзовом слое */
+.stats {
+  display: grid;
+  gap: 14px;
+}
+
+.stats div {
+  padding: 24px 28px;
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.stats dd {
+  font-size: clamp(40px, 4.4vw, 60px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats dt {
+  margin-top: 6px;
+  color: rgb(255 255 255 / 0.8);
+  font-size: 16px;
+}
+
+/* Аукционы в тёмном слое */
+.auctions {
+  display: grid;
+  gap: 14px;
+}
+
+.auctions li {
+  display: grid;
+  gap: 4px;
+  padding: 26px 28px;
+  border-radius: 28px;
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.auctions small {
+  justify-self: start;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--teal-2);
+  color: var(--dark);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auctions b {
+  margin-top: 6px;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.auctions span {
+  color: rgb(255 255 255 / 0.7);
+  font-size: 16px;
+}
+
+/* Отчёты в мятном слое */
+.reports {
+  display: grid;
+  gap: 12px;
+}
+
+.reports a {
+  display: grid;
+  gap: 6px;
+  padding: 22px 26px;
+  border-radius: 26px;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+
+.reports a:hover {
+  transform: translateY(-3px);
+}
+
+.reports small {
+  color: var(--teal);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reports b {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* ---------- Шаги ---------- */
+.stepsLayer {
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 96px 0 72px;
+}
+
+.stepsLayer ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 40px;
+}
+
+.stepsLayer a {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  height: 100%;
+  padding: 28px;
+  border-radius: 32px;
+  background: #f4f8f8;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.stepsLayer a:hover {
+  background: var(--ink);
+  color: #fff;
+}
+
+.stepsLayer span {
+  color: var(--teal);
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.stepsLayer a:hover span {
+  color: var(--teal-2);
+}
+
+.stepsLayer b {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.stepsLayer small {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.stepsLayer a:hover small {
+  color: rgb(255 255 255 / 0.75);
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px 40px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 40px 0 100px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.footer b {
+  color: var(--ink);
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.footer a:hover {
+  color: var(--teal);
+}
+
+.legal {
+  grid-column: 1 / -1;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 980px) {
+  .nav {
+    display: none;
+  }
+
+  .hero,
+  .layerInner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stepsLayer ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    --wrap: calc(100% - 32px);
+    font-size: 17px;
+  }
+
+  .hero {
+    padding: 24px 0 64px;
+  }
+
+  .phone {
+    width: 280px;
+  }
+
+  .layer {
+    margin: 0 8px 8px;
+    border-radius: 28px;
+  }
+
+  .layerInner {
+    width: calc(100% - 40px);
+    padding: 64px 0;
+  }
+
+  .stepsLayer ol,
+  .footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btnDark,
+  .btnSoft,
+  .btnLight,
+  .reports a,
+  .stepsLayer a {
+    transition: none;
+  }
+}

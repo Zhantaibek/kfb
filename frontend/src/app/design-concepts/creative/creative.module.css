@@ -1,0 +1,1026 @@
+/* Концепция 5 — Creative: ночное небо над Ала-Тоо. Индиго, снег, коралл заката, абрикос и ледниковая бирюза. */
+.page {
+  --c-night: #0b0f2a;
+  --c-night2: #161c4d;
+  --c-snow: #f4f1ea;
+  --c-muted: rgba(244, 241, 234, 0.68);
+  --c-coral: #ff6b4a;
+  --c-apricot: #ffb347;
+  --c-glacier: #5ee0c8;
+  --c-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --c-pad: max(16px, calc((100% - 1320px) / 2));
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--c-night);
+  color: var(--c-snow);
+  font-family: var(--c-body), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.page h1,
+.page h2 {
+  margin: 0;
+  font-family: var(--c-display), sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 0.98;
+}
+
+.page a:focus-visible,
+.page summary:focus-visible {
+  outline: 3px solid var(--c-coral);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 80;
+  padding: 10px 14px;
+  background: var(--c-coral);
+  color: var(--c-night);
+}
+
+.skip:focus {
+  top: 8px;
+}
+
+/* ---------- Плавающая шапка-«пилюля» ---------- */
+.header {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: min(1180px, calc(100% - 32px));
+  padding: 8px 8px 8px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(11, 15, 42, 0.7);
+  backdrop-filter: blur(14px) saturate(140%);
+  transform: translateX(-50%);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--c-display), sans-serif;
+  font-size: 18px;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav a {
+  padding: 8px 12px;
+  border-radius: 12px;
+  color: var(--c-muted);
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+
+.nav a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--c-snow);
+}
+
+.headCta {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: var(--c-coral);
+  color: var(--c-night);
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.headCta:hover {
+  background: var(--c-snow);
+}
+
+.menu {
+  display: none;
+  margin-left: auto;
+}
+
+.menu summary {
+  padding: 9px 18px;
+  border-radius: 12px;
+  background: var(--c-snow);
+  color: var(--c-night);
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu nav {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: min(320px, calc(100vw - 32px));
+  padding: 10px 20px;
+  border-radius: 24px;
+  background: var(--c-night2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+}
+
+.menu nav a {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--c-display), sans-serif;
+  font-size: 20px;
+}
+
+/* ---------- Первый экран: небо и горы ---------- */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100svh;
+  padding: clamp(120px, 18vh, 180px) var(--c-pad) clamp(240px, 38vh, 420px);
+  overflow: hidden;
+  background:
+    radial-gradient(70% 60% at 15% 0%, rgba(106, 76, 255, 0.2), transparent 70%), radial-gradient(50% 50% at 85% 20%, rgba(255, 107, 74, 0.1), transparent 70%),
+    linear-gradient(180deg, #070a1f 0%, #141a4a 70%, #26245e 100%);
+}
+
+/* Мягкий свет под курсором (координаты ставит data-spotlight). */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(460px circle at var(--kc-mx, 70%) var(--kc-my, 30%), rgba(255, 179, 71, 0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.stars i {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  background: #fff;
+  animation: c-twinkle 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes c-twinkle {
+  from {
+    opacity: 0.15;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+
+.tunduk {
+  position: absolute;
+  top: 6vh;
+  right: -10vw;
+  z-index: -1;
+  width: min(64vw, 780px);
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 0.35;
+  animation: c-spin 160s linear infinite;
+}
+
+@keyframes c-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.heroText {
+  position: relative;
+  z-index: 2;
+  align-self: start;
+}
+
+.kicker {
+  margin: 0 0 22px;
+  color: var(--c-coral);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-size: clamp(42px, 7vw, 112px);
+}
+
+.hero h1 em {
+  color: var(--c-coral);
+  font-style: normal;
+}
+
+.lead {
+  max-width: 34em;
+  margin: 26px 0 0;
+  color: var(--c-muted);
+  font-size: clamp(16px, 1.35vw, 20px);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+
+.btnHot,
+.btnLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  transition:
+    background 0.3s,
+    color 0.3s,
+    scale 0.3s var(--c-ease);
+}
+
+.btnHot {
+  background: var(--c-coral);
+  color: var(--c-night);
+}
+
+.btnHot span {
+  transition: rotate 0.4s var(--c-ease);
+}
+
+.btnHot:hover {
+  background: var(--c-snow);
+}
+
+.btnHot:hover span {
+  rotate: 45deg;
+}
+
+.btnLine {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.btnLine:hover {
+  background: var(--c-snow);
+  color: var(--c-night);
+}
+
+.range {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  height: clamp(260px, 44vh, 470px);
+}
+
+.range svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.far {
+  opacity: 0.9;
+}
+
+.mid path {
+  fill: #1c2260;
+}
+
+.frontArea {
+  fill: var(--c-night);
+}
+
+.frontLine {
+  fill: none;
+  stroke: var(--c-coral);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 8px rgba(255, 107, 74, 0.8));
+}
+
+.peak {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+}
+
+.peak i {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c-coral);
+  box-shadow: 0 0 0 0 rgba(255, 107, 74, 0.7);
+  animation: c-pulse 2s ease-out infinite;
+}
+
+@keyframes c-pulse {
+  70%,
+  100% {
+    box-shadow: 0 0 0 16px rgba(255, 107, 74, 0);
+  }
+}
+
+.peak > span {
+  position: absolute;
+  right: -6px;
+  bottom: 26px;
+  padding: 7px 14px;
+  border-radius: 12px;
+  background: var(--c-snow);
+  color: var(--c-night);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.peak b {
+  font-weight: 800;
+}
+
+.scrollHint {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--c-muted);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+
+.scrollHint::after {
+  content: "";
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(var(--c-coral), transparent);
+  transform-origin: top;
+  animation: c-drip 2.2s var(--c-ease) infinite;
+}
+
+@keyframes c-drip {
+  from {
+    scale: 1 0;
+  }
+  60% {
+    scale: 1 1;
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------- Бегущие строки ---------- */
+.marquee {
+  display: grid;
+  gap: 4px;
+  padding: 20px 0;
+  overflow: hidden;
+  border-block: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--c-night);
+  color: var(--c-snow);
+  font-family: var(--c-display), sans-serif;
+  font-size: clamp(26px, 3.6vw, 52px);
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.rowFwd,
+.rowBack {
+  display: flex;
+  width: max-content;
+  animation: c-marquee 70s linear infinite;
+}
+
+.rowBack {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(244, 241, 234, 0.45);
+  animation-direction: reverse;
+}
+
+.rowFwd > span,
+.rowBack > span {
+  padding-right: 0.4em;
+}
+
+.marquee i {
+  color: var(--c-coral);
+  font-style: normal;
+  -webkit-text-stroke: 0;
+}
+
+@keyframes c-marquee {
+  to {
+    translate: -50% 0;
+  }
+}
+
+/* ---------- Общие заголовки секций ---------- */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px 40px;
+  margin: 0 0 48px;
+  padding-inline: var(--c-pad);
+}
+
+.head h2 {
+  font-size: clamp(40px, 6vw, 92px);
+}
+
+.head p {
+  max-width: 30em;
+  margin: 0;
+  color: var(--c-muted);
+}
+
+.head a {
+  font-weight: 700;
+}
+
+.head a:hover {
+  color: var(--c-coral);
+}
+
+/* ---------- Созвездие рынка ---------- */
+.sky {
+  padding: clamp(96px, 12vw, 160px) 0 clamp(64px, 8vw, 110px);
+  background: radial-gradient(60% 50% at 50% 60%, rgba(94, 224, 200, 0.08), transparent 70%), var(--c-night);
+}
+
+.field {
+  position: relative;
+  max-width: 1320px;
+  height: clamp(520px, 50vw, 680px);
+  margin: 0 auto;
+}
+
+.links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.links polyline {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-dasharray: 3 7;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.field ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.field li {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  transform: translate(-50%, -50%);
+}
+
+.field li:hover {
+  z-index: 2;
+}
+
+.field a {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  color: var(--c-night);
+  text-align: center;
+  animation: c-float 9s ease-in-out var(--float, 0s) infinite;
+  transition:
+    scale 0.5s var(--c-ease),
+    box-shadow 0.5s;
+}
+
+.field a:hover {
+  scale: 1.06;
+}
+
+@keyframes c-float {
+  50% {
+    translate: 0 -6px;
+  }
+}
+
+.starUp a,
+.starDown a,
+.starFlat a {
+  color: var(--c-snow);
+}
+
+.starUp a {
+  background: rgba(94, 224, 200, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(94, 224, 200, 0.55);
+}
+
+.starDown a {
+  background: rgba(255, 107, 74, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 107, 74, 0.55);
+}
+
+.starFlat a {
+  background: rgba(201, 203, 230, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(201, 203, 230, 0.4);
+}
+
+.starUp span {
+  color: var(--c-glacier);
+}
+
+.starDown span {
+  color: var(--c-coral);
+}
+
+.starFlat span {
+  color: #c9cbe6;
+}
+
+.field b {
+  font-family: var(--c-display), sans-serif;
+  font-size: max(14px, calc(var(--size) * 0.15));
+  font-weight: 400;
+  line-height: 1;
+}
+
+.field span {
+  font-size: max(12px, calc(var(--size) * 0.1));
+  font-weight: 800;
+}
+
+.field small {
+  max-width: 80%;
+  max-height: 0;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  opacity: 0;
+  transition:
+    opacity 0.3s,
+    max-height 0.3s;
+}
+
+.field a:hover small,
+.field a:focus-visible small {
+  max-height: 3em;
+  opacity: 1;
+}
+
+/* ---------- Три двери ---------- */
+.doorsWrap {
+  padding: clamp(96px, 12vw, 150px) 0;
+  background: var(--c-snow);
+  color: var(--c-night);
+}
+
+.doorsWrap .head p {
+  color: #4b4f6b;
+}
+
+.doors {
+  display: flex;
+  gap: 14px;
+  height: clamp(420px, 44vw, 580px);
+  margin: 0;
+  padding: 0 var(--c-pad);
+  list-style: none;
+}
+
+.doors li {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--c-night2);
+  transition: flex 0.8s var(--c-ease);
+}
+
+.doors li:hover,
+.doors li:focus-within {
+  flex: 2.4;
+}
+
+.doors a {
+  position: absolute;
+  inset: 0;
+  color: var(--c-snow);
+}
+
+.doors img {
+  object-fit: cover;
+  transition: scale 1.4s var(--c-ease);
+}
+
+.doors li:hover img {
+  scale: 1.07;
+}
+
+.doors a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(11, 15, 42, 0.92) 0%, rgba(11, 15, 42, 0.2) 55%, rgba(11, 15, 42, 0.1) 100%);
+}
+
+.doorNo,
+.doorBody {
+  position: absolute;
+  z-index: 1;
+}
+
+.doorNo {
+  top: 22px;
+  left: 26px;
+  font-family: var(--c-display), sans-serif;
+  font-size: 22px;
+}
+
+.doorBody {
+  right: 26px;
+  bottom: 26px;
+  left: 26px;
+  display: grid;
+  gap: 10px;
+}
+
+.doorBody b {
+  font-family: var(--c-display), sans-serif;
+  font-size: clamp(26px, 2.6vw, 42px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.doorBody span {
+  max-width: 28em;
+  color: var(--c-muted);
+  opacity: 0;
+  translate: 0 14px;
+  transition:
+    opacity 0.5s,
+    translate 0.6s var(--c-ease);
+}
+
+.doors li:hover .doorBody span,
+.doors li:focus-within .doorBody span {
+  opacity: 1;
+  translate: none;
+}
+
+/* ---------- Путь инвестора: карточки-стопка ---------- */
+.path {
+  padding: clamp(96px, 12vw, 150px) 0 clamp(120px, 14vw, 200px);
+}
+
+.stack {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px;
+  list-style: none;
+}
+
+.stack li {
+  position: sticky;
+  top: calc(100px + var(--i) * 28px);
+  margin-bottom: 32px;
+}
+
+.stack a {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 40px;
+  align-items: end;
+  min-height: 320px;
+  padding: clamp(28px, 4vw, 48px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  background: var(--c-night2);
+  color: var(--c-snow);
+  box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.3s;
+}
+
+.stack a:hover {
+  border-color: var(--c-coral);
+}
+
+.stepNo {
+  grid-row: span 2;
+  font-family: var(--c-display), sans-serif;
+  color: var(--c-coral);
+  font-size: clamp(96px, 11vw, 170px);
+  line-height: 0.78;
+}
+
+.stepTitle {
+  font-family: var(--c-display), sans-serif;
+  font-size: clamp(28px, 3.6vw, 54px);
+  line-height: 1;
+}
+
+.stepText {
+  max-width: 30em;
+  color: var(--c-muted);
+  font-size: 18px;
+}
+
+.stepGo {
+  position: absolute;
+  top: 26px;
+  right: 34px;
+  font-size: 44px;
+  line-height: 1;
+  transition: rotate 0.5s var(--c-ease);
+}
+
+.stack a:hover .stepGo {
+  rotate: 45deg;
+}
+
+/* ---------- Газетные вырезки ---------- */
+.press {
+  padding: clamp(96px, 12vw, 150px) 0;
+  background: var(--c-snow);
+  color: var(--c-night);
+}
+
+.press ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
+  margin: 0;
+  padding: 20px var(--c-pad) 0;
+  list-style: none;
+}
+
+.press li a {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  height: 100%;
+  padding: 0 0 24px;
+  border-bottom: 2px solid var(--c-night);
+  transition: border-color 0.3s;
+}
+
+.press li a:hover {
+  border-color: var(--c-coral);
+}
+
+.clipPhoto {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.clipPhoto img {
+  object-fit: cover;
+  transition: scale 1s var(--c-ease);
+}
+
+.press li a:hover img {
+  scale: 1.05;
+}
+
+.press small {
+  color: #c4432b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.press b {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+/* ---------- Цифры ---------- */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 40px;
+  padding: clamp(56px, 7vw, 96px) var(--c-pad);
+  border-block: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--c-night2);
+}
+
+.facts div {
+  display: grid;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 2px solid var(--c-coral);
+}
+
+.facts b {
+  font-family: var(--c-display), sans-serif;
+  font-size: clamp(48px, 6.2vw, 100px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.facts span {
+  color: var(--c-muted);
+}
+
+/* ---------- Финальный призыв ---------- */
+.cta {
+  padding: clamp(110px, 14vw, 200px) 16px;
+  text-align: center;
+}
+
+.cta p {
+  margin: 0 0 18px;
+  color: var(--c-muted);
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.cta h2 {
+  font-size: clamp(40px, 7vw, 116px);
+}
+
+/* Цвет заголовка «течёт» за курсором: градиент с центром в точке --kc-mx/--kc-my. */
+.cta a {
+  display: inline-block;
+  background: radial-gradient(circle 340px at var(--kc-mx, 50%) var(--kc-my, 50%), var(--c-coral), var(--c-snow) 60%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 32px;
+  padding: 56px var(--c-pad) 96px;
+  background: #070a1f;
+  color: var(--c-muted);
+  font-size: 14px;
+}
+
+.footer > div,
+.footer nav {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.footer b {
+  color: var(--c-snow);
+}
+
+.footer a:hover {
+  color: var(--c-coral);
+}
+
+.demo {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 1060px) {
+  .nav,
+  .headCta {
+    display: none;
+  }
+
+  .menu {
+    display: block;
+  }
+}
+
+@media (max-width: 900px) {
+  .press ul,
+  .footer {
+    grid-template-columns: 1fr;
+  }
+
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .doors {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .doors li {
+    flex: none;
+    height: 300px;
+  }
+
+  .doors li:hover,
+  .doors li:focus-within {
+    flex: none;
+  }
+
+  .doorBody span {
+    opacity: 1;
+    translate: none;
+  }
+
+  .stack a {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .stepNo {
+    grid-row: auto;
+  }
+}
+
+/* На телефоне «созвездие» превращается в сетку кругов. */
+@media (max-width: 760px) {
+  .field {
+    height: auto;
+    padding: 0 16px;
+  }
+
+  .links {
+    display: none;
+  }
+
+  .field ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .field li {
+    position: static;
+    width: auto;
+    height: auto;
+    aspect-ratio: 1;
+    transform: none;
+    --size: 150px;
+  }
+
+  .peak > span {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page * {
+    transition: none !important;
+  }
+
+  .stars i,
+  .tunduk,
+  .peak i,
+  .scrollHint::after,
+  .rowFwd,
+  .rowBack,
+  .field a {
+    animation: none;
+  }
+}

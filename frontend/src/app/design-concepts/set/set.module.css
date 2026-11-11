@@ -1,0 +1,1261 @@
+/*
+ * Концепция 23 — «Сеть». Визуальный язык по снимкам plaid.com: первый экран — градиент #08588d → #0d89c9 → #42f2cc
+ * с гравюрной (штриховой) картой, заголовок с зелёно-голубым градиентом, меню-капсула; светлые секции #f5f6ff,
+ * тёмно-синие #012b4f, подвал #00172e. Заголовки — Montserrat 600 с узким трекингом. Радиусы 12/16/24/999.
+ */
+.page {
+  --blue-1: #08588d;
+  --blue-2: #0d89c9;
+  --teal: #42f2cc;
+  --green: #74ea68;
+  --navy: #012b4f;
+  --navy-2: #00172e;
+  --ink: #111;
+  --ink-2: #4a5462;
+  --ink-3: #7a8494;
+  --light: #f5f6ff;
+  --line: #e1e4f0;
+
+  --wrap: min(1200px, calc(100% - 48px));
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-24: 96px;
+  --s-32: 128px;
+
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--st-font), Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, h3, p, ul, ol, dl, dd) {
+  margin: 0;
+}
+
+.page :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+
+.page :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(h1, h2, h3) {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.page :where(a, button, input, summary):focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  top: -100px;
+  left: var(--s-4);
+  z-index: 100;
+  padding: var(--s-2) var(--s-4);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.skip:focus {
+  top: var(--s-4);
+}
+
+.up {
+  color: #5ee6a8;
+}
+
+.down {
+  color: #ff8f8f;
+}
+
+/* Кнопки */
+.whiteBtn,
+.ghostBtn,
+.darkBtn,
+.outlineBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--s-6);
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+/* Белая кнопка с радужной обводкой — как главная кнопка первого экрана. */
+.whiteBtn {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(90deg, #74ea68, #42f2cc, #b383ff, #ff9ad5) border-box;
+  color: var(--ink);
+}
+
+.whiteBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.35);
+}
+
+.ghostBtn {
+  border: 2px solid rgb(255 255 255 / 0.9);
+  color: #fff;
+}
+
+.ghostBtn:hover {
+  background: rgb(255 255 255 / 0.12);
+}
+
+.darkBtn {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#111, #111) padding-box,
+    linear-gradient(90deg, #74ea68, #42f2cc, #b383ff, #ff9ad5) border-box;
+  color: #fff;
+}
+
+.darkBtn:hover {
+  transform: translateY(-2px);
+}
+
+.outlineBtn {
+  min-height: 40px;
+  padding: 0 var(--s-4);
+  border: 2px solid #5b3fd0;
+  font-size: 15px;
+}
+
+.outlineBtn:hover {
+  background: rgb(91 63 208 / 0.08);
+}
+
+/* Меню-капсула */
+.header {
+  position: fixed;
+  top: var(--s-6);
+  right: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--s-6);
+}
+
+.capsule {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  width: min(1130px, 100%);
+  padding: var(--s-3) var(--s-3) var(--s-3) var(--s-6);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 8px 30px -12px rgb(1 43 79 / 0.35);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.nav {
+  display: flex;
+  gap: var(--s-8);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nav a:hover {
+  color: var(--blue-1);
+}
+
+.headActions {
+  display: flex;
+  gap: var(--s-3);
+  margin-left: auto;
+}
+
+.headActions .darkBtn {
+  min-height: 40px;
+  padding: 0 var(--s-4);
+  font-size: 15px;
+}
+
+.menu {
+  display: none;
+  position: relative;
+  margin-left: auto;
+}
+
+.menu summary {
+  padding: var(--s-2) var(--s-4);
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu nav {
+  position: absolute;
+  top: calc(100% + var(--s-3));
+  right: 0;
+  display: grid;
+  min-width: 240px;
+  padding: var(--s-2);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(1 43 79 / 0.2);
+}
+
+.menu nav a {
+  padding: var(--s-2) var(--s-3);
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.menu nav a:hover {
+  background: var(--light);
+}
+
+/* 1. Первый экран */
+.hero {
+  position: relative;
+  min-height: max(760px, 100dvh);
+  overflow: hidden;
+  background: linear-gradient(105deg, var(--blue-1) 0%, var(--blue-2) 48%, #19c6d6 76%, var(--teal) 100%);
+  color: #fff;
+}
+
+.heroMap {
+  position: absolute;
+  top: 6%;
+  right: -6%;
+  width: 70%;
+  height: auto;
+  overflow: visible;
+}
+
+.heroMap pattern path {
+  stroke: rgb(1 60 90 / 0.55);
+  stroke-width: 1.2;
+}
+
+.mapRegion {
+  fill: url(#st-hatch);
+  stroke: rgb(1 60 90 / 0.65);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.meridian {
+  fill: none;
+  stroke: rgb(1 60 90 / 0.4);
+  stroke-width: 1.4;
+  stroke-dasharray: 10 8;
+}
+
+/* Тонкие концентрические линии слева, как волны у Plaid. */
+.rings {
+  position: absolute;
+  top: -30%;
+  left: -40%;
+  width: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 9px, rgb(255 255 255 / 0.1) 9px 10px);
+  pointer-events: none;
+}
+
+.heroInner {
+  position: relative;
+  display: grid;
+  gap: var(--s-6);
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 180px 0 var(--s-16);
+}
+
+.heroInner h1 {
+  max-width: 11ch;
+  background: linear-gradient(90deg, #74ea68 0%, #9cf27a 35%, #d4f5ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(44px, 5vw, 72px);
+  letter-spacing: -0.045em;
+}
+
+.heroInner p {
+  max-width: 30ch;
+  font-size: 22px;
+  line-height: 1.45;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+  margin-top: var(--s-4);
+}
+
+.logos {
+  position: relative;
+  overflow: hidden;
+  padding: var(--s-8) 0 var(--s-12);
+}
+
+.logosTrack {
+  display: flex;
+  align-items: center;
+  gap: 96px;
+  width: max-content;
+  animation: st-logos 45s linear infinite;
+}
+
+.logosTrack img {
+  width: auto;
+  height: 46px;
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
+}
+
+.logosTrack b {
+  font-size: 28px;
+}
+
+@keyframes st-logos {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* 2. Светлая секция с карточками */
+.light {
+  position: relative;
+  padding: var(--s-32) 0 var(--s-24);
+  overflow: hidden;
+  background: linear-gradient(180deg, #ccf5f5 0%, #eefcfb 22%, var(--light) 60%);
+}
+
+/* Волнистые линии-«ленты» как у Plaid — повторяющийся радиальный узор. */
+.waves {
+  position: absolute;
+  top: -260px;
+  right: -200px;
+  width: 900px;
+  height: 600px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(ellipse at 30% 60%, transparent 0 7px, rgb(120 140 255 / 0.12) 7px 8px);
+  pointer-events: none;
+}
+
+.centerHead {
+  position: relative;
+  max-width: 20ch;
+  margin: 0 auto;
+  font-size: clamp(32px, 3.4vw, 48px);
+  text-align: center;
+}
+
+.cards {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-16) var(--s-8);
+  width: var(--wrap);
+  margin: var(--s-16) auto 0;
+}
+
+.cards a {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.cardArt {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 16px;
+  padding-top: var(--s-8);
+}
+
+.cardArt[data-tone="teal"] {
+  background: linear-gradient(140deg, #0e8f7a 0%, #26c6a2 55%, #b6f3e2 100%);
+}
+
+.cardArt[data-tone="violet"] {
+  background: linear-gradient(140deg, #6b3fd6 0%, #b35be6 55%, #f2a5d9 100%);
+}
+
+.cardArt[data-tone="magenta"] {
+  background: linear-gradient(140deg, #b1356d 0%, #d9599b 50%, #a96ff2 100%);
+}
+
+.cardArt[data-tone="green"] {
+  background: linear-gradient(140deg, #157f55 0%, #36b37e 55%, #c9f5b8 100%);
+}
+
+.phone {
+  display: grid;
+  align-content: start;
+  gap: var(--s-2);
+  width: 62%;
+  height: 92%;
+  padding: var(--s-5) var(--s-5) 0;
+  border: 6px solid #1d1d1f;
+  border-bottom: 0;
+  border-radius: 28px 28px 0 0;
+  background: #fff;
+  box-shadow: 0 -10px 40px -10px rgb(0 0 0 / 0.35);
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.phoneTitle {
+  margin-bottom: var(--s-2);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.phoneRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.phoneRow > span:first-child {
+  display: grid;
+  min-width: 0;
+}
+
+.phoneRow small {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phoneBtn {
+  margin-top: var(--s-2);
+  padding: var(--s-2);
+  border-radius: 8px;
+  background: #0e8f7a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.dash {
+  display: grid;
+  align-content: start;
+  gap: var(--s-3);
+  width: 76%;
+  height: 80%;
+  margin-bottom: var(--s-8);
+  padding: var(--s-5);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.45);
+  align-self: center;
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.dashHead {
+  display: grid;
+}
+
+.dashHead small {
+  color: var(--ink-3);
+  font-size: 11px;
+}
+
+.dashHead b {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 110px;
+}
+
+.dashBars i {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, #6b3fd6, #b383ff);
+}
+
+.chipRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chipRow i {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: #d9599b;
+}
+
+.cardTitle {
+  margin-top: var(--s-3);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.cardText {
+  color: var(--ink-2);
+}
+
+.cardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+  font-weight: 600;
+}
+
+.cardLink i {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 12px;
+  font-style: normal;
+  transition: transform 0.2s ease;
+}
+
+.cards a:hover .cardLink i {
+  transform: translateX(3px);
+}
+
+.cards a:hover .phone,
+.cards a:hover .dash {
+  transform: translateY(-8px);
+}
+
+/* 3. Тёмно-синяя секция */
+.navy {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: var(--s-16);
+  height: 560px;
+  padding: 0 max(24px, calc((100% - 1200px) / 2));
+  overflow: hidden;
+  background: var(--navy);
+  color: #fff;
+  border-top: 4px solid transparent;
+  border-image: linear-gradient(90deg, var(--teal), #b383ff, var(--green)) 1;
+}
+
+.navyText {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-8);
+}
+
+.navyText h2 {
+  font-size: clamp(34px, 3.4vw, 48px);
+}
+
+.pillCols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4);
+  height: 100%;
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.pillCol {
+  overflow: hidden;
+}
+
+.pillCol ul {
+  display: grid;
+  gap: var(--s-3);
+  animation: st-up 26s linear infinite;
+}
+
+.pillCol[data-dir="1"] ul {
+  animation-direction: reverse;
+  animation-duration: 30s;
+}
+
+.pillCol li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-5);
+  border: 2px solid rgb(255 255 255 / 0.35);
+  border-radius: 999px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.pillCol b {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--teal);
+  color: var(--navy);
+  font-size: 14px;
+}
+
+@keyframes st-up {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* 4. Сеть и цифры */
+.network {
+  position: relative;
+  padding: var(--s-32) 0 var(--s-24);
+  background: var(--light);
+}
+
+.netGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-16);
+  width: var(--wrap);
+  margin: 0 auto;
+}
+
+.stack {
+  display: grid;
+  gap: var(--s-4);
+  padding: var(--s-8);
+  border-radius: 24px;
+  background: linear-gradient(160deg, #e3e9ff, #f1e6ff 60%, #e6fbf6);
+}
+
+.note {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-3);
+  width: min(380px, 88%);
+  margin-left: var(--o);
+  padding: var(--s-3);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 28px -14px rgb(1 43 79 / 0.35);
+  transition: transform 0.2s ease;
+}
+
+.note:hover {
+  transform: translateX(6px);
+}
+
+.notePhoto {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.notePhoto img {
+  object-fit: cover;
+}
+
+.note > span:last-child {
+  display: grid;
+  min-width: 0;
+}
+
+.note small {
+  color: var(--ink-3);
+  font-size: 11px;
+}
+
+.note b {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.netText {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.netText h2 {
+  font-size: 28px;
+}
+
+.netText p {
+  color: var(--ink-2);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-8);
+  width: var(--wrap);
+  margin: var(--s-24) auto 0;
+}
+
+.stats div {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.stats dd {
+  color: #3a5bd9;
+  font-size: clamp(48px, 5.5vw, 76px);
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.stats dt {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+/* 5. Тёмная карточка с «кодом» */
+.devWrap {
+  padding: var(--s-16) 0 var(--s-32);
+  background: var(--light);
+}
+
+.dev {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--s-6);
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: var(--s-24) var(--s-8) var(--s-16);
+  overflow: hidden;
+  border-radius: 24px;
+  background:
+    radial-gradient(60% 50% at 50% 100%, rgb(150 70 220 / 0.45), transparent 70%),
+    #0d0b3a;
+  color: #fff;
+  text-align: center;
+  box-shadow:
+    -40px 0 80px -40px rgb(255 120 220 / 0.35),
+    40px 0 80px -40px rgb(66 242 204 / 0.35);
+}
+
+.gradText {
+  background: linear-gradient(90deg, #d5b4ff, #9fb7ff 50%, #a6ffef);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(32px, 3.6vw, 50px);
+}
+
+.dev p {
+  max-width: 44ch;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.code {
+  width: min(760px, 100%);
+  margin-top: var(--s-8);
+  overflow: hidden;
+  border-radius: 14px;
+  background: #0f1416;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 15px;
+  text-align: left;
+}
+
+.codeBar {
+  padding: var(--s-4) var(--s-6);
+  border-bottom: 1px solid #23313a;
+  color: #cfe2ff;
+}
+
+.code ol {
+  padding: var(--s-4) 0;
+  counter-reset: ln;
+  overflow-x: auto;
+}
+
+.code li {
+  padding: 2px var(--s-6);
+  white-space: pre;
+  counter-increment: ln;
+}
+
+.code li::before {
+  content: counter(ln);
+  display: inline-block;
+  width: 32px;
+  margin-right: var(--s-4);
+  border-right: 1px solid #23313a;
+  color: #4a6170;
+}
+
+.kw {
+  color: #6cc4ff;
+}
+
+.fn {
+  color: #b9c7d1;
+}
+
+.cm {
+  color: #5f7684;
+}
+
+/* 6. Карусель компаний */
+.companies {
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: var(--s-24) 0;
+}
+
+.carouselHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-6);
+}
+
+.carouselHead h2 {
+  max-width: 14ch;
+  font-size: clamp(32px, 3.6vw, 48px);
+}
+
+.arrows {
+  display: flex;
+  gap: var(--s-3);
+}
+
+.arrows button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.arrows button:last-child {
+  background: #e7ecff;
+}
+
+.arrows button:hover {
+  border-color: #3a5bd9;
+}
+
+.arrows svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.carousel {
+  display: grid;
+  grid-auto-columns: 270px;
+  grid-auto-flow: column;
+  gap: var(--s-6);
+  margin-top: var(--s-8);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.carousel li {
+  scroll-snap-align: start;
+}
+
+.carousel a {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.coTile {
+  display: grid;
+  place-items: center;
+  height: 150px;
+  border-radius: 4px;
+  background: var(--tone);
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  transition: transform 0.3s ease;
+}
+
+.carousel a:hover .coTile {
+  transform: translateY(-4px);
+}
+
+.coText {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+/* 7. Градиентный финал */
+.final {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  align-items: center;
+  gap: var(--s-16);
+  padding: var(--s-24) max(24px, calc((100% - 1200px) / 2));
+  background: linear-gradient(105deg, var(--blue-1) 0%, var(--blue-2) 50%, #19c6d6 78%, var(--teal) 100%);
+  color: #fff;
+  border-top: 4px solid transparent;
+  border-image: linear-gradient(90deg, #b383ff, var(--teal), var(--green)) 1;
+}
+
+.final h2 {
+  font-size: clamp(36px, 4vw, 56px);
+}
+
+.formCard {
+  display: grid;
+  gap: var(--s-5);
+  padding: var(--s-8);
+  border: 3px solid transparent;
+  border-radius: 24px;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(140deg, #74ea68, #42f2cc, #b383ff, #ff9ad5) border-box;
+  color: var(--ink);
+}
+
+.formCard h3 {
+  font-size: 24px;
+}
+
+.form {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.form input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 var(--s-4);
+  border: 1.5px solid #c9cfdc;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.form input:focus-visible {
+  border-color: #3a5bd9;
+  outline: none;
+}
+
+.steps {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.steps a {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border: 1.5px solid #e3e6ef;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.steps a:hover {
+  border-color: #3a5bd9;
+}
+
+.steps span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #e7ecff;
+  color: #3a5bd9;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.fine {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+/* Подвал */
+.footer {
+  padding: var(--s-16) max(24px, calc((100% - 1200px) / 2)) var(--s-24);
+  background: var(--navy-2);
+  color: #fff;
+  font-size: 14px;
+}
+
+.footGrid {
+  display: grid;
+  grid-template-columns: 1fr repeat(4, minmax(0, 1fr));
+  gap: var(--s-8);
+}
+
+.footGrid nav {
+  display: grid;
+  align-content: start;
+  gap: var(--s-1);
+}
+
+.footGrid b {
+  margin-bottom: var(--s-2);
+}
+
+.footGrid a:hover {
+  text-decoration: underline;
+}
+
+.footBottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-8);
+  margin-top: var(--s-16);
+  font-weight: 600;
+}
+
+.legal {
+  margin-top: var(--s-6) !important;
+  padding-top: var(--s-6);
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+  color: rgb(255 255 255 / 0.8);
+  font-size: 12px;
+}
+
+.footer :focus-visible,
+.navy :focus-visible,
+.hero :focus-visible {
+  outline-color: #fff;
+}
+
+/* Адаптив */
+@media (max-width: 1099px) {
+  .nav,
+  .headActions {
+    display: none;
+  }
+
+  .menu {
+    display: block;
+  }
+
+  .heroMap {
+    top: auto;
+    bottom: 12%;
+    right: -20%;
+    width: 110%;
+    opacity: 0.6;
+  }
+
+  .navy {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    padding-block: var(--s-16);
+  }
+
+  .pillCols {
+    height: 380px;
+  }
+
+  .netGrid,
+  .final {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    --wrap: calc(100% - 32px);
+  }
+
+  .header {
+    top: var(--s-3);
+    padding: 0 var(--s-3);
+  }
+
+  .heroInner {
+    padding-top: 130px;
+  }
+
+  .heroInner p {
+    font-size: 18px;
+  }
+
+  .heroActions {
+    gap: var(--s-3);
+  }
+
+  .logosTrack {
+    gap: 56px;
+  }
+
+  .logosTrack img {
+    height: 34px;
+  }
+
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-12);
+  }
+
+  .cardArt {
+    height: 240px;
+  }
+
+  .pillCol li {
+    padding: var(--s-2) var(--s-3);
+    font-size: 14px;
+  }
+
+  .note {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .stack {
+    padding: var(--s-4);
+  }
+
+  .dev {
+    padding: var(--s-16) var(--s-4) var(--s-8);
+  }
+
+  .code {
+    font-size: 12px;
+  }
+
+  .carouselHead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .formCard {
+    padding: var(--s-5);
+  }
+
+  .form {
+    flex-direction: column;
+  }
+
+  .footGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logosTrack,
+  .pillCol ul {
+    animation: none;
+  }
+
+  .logos,
+  .pillCol {
+    overflow-x: auto;
+  }
+
+  .phone,
+  .dash,
+  .note,
+  .coTile,
+  .whiteBtn,
+  .darkBtn,
+  .cardLink i {
+    transition: none;
+  }
+}

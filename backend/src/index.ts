@@ -6,6 +6,7 @@ import { startIssuersSync } from "./modules/issuers-sync/sync";
 import { startKseSync } from "./modules/kse-sync/sync";
 import { startDisclosureSync } from "./modules/disclosure/disclosure.service";
 import { pruneOldAudit } from "./db/repositories/cms.repository";
+import { startOracleSync } from "./integrations/oracle/oracle.sync";
 
 async function main() {
   await initDb();
@@ -21,6 +22,8 @@ async function main() {
   startIssuersSync();
   // Существенные факты эмитентов со страниц kse.kg — раз в 6 часов.
   startDisclosureSync();
+  // Итоги торгов из торговой системы (Oracle 8i) — только при ORACLE_SYNC=on, раз в ORACLE_SYNC_MINUTES минут.
+  startOracleSync();
   // Журнал аудита — записи старше года удаляем раз в сутки.
   const pruneAudit = () => void pruneOldAudit().catch((error) => console.warn("audit prune:", error));
   pruneAudit();

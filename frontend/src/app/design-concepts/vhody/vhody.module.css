@@ -1,0 +1,666 @@
+/*
+ * Концепция 31 — «Два входа». Две двери-фотографии под тёмным затемнением: инвестор (торги) и компания
+ * (переговоры). Деловая палитра: графит #15181c, тёмно-зелёный #1d4d3a, бронза #8a5a2b, фон #f7f6f3,
+ * тонкие линии #e2ded6, радиусы 4px. Шрифт Commissioner.
+ */
+.page {
+  --green: #1d4d3a;
+  --green-soft: #e6eee9;
+  --bronze: #8a5a2b;
+  --bronze-soft: #f1e9df;
+  --ink: #15181c;
+  --ink-2: #4f545b;
+  --ink-3: #868a91;
+  --bg: #f7f6f3;
+  --line: #e2ded6;
+  --up: #1d7a4c;
+  --down: #c13a30;
+
+  --wrap: min(1180px, calc(100% - 48px));
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--vh-font), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, p, ul, ol, dl, dd) {
+  margin: 0;
+  padding: 0;
+}
+
+/* У сайта свой шрифт заголовков — здесь всё набрано Commissioner. */
+.page :where(h1, h2) {
+  font-family: inherit;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a, button):focus-visible {
+  outline: 2px solid var(--bronze);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 50;
+  padding: 10px 16px;
+  background: var(--ink);
+  color: #fff !important;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+/* Акцент выбранной аудитории: зелёный у инвестора, бронза у компании. */
+.switchRoot {
+  --accent: var(--green);
+  --accent-soft: var(--green-soft);
+}
+
+.switchRoot[data-audience="company"] {
+  --accent: var(--bronze);
+  --accent-soft: var(--bronze-soft);
+}
+
+/* ---------- Шапка ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  gap: 24px;
+  margin-left: auto;
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.nav a {
+  white-space: nowrap;
+}
+
+.nav a:hover {
+  color: var(--ink);
+}
+
+.member {
+  padding: 8px 14px;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.member:hover {
+  background: var(--ink);
+  color: #fff;
+}
+
+.ask {
+  width: var(--wrap);
+  margin: 36px auto 20px !important;
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ---------- Две двери ---------- */
+.doors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: var(--wrap);
+  margin: 0 auto;
+}
+
+.door {
+  position: relative;
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  gap: 10px;
+  min-height: min(56vh, 480px);
+  padding: 40px;
+  border: 0;
+  border-radius: 4px;
+  background-color: var(--ink);
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: filter 0.3s ease;
+}
+
+.door[data-door="investor"] {
+  background-image:
+    linear-gradient(to top, rgb(12 28 21 / 0.92) 0%, rgb(12 28 21 / 0.55) 55%, rgb(12 28 21 / 0.25) 100%),
+    url("/carousel/trading.jpg");
+}
+
+.door[data-door="company"] {
+  background-image:
+    linear-gradient(to top, rgb(36 22 10 / 0.92) 0%, rgb(36 22 10 / 0.55) 55%, rgb(36 22 10 / 0.25) 100%),
+    url("/carousel/meeting.jpg");
+}
+
+/* Невыбранная дверь приглушена, но остаётся заметной кнопкой. */
+.door[aria-pressed="false"] {
+  filter: grayscale(0.85) brightness(0.8);
+}
+
+.door[aria-pressed="false"]:hover {
+  filter: none;
+}
+
+/* Полоса снизу у выбранной двери. */
+.door[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: #fff;
+}
+
+.doorWho {
+  font-size: clamp(32px, 3.8vw, 50px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+
+.doorWant {
+  max-width: 440px;
+  color: rgb(255 255 255 / 0.82);
+  font-size: 18px;
+}
+
+.doorGo {
+  margin-top: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.6);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ---------- Содержимое под выбранную аудиторию ---------- */
+.content {
+  scroll-margin-top: 16px;
+}
+
+.switchRoot[data-audience="investor"] [data-for="company"],
+.switchRoot[data-audience="company"] [data-for="investor"] {
+  display: none;
+}
+
+.panel,
+.news {
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 64px 0 0;
+}
+
+.panel {
+  animation: vh-in 0.35s ease-out;
+}
+
+@keyframes vh-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.title {
+  font-size: clamp(26px, 2.8vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.panel > .title {
+  margin-bottom: 24px;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.titleRow a {
+  color: var(--accent, var(--ink));
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Цифры */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  border-top: 2px solid var(--accent);
+  background: #fff;
+}
+
+.benefits + .stats {
+  margin-top: 32px;
+}
+
+.stats div {
+  display: grid;
+  gap: 2px;
+  padding: 22px 24px;
+}
+
+.stats div + div {
+  border-left: 1px solid var(--line);
+}
+
+.stats dt {
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.stats dd {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats dd.small {
+  font-size: 26px;
+}
+
+.stats small {
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+/* Котировки */
+.quotes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  background: #fff;
+}
+
+.quotes li {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.quotes a {
+  display: grid;
+  gap: 2px;
+  padding: 18px 22px;
+  transition: background-color 0.15s ease;
+}
+
+.quotes a:hover {
+  background: var(--accent-soft);
+}
+
+.quotes b {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.quotes span {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quotes strong {
+  margin-top: 6px;
+  font-size: 19px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Шаги — нумерованные колонки с линией сверху */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.steps a {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  height: 100%;
+  padding-top: 18px;
+  border-top: 2px solid var(--accent);
+}
+
+.steps span {
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.steps b {
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.steps a:hover b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.steps small {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+/* Аукционы ГЦБ */
+.auctions {
+  border-top: 1px solid var(--line);
+}
+
+.auctions li {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.auctions b {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.auctions em {
+  padding: 3px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Компании: преимущества и полезные разделы */
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.benefits li {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 2px solid var(--accent);
+}
+
+.benefits span {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.benefits b {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.benefits p {
+  color: var(--ink-2);
+  font-size: 16px;
+}
+
+.links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+}
+
+.links li {
+  border-bottom: 1px solid var(--line);
+}
+
+.links li:nth-child(odd) {
+  border-right: 1px solid var(--line);
+}
+
+.links a {
+  display: grid;
+  gap: 2px;
+  padding: 20px 24px 20px 0;
+}
+
+.links li:nth-child(even) a {
+  padding-left: 24px;
+}
+
+.links b {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.links b::after {
+  content: " →";
+  color: var(--accent);
+}
+
+.links a:hover b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.links span {
+  color: var(--ink-3);
+  font-size: 15px;
+}
+
+/* ---------- Новости ---------- */
+.news {
+  padding-bottom: 72px;
+}
+
+.news ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.news a {
+  display: grid;
+  gap: 10px;
+}
+
+.newsPhoto {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.newsPhoto img {
+  object-fit: cover;
+}
+
+.news time {
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.news b {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.news a:hover b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px 40px;
+  padding: 40px max(24px, calc((100% - 1180px) / 2)) 100px;
+  background: var(--ink);
+  color: rgb(255 255 255 / 0.72);
+  font-size: 15px;
+}
+
+.footer b {
+  color: #fff;
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.footer a:hover {
+  color: #fff;
+}
+
+.legal {
+  grid-column: 1 / -1;
+  color: rgb(255 255 255 / 0.45);
+  font-size: 13px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 960px) {
+  .quotes,
+  .benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    --wrap: calc(100% - 32px);
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+  }
+
+  .member {
+    margin-left: auto;
+  }
+
+  .doors {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .door {
+    min-height: 280px;
+    padding: 26px;
+  }
+
+  .quotes,
+  .benefits,
+  .steps,
+  .links,
+  .news ul,
+  .footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stats div + div {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .links li:nth-child(odd) {
+    border-right: 0;
+  }
+
+  .links li:nth-child(even) a {
+    padding-left: 0;
+  }
+
+  .auctions li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .titleRow {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .door {
+    transition: none;
+  }
+
+  .panel {
+    animation: none;
+  }
+}

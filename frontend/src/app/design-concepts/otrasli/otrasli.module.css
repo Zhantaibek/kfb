@@ -1,0 +1,564 @@
+/*
+ * Концепция 36 — «Отрасли». Фото-сторителлинг: тёплый белый #fbfaf7, тёмный #0d2a2e, фирменная бирюза #2c7e87 /
+ * #57b6c0, линии #e3e0d8. Заголовки — Literata, текст — Inter. Большие фото без скруглений, по отрасли на экран.
+ */
+.page {
+  --dark: #0d2a2e;
+  --brand: #2c7e87;
+  --brand-2: #57b6c0;
+  --ink: #15201f;
+  --ink-2: #4b5a5b;
+  --ink-3: #849394;
+  --bg: #fbfaf7;
+  --line: #e3e0d8;
+
+  --wrap: min(1240px, calc(100% - 48px));
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ot-sans), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, p, ul, ol, dl, dd) {
+  margin: 0;
+  padding: 0;
+}
+
+.page :where(h1, h2) {
+  font-family: var(--ot-serif), Georgia, serif;
+  font-weight: 500;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a):focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 50;
+  padding: 10px 16px;
+  background: var(--dark);
+  color: #fff !important;
+}
+
+/* ---------- Шапка поверх фото ---------- */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 22px max(24px, calc((100% - 1240px) / 2));
+  color: #fff;
+  font-size: 15px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.nav {
+  display: flex;
+  gap: 26px;
+  margin-left: auto;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.nav a:hover {
+  color: #fff;
+}
+
+.headCta {
+  padding: 10px 18px;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  border-radius: 999px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.headCta:hover {
+  background: #fff;
+  color: var(--dark) !important;
+}
+
+/* ---------- Первый экран ---------- */
+.hero {
+  position: relative;
+  display: grid;
+  align-items: end;
+  min-height: 100vh;
+  overflow: hidden;
+  color: #fff;
+}
+
+.hero img {
+  object-fit: cover;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgb(13 42 46 / 0.92) 0%, rgb(13 42 46 / 0.45) 45%, rgb(13 42 46 / 0.15) 75%),
+    linear-gradient(180deg, rgb(13 42 46 / 0.55) 0%, transparent 20%);
+}
+
+.heroText {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding-bottom: 96px;
+}
+
+.kicker,
+.kickerDark {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Над светлым небом фото: светлый цвет и тень, чтобы надпись читалась. */
+.kicker {
+  color: #cdebf0;
+  text-shadow: 0 1px 12px rgb(13 42 46 / 0.7);
+}
+
+.kickerDark {
+  color: var(--brand);
+}
+
+.hero h1 {
+  max-width: 900px;
+  font-size: clamp(44px, 6.4vw, 92px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.heroText > p:not(.kicker) {
+  max-width: 640px;
+  color: rgb(255 255 255 / 0.85);
+  font-size: 19px;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btnLight,
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.btnLight {
+  background: #fff;
+  color: var(--dark) !important;
+}
+
+.btnGhost {
+  border: 1px solid rgb(255 255 255 / 0.6);
+  color: #fff !important;
+}
+
+.btnGhost:hover {
+  background: rgb(255 255 255 / 0.12);
+}
+
+/* ---------- Оглавление отраслей ---------- */
+.toc {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 16px;
+}
+
+.toc p {
+  flex: none;
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.toc ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toc a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 15px;
+}
+
+.toc a:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.toc small {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+/* ---------- Отрасль ---------- */
+.sector {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 80px);
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 72px 0;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 16px;
+}
+
+.sector[data-flip] .sectorPhoto {
+  order: 2;
+}
+
+.sectorPhoto {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.sectorPhoto img {
+  object-fit: cover;
+  transition: transform 0.8s ease;
+}
+
+.sector:hover .sectorPhoto img {
+  transform: scale(1.03);
+}
+
+.sectorNum {
+  position: absolute;
+  left: 20px;
+  bottom: 14px;
+  color: #fff;
+  font-family: var(--ot-serif), Georgia, serif;
+  font-size: 56px;
+  line-height: 1;
+  text-shadow: 0 2px 20px rgb(0 0 0 / 0.4);
+}
+
+.sectorText {
+  display: grid;
+  gap: 14px;
+}
+
+.sectorText h2 {
+  font-size: clamp(32px, 3.6vw, 48px);
+  line-height: 1.08;
+}
+
+.sectorText > p:not(.kickerDark):not(.more) {
+  color: var(--ink-2);
+  font-size: 18px;
+}
+
+.papers {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.papers li {
+  border-bottom: 1px solid var(--line);
+}
+
+.papers a {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 14px;
+  padding: 12px 0;
+}
+
+.papers b {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.papers span {
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.papers em {
+  font-style: normal;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.papers a:hover span {
+  color: var(--ink);
+}
+
+.more {
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+/* ---------- Рынок в цифрах ---------- */
+.numbers {
+  margin-top: 40px;
+  padding: 72px max(24px, calc((100% - 1240px) / 2));
+  background: var(--dark);
+  color: #fff;
+}
+
+.numbers dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.numbers dt {
+  color: rgb(255 255 255 / 0.6);
+  font-size: 14px;
+}
+
+.numbers dd {
+  margin-top: 4px;
+  font-family: var(--ot-serif), Georgia, serif;
+  font-size: clamp(36px, 4vw, 54px);
+  font-variant-numeric: tabular-nums;
+}
+
+.numbers > p {
+  margin-top: 28px;
+  color: rgb(255 255 255 / 0.5);
+  font-size: 14px;
+}
+
+/* ---------- Новости ---------- */
+.news {
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 88px 0;
+}
+
+.newsHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.newsHead h2 {
+  font-size: clamp(32px, 3.6vw, 46px);
+}
+
+.newsHead a {
+  color: var(--brand);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.news ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.news a {
+  display: grid;
+  gap: 10px;
+}
+
+.newsPhoto {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+}
+
+.newsPhoto img {
+  object-fit: cover;
+}
+
+.news small {
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.news b {
+  font-family: var(--ot-serif), Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.news a:hover b {
+  color: var(--brand);
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px 40px;
+  padding: 44px max(24px, calc((100% - 1240px) / 2)) 100px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.footer b {
+  color: var(--ink);
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.footer a:hover {
+  color: var(--brand);
+}
+
+.legal {
+  grid-column: 1 / -1;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 960px) {
+  .nav {
+    display: none;
+  }
+
+  .headCta {
+    margin-left: auto;
+  }
+
+  .sector {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 52px 0;
+  }
+
+  .sector[data-flip] .sectorPhoto {
+    order: 0;
+  }
+
+  .numbers dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .news ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    --wrap: calc(100% - 32px);
+  }
+
+  .header {
+    padding: 16px;
+  }
+
+  .brand span {
+    font-size: 14px;
+  }
+
+  .headCta {
+    display: none;
+  }
+
+  .hero {
+    min-height: 88vh;
+  }
+
+  .heroText {
+    padding-bottom: 56px;
+  }
+
+  .toc {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .papers a {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+
+  .papers em {
+    grid-column: 2;
+  }
+
+  .newsHead {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectorPhoto img {
+    transition: none;
+  }
+}

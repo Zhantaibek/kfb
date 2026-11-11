@@ -8,6 +8,9 @@ COPY frontend ./frontend
 COPY shared ./shared
 ARG API_URL=http://api:4000
 ENV API_URL=$API_URL
+# Адрес учебного центра вшивается в код при сборке (NEXT_PUBLIC_*): без него ссылка вела бы на localhost.
+ARG NEXT_PUBLIC_EDU_URL
+ENV NEXT_PUBLIC_EDU_URL=$NEXT_PUBLIC_EDU_URL
 RUN npm run build -w frontend
 
 # Запуск из standalone-сборки: только трассированные файлы, без полного node_modules.
