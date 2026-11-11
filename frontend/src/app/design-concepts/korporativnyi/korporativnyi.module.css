@@ -1,0 +1,683 @@
+/*
+ * Концепция 49 — «Корпоративный» (по мотивам ICE и UBS). Тёмная бирюза #0f2f33 для первого экрана и подвала,
+ * белый и тёплый светлый #f5f7f6 для секций, фирменная бирюза #57b6c0 / #2c7e87 для акцентов и призыва.
+ * Тонкие линии, прямые углы у фото, крупные заголовки. Шрифты — основного сайта.
+ */
+.page {
+  --brand: #57b6c0;
+  --brand-fill: #2c7e87;
+  --brand-deep: #1d4f55;
+  --night: #0f2f33;
+  --ink: #13211e;
+  --ink-2: #4a5f5f;
+  --ink-3: #82918f;
+  --light: #f5f7f6;
+  --line: #dfe6e5;
+  --up: #7fe0b4;
+  --down: #ffadb3;
+  --wrap: min(1240px, calc(100% - 48px));
+
+  min-height: 100vh;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.page :where(h1, h2, h3) {
+  margin: 0;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+.page :where(p, dl, dd, blockquote) {
+  margin: 0;
+}
+
+.page :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: #fff;
+  color: var(--ink) !important;
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: var(--wrap);
+  margin: 0 auto;
+}
+
+.eyebrow,
+.eyebrowDark {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  color: var(--brand);
+}
+
+.eyebrowDark {
+  color: var(--brand-fill);
+}
+
+.sectionTitle {
+  margin-top: 14px;
+  font-size: clamp(26px, 3.2vw, 44px);
+  line-height: 1.12;
+}
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1.5px solid currentColor;
+  color: var(--brand-fill);
+  font-weight: 700;
+}
+
+.textLink svg {
+  transition: transform 0.25s ease;
+}
+
+.textLink:hover svg {
+  transform: translateX(4px);
+}
+
+/* ---------- Первый экран ---------- */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: min(100vh, 860px);
+  overflow: hidden;
+  background: var(--night);
+  color: #fff;
+}
+
+.header {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: var(--wrap);
+  height: 84px;
+  margin: 0 auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  gap: 26px;
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.nav a {
+  color: rgba(255, 255, 255, 0.82);
+  transition: color 0.2s ease;
+}
+
+.nav a:hover {
+  color: #fff;
+}
+
+.headBtn {
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.headBtn:hover {
+  background: #fff;
+  color: var(--night) !important;
+}
+
+.heroPhoto {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 48%;
+  z-index: 1;
+}
+
+.heroPhoto img {
+  object-fit: cover;
+  object-position: 60% 50%;
+}
+
+.heroPhoto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--night) 0%, rgba(15, 47, 51, 0.55) 35%, rgba(15, 47, 51, 0.15) 100%);
+}
+
+.heroText {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  display: grid;
+  gap: 22px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 48px 0;
+}
+
+.heroText h1 {
+  max-width: 13ch;
+  font-size: clamp(34px, 5.2vw, 72px);
+  line-height: 1.04;
+}
+
+.heroLead {
+  max-width: 520px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(16px, 1.3vw, 19px);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.btnLight,
+.btnLine,
+.btnDark,
+.btnDarkLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 50px;
+  padding: 0 26px;
+  font-weight: 700;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btnLight {
+  background: var(--brand);
+  color: #0b2a2e !important;
+}
+
+.btnLight:hover {
+  background: #7cc8d0;
+}
+
+.btnLine {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff !important;
+}
+
+.btnLine:hover {
+  border-color: #fff;
+}
+
+.ticker {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: var(--wrap);
+  margin: 0 auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.ticker div {
+  padding: 22px 20px 26px 0;
+}
+
+.ticker div + div {
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.ticker dt {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ticker dd {
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticker small {
+  margin-left: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ticker small[data-up] {
+  color: var(--up);
+}
+
+.ticker small[data-down] {
+  color: var(--down);
+}
+
+/* ---------- Направления ---------- */
+.directions {
+  padding: clamp(64px, 9vw, 120px) 0 0;
+}
+
+.direction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  width: var(--wrap);
+  margin: clamp(40px, 6vw, 72px) auto 0;
+  border-top: 1px solid var(--line);
+  padding-top: clamp(40px, 6vw, 72px);
+}
+
+.direction[data-flip] .dirPhoto {
+  order: 2;
+}
+
+.dirPhoto {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+}
+
+.dirPhoto img {
+  object-fit: cover;
+  transition: transform 1s ease;
+}
+
+.direction:hover .dirPhoto img {
+  transform: scale(1.03);
+}
+
+.dirText {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  padding: 24px clamp(24px, 5vw, 72px);
+}
+
+.dirNum {
+  color: var(--brand-fill);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.dirText h3 {
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.15;
+}
+
+.dirText p {
+  color: var(--ink-2);
+  font-size: 17px;
+}
+
+.dirText .textLink {
+  justify-self: start;
+}
+
+/* ---------- Полоса цифр ---------- */
+.numbers {
+  margin-top: clamp(64px, 9vw, 120px);
+  padding: clamp(48px, 6vw, 80px) 0;
+  background: var(--light);
+}
+
+.numbers dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.numbers dl div {
+  padding: 0 24px;
+  border-left: 1px solid var(--line);
+}
+
+.numbers dl div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.numbers dt {
+  color: var(--ink-3);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.numbers dd {
+  margin-top: 6px;
+  color: var(--brand-deep);
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(34px, 4vw, 56px);
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Миссия ---------- */
+.mission {
+  padding: clamp(64px, 9vw, 120px) 0;
+}
+
+.mission blockquote {
+  max-width: 980px;
+  padding-left: clamp(20px, 3vw, 40px);
+  border-left: 3px solid var(--brand);
+}
+
+.mission p {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(20px, 2.4vw, 32px);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+
+.mission footer {
+  margin-top: 20px;
+  color: var(--ink-3);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------- Новости ---------- */
+.newsHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+.news {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.newsCard {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.newsPhoto {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.newsPhoto img {
+  object-fit: cover;
+  transition: transform 0.8s ease;
+}
+
+.newsCard:hover .newsPhoto img {
+  transform: scale(1.04);
+}
+
+.newsMeta {
+  display: flex;
+  gap: 12px;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.newsMeta em {
+  color: var(--brand-fill);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.newsCard b {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.newsCard:hover b {
+  color: var(--brand-fill);
+}
+
+/* ---------- Призыв ---------- */
+.cta {
+  margin-top: clamp(64px, 9vw, 120px);
+  padding: clamp(48px, 6vw, 80px) 0;
+  background: var(--brand);
+  color: #0b2a2e;
+}
+
+.ctaInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.ctaInner h2 {
+  max-width: 18ch;
+  font-size: clamp(26px, 3vw, 42px);
+  line-height: 1.1;
+}
+
+.ctaInner > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btnDark {
+  background: var(--night);
+  color: #fff !important;
+}
+
+.btnDark:hover {
+  background: #0b2a2e;
+}
+
+.btnDarkLine {
+  border: 1px solid #0b2a2e;
+  color: #0b2a2e !important;
+}
+
+.btnDarkLine:hover {
+  background: rgba(11, 42, 46, 0.08);
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  padding: 56px 0 110px;
+  background: var(--night);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+}
+
+.footInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.footInner > div {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.footBrand img {
+  margin-bottom: 8px;
+}
+
+.footInner h3 {
+  margin-bottom: 6px;
+  color: #fff;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.footInner a:hover {
+  color: #fff;
+}
+
+.legal {
+  margin-top: 40px !important;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+/* ---------- Адаптивность ---------- */
+@media (max-width: 1080px) {
+  .nav {
+    display: none;
+  }
+
+  .headBtn {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .heroPhoto {
+    width: 100%;
+    opacity: 0.35;
+  }
+
+  .direction {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .direction[data-flip] .dirPhoto {
+    order: 0;
+  }
+
+  .dirPhoto {
+    min-height: 260px;
+  }
+
+  .dirText {
+    padding: 28px 0 0;
+  }
+
+  .ticker,
+  .numbers dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ticker div:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .ticker div:nth-child(n + 3) {
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  .numbers dl {
+    gap: 28px 0;
+  }
+
+  .numbers dl div:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .news {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footInner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    --wrap: calc(100% - 32px);
+  }
+
+  .brand span {
+    font-size: 14px;
+  }
+
+  .headBtn {
+    padding: 8px 14px;
+  }
+
+  .ticker dd {
+    font-size: 17px;
+  }
+
+  .newsHead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footInner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dirPhoto img,
+  .newsPhoto img,
+  .textLink svg {
+    transition: none;
+  }
+}

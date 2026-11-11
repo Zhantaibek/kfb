@@ -1,0 +1,836 @@
+/*
+ * Концепция 35 — «Портал». Сайт мировой биржи в фирменной бирюзе: тёмный #0d2a2e (служебная полоса, подвал),
+ * основной #2c7e87, светлый #57b6c0, серый фон #f3f6f7, линии #dde5e7. IBM Plex Sans, радиусы 2–4px.
+ */
+.page {
+  --dark: #0d2a2e;
+  --brand: #2c7e87;
+  --brand-2: #57b6c0;
+  --brand-soft: #e3f4f6;
+  --ink: #12262a;
+  --ink-2: #4a6468;
+  --ink-3: #7f9497;
+  --grey: #f3f6f7;
+  --line: #dde5e7;
+  --up: #11804f;
+  --down: #c8312b;
+
+  min-height: 100vh;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--pt-font), Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.page :where(h1, h2, p, ul, ol, dl, dd) {
+  margin: 0;
+  padding: 0;
+}
+
+/* У сайта свой шрифт заголовков — здесь всё набрано IBM Plex Sans. */
+.page :where(h1, h2) {
+  font-family: inherit;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a):focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.wrap {
+  width: min(1240px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 50;
+  padding: 10px 16px;
+  background: var(--dark);
+  color: #fff !important;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+.flat {
+  color: var(--ink-3);
+}
+
+/* ---------- Служебная полоса ---------- */
+.utility {
+  background: var(--dark);
+  color: rgb(255 255 255 / 0.75);
+  font-size: 13px;
+}
+
+.utility .wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  min-height: 38px;
+}
+
+.utility p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.utility i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.4);
+}
+
+.utility i[data-open] {
+  background: #4fd1a5;
+}
+
+.utility p span {
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid rgb(255 255 255 / 0.2);
+}
+
+.utility b {
+  color: #fff;
+}
+
+.utility em {
+  font-style: normal;
+}
+
+.utility .up {
+  color: #6fe0b2;
+}
+
+.utility .down {
+  color: #ff8a84;
+}
+
+.utility nav {
+  display: flex;
+  gap: 18px;
+}
+
+.utility nav a:hover {
+  color: #fff;
+}
+
+.utility nav span {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- Шапка ---------- */
+.header {
+  border-bottom: 1px solid var(--line);
+}
+
+.header .wrap {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  min-height: 80px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand span {
+  display: grid;
+  line-height: 1.2;
+}
+
+.brand b {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.brand small {
+  color: var(--ink-3);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.nav {
+  display: flex;
+  gap: 30px;
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.nav a {
+  padding: 28px 0 26px;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.nav a:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.searchBtn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 18px;
+}
+
+.searchBtn:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+/* ---------- Кнопки ---------- */
+.btn,
+.btnOutline {
+  display: inline-flex;
+  align-items: center;
+  padding: 13px 22px;
+  border-radius: 2px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color 0.15s ease;
+}
+
+.btn {
+  background: var(--brand-2);
+  color: var(--dark) !important;
+}
+
+.btn:hover {
+  background: #7fd0d8;
+}
+
+.btnOutline {
+  border: 1px solid rgb(255 255 255 / 0.7);
+  color: #fff !important;
+}
+
+.btnOutline:hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+/* ---------- Первый экран ---------- */
+.hero {
+  padding: 28px 0 0;
+}
+
+.hero .wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr);
+  gap: 24px;
+}
+
+.heroPanel {
+  position: relative;
+  display: grid;
+  align-items: end;
+  min-height: 520px;
+  overflow: hidden;
+  background: var(--dark);
+  color: #fff;
+}
+
+.heroPanel img {
+  object-fit: cover;
+  opacity: 0.5;
+}
+
+.heroPanel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(13 42 46 / 0.95) 0%, rgb(13 42 46 / 0.7) 55%, rgb(13 42 46 / 0.2) 100%);
+}
+
+.heroText {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 16px;
+  max-width: 620px;
+  padding: 48px;
+}
+
+.kicker {
+  color: var(--brand-2);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.heroText h1 {
+  font-size: clamp(32px, 3.6vw, 48px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+
+.heroText > p:not(.kicker) {
+  color: rgb(255 255 255 / 0.8);
+  font-size: 17px;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* Виджет рынка */
+.widget {
+  display: grid;
+  align-content: start;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--brand);
+}
+
+.widgetHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 18px 20px 10px;
+}
+
+.widgetHead h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.widgetHead span {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.widgetTabs {
+  display: flex;
+  gap: 18px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.widgetTabs b,
+.widgetTabs span {
+  padding: 8px 0 10px;
+}
+
+.widgetTabs b {
+  border-bottom: 2px solid var(--brand);
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.widgetTabs span {
+  color: var(--ink-3);
+}
+
+.widget table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.widget th,
+.widget td {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.widget thead th {
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.widget :is(td, th):nth-child(n + 2) {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.widget tbody th a {
+  display: grid;
+  font-weight: 600;
+}
+
+.widget tbody th a:hover {
+  color: var(--brand);
+}
+
+.widget tbody th small {
+  overflow: hidden;
+  max-width: 170px;
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.widgetMore {
+  display: inline-block;
+  padding: 14px 20px;
+  color: var(--brand) !important;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---------- Лента бумаг ---------- */
+.ticker {
+  margin-top: 24px;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--grey);
+}
+
+.ticker ul {
+  display: flex;
+  width: max-content;
+  animation: pt-ticker 60s linear infinite;
+}
+
+.ticker:hover ul {
+  animation-play-state: paused;
+}
+
+.ticker li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 24px;
+  border-right: 1px solid var(--line);
+  font-size: 14px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticker span {
+  color: var(--ink-2);
+}
+
+.ticker em {
+  color: var(--ink-3);
+  font-style: normal;
+}
+
+@keyframes pt-ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Секции ---------- */
+.section {
+  padding: 72px 0;
+}
+
+.grey {
+  background: var(--grey);
+}
+
+.h2 {
+  margin-bottom: 28px !important;
+  font-size: clamp(26px, 2.6vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.titleRow a {
+  color: var(--brand);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Аудитории */
+.audiences {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.audiences > li {
+  display: grid;
+  border: 1px solid var(--line);
+}
+
+.audPhoto {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.audPhoto img {
+  object-fit: cover;
+}
+
+.audiences > li > div {
+  display: grid;
+  gap: 12px;
+  padding: 22px 24px 26px;
+  border-top: 4px solid var(--brand);
+}
+
+.audiences b {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.audiences ul li + li {
+  border-top: 1px solid var(--line);
+}
+
+.audiences ul a {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  color: var(--ink-2);
+}
+
+.audiences ul a::after {
+  content: "→";
+  color: var(--brand);
+}
+
+.audiences ul a:hover {
+  color: var(--brand);
+}
+
+/* KPI */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kpis div {
+  display: grid;
+  gap: 4px;
+  padding: 22px 24px;
+  border-left: 4px solid var(--brand);
+  background: #fff;
+}
+
+.kpis dt {
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.kpis dd {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpis small {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.tableWrap {
+  margin-top: 28px;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.tableWrap table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.tableWrap caption {
+  padding: 18px 20px 12px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+}
+
+.tableWrap thead th {
+  background: var(--grey);
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 10px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Новости */
+.newsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 32px;
+}
+
+.leadNews {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.leadPhoto {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.leadPhoto img {
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.leadNews:hover img {
+  transform: scale(1.03);
+}
+
+.leadNews small,
+.newsList small {
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.leadNews b {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.leadNews > span:last-child {
+  color: var(--ink-2);
+}
+
+.leadNews:hover b,
+.newsList a:hover b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.newsList {
+  display: grid;
+  align-content: start;
+}
+
+.newsList li + li {
+  border-top: 1px solid var(--line);
+}
+
+.newsList a {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px 0;
+}
+
+.newsList li:first-child a {
+  padding-top: 0;
+}
+
+.thumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.thumb img {
+  object-fit: cover;
+}
+
+.newsList a > span:last-child {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.newsList b {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  padding: 56px 0 100px;
+  background: var(--dark);
+  color: rgb(255 255 255 / 0.7);
+  font-size: 14px;
+}
+
+.footGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.15);
+}
+
+.footBrand {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.footer b {
+  color: #fff;
+}
+
+.footer nav {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.footer a:hover {
+  color: #fff;
+}
+
+.legal {
+  padding-top: 24px;
+  color: rgb(255 255 255 / 0.45);
+  font-size: 13px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 1080px) {
+  .nav {
+    display: none;
+  }
+
+  .hero .wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .audiences {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .newsGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .footBrand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 680px) {
+  .utility nav {
+    display: none;
+  }
+
+  .header .wrap {
+    min-height: 68px;
+  }
+
+  .brand b {
+    font-size: 16px;
+  }
+
+  .searchBtn {
+    margin-left: auto;
+  }
+
+  .heroPanel {
+    min-height: 460px;
+  }
+
+  .heroText {
+    padding: 28px 22px;
+  }
+
+  .kpis,
+  .footGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .newsList a {
+    grid-template-columns: 100px minmax(0, 1fr);
+  }
+
+  .titleRow {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker ul {
+    animation: none;
+  }
+
+  .leadPhoto img {
+    transition: none;
+  }
+}

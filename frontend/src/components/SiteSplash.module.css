@@ -95,6 +95,26 @@
   display: none;
 }
 
+/* До готовности страницы (data-play ставит SiteSplash) анимации логотипа, букв, блика и линии на паузе —
+   надпись появляется с начала, когда посетитель уже видит заставку. */
+.splash:not([data-play]) *,
+.splash:not([data-play]) .word::after {
+  animation-play-state: paused;
+}
+
+/* Страховка: если скрипты не загрузились, заставка сама уходит через 8 с и не закрывает сайт навсегда. */
+.splash {
+  animation: splashFailsafe 0.4s ease 8s forwards;
+}
+
+@keyframes splashFailsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
 .splash[data-phase="hide"] {
   opacity: 0;
   pointer-events: none;

@@ -1,0 +1,913 @@
+/*
+ * Концепция 20 — «Карта». Светлый тёплый фон, карта областей в оттенках изумрудного: чем больше эмитентов,
+ * тем насыщеннее область. Выбранная — с тёмным контуром. Шрифт Nunito Sans, радиусы 10/16/24, отступы 4/8.
+ */
+.page {
+  --bg: #f6f4ef;
+  --card: #fff;
+  --ink: #18241f;
+  --ink-2: #4a5852;
+  --ink-3: #6f7c76;
+  --line: #e3e0d8;
+  --green: #0e7c6b;
+  --green-2: #095c50;
+  --green-soft: #e1f1ed;
+  --land: #e9e6dd;
+  --up: #12804a;
+  --down: #c63a32;
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  --r-1: 10px;
+  --r-2: 16px;
+  --r-3: 24px;
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--k-font), "Segoe UI", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, h3, p, ul, ol, dl, dd) {
+  margin: 0;
+}
+
+.page :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+
+.page :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(h1, h2, h3) {
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+.page :where(a, button, input, summary):focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  top: -100px;
+  left: var(--s-4);
+  z-index: 100;
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-1);
+  background: var(--green);
+  color: #fff;
+}
+
+.skip:focus {
+  top: var(--s-4);
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+.flat {
+  color: var(--ink-3);
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Шапка */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: var(--s-4) var(--s-8);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.nav {
+  display: flex;
+  gap: var(--s-1);
+  margin-inline: auto;
+}
+
+.nav a {
+  padding: var(--s-2) var(--s-3);
+  border-radius: 999px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.nav a:hover {
+  background: var(--card);
+  color: var(--ink);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--s-5);
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cta:hover {
+  background: var(--green-2);
+}
+
+.menu {
+  display: none;
+  position: relative;
+}
+
+.menu summary {
+  padding: var(--s-2) var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu nav {
+  position: absolute;
+  top: calc(100% + var(--s-2));
+  right: 0;
+  z-index: 20;
+  display: grid;
+  min-width: 240px;
+  padding: var(--s-2);
+  border-radius: var(--r-2);
+  background: var(--card);
+  box-shadow: 0 16px 40px rgb(24 36 31 / 0.14);
+}
+
+.menu nav a {
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-1);
+}
+
+.menu nav a:hover {
+  background: var(--bg);
+}
+
+/* Первый экран: текст + карта на всю ширину */
+.hero {
+  display: grid;
+  gap: var(--s-6);
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-8) 0;
+}
+
+.heroText {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: end;
+  gap: var(--s-4) var(--s-12);
+}
+
+.kicker {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  grid-column: 1 / -1;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.on,
+.off {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--up);
+}
+
+.off {
+  background: var(--ink-3);
+}
+
+.heroText h1 {
+  font-size: clamp(34px, 4.6vw, 64px);
+}
+
+.lead {
+  color: var(--ink-2);
+  font-size: 18px;
+}
+
+.heroStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+  grid-column: 1 / -1;
+  max-width: 640px;
+}
+
+.heroStats > div {
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-1);
+  background: var(--card);
+}
+
+.heroStats dt {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.heroStats dd {
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.source {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+/* Карта: слева карта со списком областей, справа панель выбранной области */
+.explorer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-areas:
+    "map panel"
+    "list panel";
+  gap: var(--s-4);
+}
+
+.mapBox {
+  position: relative;
+  grid-area: map;
+  padding: var(--s-4);
+  border-radius: var(--r-3);
+  background: var(--card);
+}
+
+.map {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.region {
+  fill: color-mix(in srgb, var(--green) calc(var(--level, 0) * 100%), var(--land));
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  cursor: pointer;
+  transition: fill 0.2s ease;
+}
+
+.region:hover {
+  fill: color-mix(in srgb, var(--green-2) calc(var(--level, 0) * 100% + 12%), var(--land));
+}
+
+.region[data-selected] {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.region:focus-visible {
+  outline: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-dasharray: 6 4;
+}
+
+.regionLabel {
+  fill: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: rgb(255 255 255 / 0.85);
+  stroke-width: 4px;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.city {
+  fill: var(--ink);
+  stroke: #fff;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.cityLabel {
+  fill: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: #fff;
+  stroke-width: 4px;
+  pointer-events: none;
+}
+
+.tip {
+  position: absolute;
+  display: grid;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-1);
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 12px));
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.legend i {
+  width: 120px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--green) 18%, var(--land)), var(--green));
+}
+
+.regionList {
+  grid-area: list;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-1) var(--s-4);
+  padding: var(--s-4);
+  border-radius: var(--r-3);
+  background: var(--card);
+}
+
+.regionList button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px 40px;
+  align-items: center;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-2) var(--s-3);
+  border: 0;
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.regionList button:hover {
+  background: var(--bg);
+}
+
+.regionList button[aria-pressed="true"] {
+  background: var(--green-soft);
+  font-weight: 700;
+}
+
+.regionList b {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.bar {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: inherit;
+  background: var(--green);
+}
+
+.unknown {
+  grid-column: 1 / -1;
+  padding: var(--s-2) var(--s-3);
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.panel {
+  grid-area: panel;
+  display: grid;
+  align-content: start;
+  gap: var(--s-3);
+  max-height: 760px;
+  overflow-y: auto;
+  padding: var(--s-6);
+  border-radius: var(--r-3);
+  background: var(--card);
+}
+
+.panelKicker {
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.panel h2 {
+  font-size: 30px;
+}
+
+.panelStat {
+  color: var(--ink-2);
+}
+
+.panelStat b {
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.activities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.activities li {
+  padding: 2px var(--s-3);
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.activities span {
+  opacity: 0.7;
+}
+
+.filter {
+  width: 100%;
+  height: 42px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.filter:focus-visible {
+  border-color: var(--green);
+  background: var(--card);
+}
+
+.issuers {
+  display: grid;
+}
+
+.issuers a {
+  display: grid;
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.issuers b {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.issuers small {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.issuers a:hover b {
+  color: var(--green);
+}
+
+.empty {
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.showAll {
+  justify-self: start;
+  padding: var(--s-2) var(--s-4);
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  background: none;
+  color: var(--green);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.showAll:hover {
+  background: var(--green);
+  color: #fff;
+}
+
+/* Разделы ниже */
+.section {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: var(--s-16) var(--s-8) 0;
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-6);
+  margin-bottom: var(--s-6);
+}
+
+.sectionHead h2 {
+  font-size: clamp(26px, 3vw, 38px);
+}
+
+.sectionHead > a,
+.more {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.sectionHead > a:hover,
+.more:hover {
+  text-decoration: underline;
+}
+
+.marketGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--s-4);
+}
+
+.card {
+  min-width: 0;
+  padding: var(--s-6);
+  border-radius: var(--r-3);
+  background: var(--card);
+}
+
+.card h3 {
+  margin-bottom: var(--s-3);
+  font-size: 20px;
+}
+
+.card h3:not(:first-child) {
+  margin-top: var(--s-6);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th,
+.table td {
+  padding: var(--s-3) var(--s-2);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.table thead th {
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.table tbody th a {
+  font-weight: 800;
+}
+
+.table tbody th a:hover {
+  color: var(--green);
+}
+
+.table td {
+  color: var(--ink-2);
+}
+
+.regionTag {
+  padding: 2px var(--s-2);
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-2);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.note {
+  margin-top: var(--s-3) !important;
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.sessionStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+.sessionStats dt {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.sessionStats dd {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.auctions {
+  display: grid;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3) !important;
+  font-size: 14px;
+}
+
+.auctions b {
+  color: var(--green);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+
+.steps a {
+  display: grid;
+  align-content: start;
+  gap: var(--s-2);
+  height: 100%;
+  padding: var(--s-6);
+  border-radius: var(--r-3);
+  background: var(--card);
+  transition: transform 0.15s ease;
+}
+
+.steps a:hover {
+  transform: translateY(-3px);
+}
+
+.steps a > span:last-child {
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.stepNo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--s-2);
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.news {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-4);
+}
+
+.news a {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.newsPhoto {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--r-2);
+  background: var(--land);
+}
+
+.newsPhoto img {
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.news a:hover img {
+  transform: scale(1.04);
+}
+
+.news small {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.news b {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.news a:hover b {
+  color: var(--green);
+}
+
+/* Подвал */
+.footer {
+  margin-top: var(--s-16);
+  padding: var(--s-12) var(--s-8);
+  background: var(--ink);
+  color: #dfe6e2;
+  font-size: 14px;
+}
+
+.footGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-8);
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+.footGrid > div,
+.footGrid nav {
+  display: grid;
+  align-content: start;
+  gap: var(--s-1);
+}
+
+.footGrid b {
+  color: #fff;
+  font-size: 18px;
+}
+
+.footGrid a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footer :focus-visible {
+  outline-color: #fff;
+}
+
+/* Адаптив */
+@media (max-width: 1199px) {
+  .nav {
+    display: none;
+  }
+
+  .cta {
+    margin-left: auto;
+  }
+
+  .menu {
+    display: block;
+  }
+
+  .explorer {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "map"
+      "panel"
+      "list";
+  }
+
+  .panel {
+    max-height: none;
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .header,
+  .hero,
+  .section {
+    padding-inline: var(--s-4);
+  }
+
+  .cta {
+    display: none;
+  }
+
+  .menu {
+    margin-left: auto;
+  }
+
+  .heroText {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .heroStats dd {
+    font-size: 22px;
+  }
+
+  .mapBox {
+    padding: var(--s-2);
+  }
+
+  .regionLabel {
+    font-size: 22px;
+  }
+
+  .cityLabel {
+    font-size: 20px;
+  }
+
+  .regionList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .marketGrid,
+  .steps,
+  .news,
+  .footGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hideSm {
+    display: none;
+  }
+
+  .panel,
+  .card {
+    padding: var(--s-4);
+  }
+
+  .footer {
+    padding-inline: var(--s-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .region,
+  .newsPhoto img,
+  .steps a {
+    transition: none;
+  }
+}

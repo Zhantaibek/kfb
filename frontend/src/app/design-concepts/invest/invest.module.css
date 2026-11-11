@@ -1,0 +1,1120 @@
+/*
+ * Концепция 44 — «Инвест» (по мотивам Freedom24). Светло-серый первый экран #f2f4f5, белые секции,
+ * серые круги #eef1f2 под иллюстрациями, бирюза КФБ #2c7e87 / #57b6c0 для кнопок, графит #3b4a50 для «падающих»
+ * свечей, текст #111a1f. Manrope, жирные заголовки, кнопки со скруглением 10px.
+ */
+.page {
+  --brand: #2c7e87;
+  --brand-2: #57b6c0;
+  --brand-dark: #1f5f66;
+  --ink: #111a1f;
+  --ink-2: #4c5961;
+  --ink-3: #87949b;
+  --grey: #f2f4f5;
+  --disc: #eceff1;
+  --line: #e2e7ea;
+  --up: #12865a;
+  --down: #c8372f;
+  --wrap: min(1180px, calc(100% - 48px));
+
+  min-height: 100vh;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--iv-font), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.page :where(h1, h2, h3) {
+  font-family: inherit;
+  margin: 0;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 100;
+  background: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+/* Кнопки. */
+.btn,
+.btnSmall {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--brand);
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 10px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn {
+  padding: 13px 26px;
+  font-size: 15px;
+}
+
+.btnSmall {
+  padding: 8px 18px;
+  font-size: 14px;
+}
+
+.btn:hover,
+.btnSmall:hover {
+  background: var(--brand-dark);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Шапка. */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.headInner {
+  width: var(--wrap);
+  margin: 0 auto;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.nav {
+  display: flex;
+  gap: 26px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.nav a:hover {
+  color: var(--brand);
+}
+
+.headActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.headLink:hover {
+  color: var(--brand);
+}
+
+.lang {
+  color: var(--ink-3);
+}
+
+/* Первый экран. */
+.hero {
+  background: var(--grey);
+  overflow: hidden;
+}
+
+.heroInner {
+  width: var(--wrap);
+  margin: 0 auto;
+  min-height: 560px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 40px;
+  padding: 48px 0;
+}
+
+.heroText h1 {
+  font-size: clamp(42px, 5.6vw, 74px);
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.heroLines {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  color: var(--ink-2);
+  font-size: 17px;
+  max-width: 470px;
+}
+
+.heroCta {
+  margin-top: 34px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px 22px;
+}
+
+.session {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.session i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+
+.session i[data-open] {
+  background: var(--up);
+  box-shadow: 0 0 0 4px rgba(18, 134, 90, 0.16);
+}
+
+.heroArt {
+  position: relative;
+  aspect-ratio: 560 / 440;
+  width: 100%;
+  max-width: 580px;
+  justify-self: end;
+}
+
+.heroPhoto {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 66%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -30px rgba(13, 42, 46, 0.45);
+}
+
+.heroPhoto img {
+  object-fit: cover;
+}
+
+.heroCandles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.heroCard {
+  position: absolute;
+  right: 4%;
+  bottom: 2%;
+  display: grid;
+  gap: 2px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px 18px;
+  box-shadow: 0 18px 40px -18px rgba(13, 42, 46, 0.35);
+  min-width: 150px;
+}
+
+.heroCard span {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+.heroCard b {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.heroCard em {
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--down);
+}
+
+.heroCard em[data-up] {
+  color: var(--up);
+}
+
+/* Зигзаг. */
+.features {
+  width: var(--wrap);
+  margin: 0 auto;
+}
+
+.feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 64px;
+  padding: 88px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.feature:last-child {
+  border-bottom: 0;
+}
+
+.feature[data-flip] .art {
+  order: 2;
+}
+
+.copy {
+  max-width: 480px;
+}
+
+.copy h2 {
+  font-size: clamp(28px, 3.2vw, 40px);
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 18px;
+}
+
+.copy p {
+  margin: 0 0 14px;
+  color: var(--ink-2);
+}
+
+.copy .btn {
+  margin-top: 14px;
+}
+
+.note {
+  background: var(--grey);
+  border-left: 3px solid var(--brand);
+  padding: 10px 14px;
+  border-radius: 0 10px 10px 0;
+}
+
+.note b {
+  color: var(--ink);
+}
+
+.miniSteps {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: s;
+  display: grid;
+  gap: 10px;
+}
+
+.miniSteps li {
+  counter-increment: s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.miniSteps li::before {
+  content: counter(s);
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e2f2f4;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.miniSteps a:hover {
+  color: var(--brand);
+}
+
+.facts {
+  margin: 22px 0 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.facts div {
+  background: var(--grey);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.facts dt {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+.facts dd {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+/* Иллюстрации на сером круге. */
+.art {
+  position: relative;
+  aspect-ratio: 1.15;
+  width: 100%;
+  max-width: 520px;
+  justify-self: center;
+  display: grid;
+  place-items: center;
+}
+
+.disc {
+  position: absolute;
+  inset: 6% 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f7f9fa, var(--disc) 70%);
+}
+
+/* 2. Стопка карточек-шагов. */
+.stackArt {
+  position: relative;
+  width: 72%;
+  height: 70%;
+}
+
+.stackCard {
+  position: absolute;
+  left: calc(var(--i) * 9%);
+  top: calc(var(--i) * 30%);
+  width: 78%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 16px 34px -18px rgba(13, 42, 46, 0.4);
+  font-size: 14px;
+}
+
+.stackCard span {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 800;
+}
+
+.stackCard b {
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.stackCard i {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid #cfe9ec;
+}
+
+.stackCard:nth-child(1) i {
+  background: var(--brand-2);
+  border-color: var(--brand-2);
+}
+
+.check {
+  position: absolute;
+  right: -2%;
+  bottom: -6%;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  box-shadow: 0 14px 30px -12px rgba(13, 42, 46, 0.6);
+}
+
+.check svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* 3. Ноутбук. */
+.laptop {
+  position: relative;
+  width: 82%;
+}
+
+.screen {
+  background: #0f1d22;
+  border: 8px solid #1c2a30;
+  border-radius: 14px 14px 4px 4px;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  color: #d9e3e6;
+  font-size: 11px;
+}
+
+.screenBar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 10px;
+  background: #16262c;
+}
+
+.screenBar i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3a4c53;
+}
+
+.screenBar span {
+  margin-left: 8px;
+  color: #8fa4ab;
+  font-weight: 600;
+}
+
+.screen table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.screen td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #1d2f35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
+}
+
+.screen td:first-child {
+  color: var(--brand-2);
+  font-weight: 700;
+  width: 22%;
+}
+
+.screen td:last-child {
+  text-align: right;
+  width: 24%;
+  font-variant-numeric: tabular-nums;
+}
+
+.base {
+  height: 14px;
+  margin: 0 -7%;
+  background: linear-gradient(#cfd6d9, #a9b3b7);
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 20px 30px -16px rgba(13, 42, 46, 0.5);
+}
+
+.chip {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand);
+  box-shadow: 0 14px 30px -14px rgba(13, 42, 46, 0.45);
+  white-space: nowrap;
+}
+
+.chip b {
+  color: var(--ink);
+  margin-left: 6px;
+}
+
+/* 4. Телефоны. */
+.phones {
+  position: relative;
+  width: 78%;
+  height: 92%;
+}
+
+.phone {
+  position: absolute;
+  right: 6%;
+  top: 0;
+  width: 46%;
+  height: 100%;
+  background: #12202a;
+  border-radius: 30px;
+  padding: 9px;
+  box-shadow: 0 30px 50px -24px rgba(13, 42, 46, 0.6);
+}
+
+.phone[data-back] {
+  right: auto;
+  left: 6%;
+  top: 9%;
+  height: 88%;
+  transform: rotate(-6deg);
+  opacity: 0.96;
+}
+
+.phoneScreen {
+  height: 100%;
+  background: #fff;
+  border-radius: 22px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.phoneScreen small {
+  color: var(--ink-3);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.phoneScreen > b {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.phoneScreen > span {
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.phoneScreen > span[data-up] {
+  color: var(--up);
+}
+
+.phoneScreen svg {
+  width: 100%;
+  height: 34%;
+  margin: 10px 0;
+}
+
+.phoneScreen p {
+  margin: auto 0 0;
+  display: grid;
+  color: var(--ink-3);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.phoneScreen p b {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.phoneLabel {
+  margin-top: 14px;
+}
+
+.phoneScreen ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.phoneScreen li {
+  display: grid;
+  gap: 3px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.phoneScreen li i {
+  display: block;
+  height: 6px;
+  width: var(--w);
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+}
+
+/* 5. Документы ГЦБ. */
+.docs {
+  position: relative;
+  width: 58%;
+  aspect-ratio: 0.82;
+}
+
+.doc {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px -22px rgba(13, 42, 46, 0.45);
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doc[data-n="1"] {
+  transform: translate(-16%, 8%) rotate(-8deg);
+  background: #f8fafa;
+}
+
+.doc[data-n="2"] {
+  transform: translate(-8%, 4%) rotate(-4deg);
+  background: #fbfcfc;
+}
+
+.doc span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.doc i {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: #e4eaec;
+}
+
+.doc i:nth-of-type(2) {
+  width: 80%;
+}
+
+.doc i:nth-of-type(4) {
+  width: 55%;
+}
+
+.doc em {
+  margin-top: auto;
+  align-self: flex-start;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 30px;
+  color: var(--brand);
+  border: 3px solid var(--brand);
+  border-radius: 50%;
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  transform: rotate(-12deg);
+  font-size: 18px;
+}
+
+.ticket {
+  position: absolute;
+  right: -34%;
+  bottom: 10%;
+  display: grid;
+  background: var(--brand);
+  color: #fff;
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: 0 20px 40px -18px rgba(31, 95, 102, 0.7);
+  min-width: 190px;
+}
+
+.ticket small {
+  opacity: 0.8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ticket b {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.ticket span {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* 6. Рост: свечи и плашки. */
+.growth {
+  position: relative;
+  width: 80%;
+}
+
+.growth svg {
+  width: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.tag {
+  position: absolute;
+  left: var(--tx);
+  top: var(--ty);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--ink-2);
+  box-shadow: 0 14px 30px -14px rgba(13, 42, 46, 0.45);
+  white-space: nowrap;
+}
+
+.tag svg {
+  width: 20px;
+  height: 20px;
+  color: var(--brand);
+}
+
+.tag b {
+  color: var(--ink);
+  font-size: 16px;
+}
+
+/* 7. Карточка «Начните инвестировать». */
+.start {
+  width: var(--wrap);
+  margin: 40px auto 96px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 56px;
+  background: var(--grey);
+  border-radius: 28px;
+  padding: 48px 56px 48px 0;
+  position: relative;
+}
+
+.startPhoto {
+  position: relative;
+  aspect-ratio: 1;
+  margin-left: -28px;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -30px rgba(13, 42, 46, 0.55);
+  border: 8px solid #fff;
+}
+
+.startPhoto img {
+  object-fit: cover;
+}
+
+.startBody h2 {
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+}
+
+.startBody > p {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.choices {
+  margin-top: 24px;
+  display: grid;
+  gap: 10px;
+  max-width: 460px;
+}
+
+.choices a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.choices a:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.choices svg {
+  width: 18px;
+  height: 18px;
+  color: var(--brand);
+}
+
+.or {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.small {
+  margin-top: 18px !important;
+  font-size: 13px;
+  color: var(--ink-3) !important;
+}
+
+/* Подвал. */
+.footer {
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 56px 0 120px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.footer h3 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 14px;
+}
+
+.footCols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.footCols > div {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.footCols a,
+.footCols p {
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.footCols a:hover {
+  color: var(--brand);
+}
+
+.footPartners {
+  margin-top: 44px;
+}
+
+.footPartners ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.footPartners a {
+  display: grid;
+  place-items: center;
+  height: 60px;
+  min-width: 120px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: var(--grey);
+  font-weight: 800;
+  color: var(--ink-2);
+}
+
+.footPartners img {
+  max-height: 36px;
+  width: auto;
+  object-fit: contain;
+  filter: grayscale(1);
+  opacity: 0.8;
+  transition: filter 0.2s, opacity 0.2s;
+}
+
+.footPartners a:hover img {
+  filter: none;
+  opacity: 1;
+}
+
+.legal {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.legal p {
+  margin: 0;
+  max-width: 980px;
+}
+
+/* Планшет. */
+@media (max-width: 1000px) {
+  .nav {
+    display: none;
+  }
+
+  .heroInner,
+  .feature,
+  .start {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .heroInner {
+    padding: 40px 0 24px;
+    gap: 16px;
+  }
+
+  .heroArt {
+    justify-self: center;
+  }
+
+  .feature {
+    gap: 28px;
+    padding: 60px 0;
+  }
+
+  .feature[data-flip] .art {
+    order: 0;
+  }
+
+  .copy {
+    max-width: none;
+  }
+
+  .start {
+    padding: 0 28px 32px;
+    gap: 24px;
+    margin-top: 16px;
+  }
+
+  .startPhoto {
+    margin: -24px auto 0;
+    width: min(320px, 80%);
+  }
+
+  .footCols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Телефон. */
+@media (max-width: 600px) {
+  .page {
+    --wrap: calc(100% - 32px);
+  }
+
+  .headActions .headLink,
+  .lang {
+    display: none;
+  }
+
+  .heroLines {
+    font-size: 16px;
+    gap: 10px;
+  }
+
+  .heroCard {
+    min-width: 0;
+    padding: 10px 14px;
+  }
+
+  .heroCard b {
+    font-size: 18px;
+  }
+
+  .facts dd {
+    font-size: 20px;
+  }
+
+  .art {
+    aspect-ratio: 1;
+  }
+
+  .phones {
+    width: 92%;
+  }
+
+  .phoneScreen {
+    padding: 14px 10px;
+  }
+
+  .phoneScreen > b {
+    font-size: 16px;
+  }
+
+  .docs {
+    width: 50%;
+  }
+
+  .ticket {
+    right: -46%;
+    min-width: 160px;
+    padding: 10px 14px;
+  }
+
+  .ticket b {
+    font-size: 15px;
+  }
+
+  .laptop {
+    width: 88%;
+  }
+
+  .chip,
+  .tag {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+
+  .start {
+    padding: 0 18px 26px;
+    border-radius: 22px;
+  }
+
+  .footCols {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+}

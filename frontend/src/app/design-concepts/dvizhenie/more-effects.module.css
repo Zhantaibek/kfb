@@ -1,0 +1,789 @@
+/* Третий набор анимаций (16–23). Цвета и кривые — из переменных .page в dvizhenie.module.css. */
+
+/* ---------- 16. Шторы ---------- */
+.window {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.windowBar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.windowBar > span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(143, 224, 230, 0.3);
+}
+
+.windowBar code {
+  margin-left: 10px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.windowNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px;
+}
+
+.windowNav button {
+  padding: 8px 15px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 14px var(--font-sans), sans-serif;
+  cursor: pointer;
+}
+
+.windowNav button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #06262a;
+}
+
+.windowBody {
+  position: relative;
+  height: clamp(280px, 42vw, 460px);
+  overflow: hidden;
+}
+
+.windowBody img {
+  object-fit: cover;
+}
+
+.windowBody::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(7, 21, 24, 0.7), transparent 55%);
+}
+
+.windowBody h3 {
+  position: absolute;
+  z-index: 1;
+  left: 26px;
+  right: 26px;
+  bottom: 22px;
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(26px, 4.4vw, 50px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.windowBody h3[data-phase="out"] {
+  animation: titleUp 0.8s var(--spring) 0.25s backwards;
+}
+
+@keyframes titleUp {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+}
+
+.strips {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  pointer-events: none;
+}
+
+.strips span {
+  margin-right: -1px;
+  background: linear-gradient(180deg, #57b6c0, #2c7e87);
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+
+.strips span:nth-child(even) {
+  background: linear-gradient(180deg, #2c7e87, #0f4a52);
+}
+
+.strips[data-phase="in"] span {
+  animation: stripIn 0.42s cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i) * 34ms) both;
+}
+
+.strips[data-phase="out"] span {
+  transform-origin: top;
+  animation: stripOut 0.42s cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i) * 34ms) both;
+}
+
+@keyframes stripIn {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes stripOut {
+  from {
+    transform: scaleY(1);
+  }
+
+  to {
+    transform: scaleY(0);
+  }
+}
+
+/* ---------- 17. Живые иконки ---------- */
+.icons {
+  --loop: 1;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (hover: none) {
+  .icons {
+    --loop: infinite;
+  }
+}
+
+.icon {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 26px 8px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.25s ease,
+    transform 0.4s var(--spring);
+}
+
+.icon:hover,
+.icon:focus-visible {
+  background: #143a42;
+  transform: translateY(-5px);
+}
+
+.icon svg {
+  width: 62px;
+  height: 62px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.4;
+}
+
+.bar {
+  fill: var(--accent);
+  stroke: none;
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+.line,
+.tick {
+  stroke: var(--sun);
+  stroke-dasharray: 1;
+}
+
+.column {
+  stroke: var(--sun);
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+.roof {
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+.shine {
+  stroke: #fff;
+  stroke-width: 3.4;
+  opacity: 0;
+}
+
+.light {
+  fill: var(--sun);
+  stroke: none;
+  opacity: 0.25;
+}
+
+.icon:hover .bar,
+.icon:focus-visible .bar {
+  animation: barGrow 0.75s var(--spring) calc(var(--i) * 0.1s) var(--loop) backwards;
+}
+
+.icon:hover .line,
+.icon:focus-visible .line {
+  animation: strokeIn 0.45s ease calc(var(--i) * 0.13s) var(--loop) backwards;
+}
+
+.icon:hover .tick,
+.icon:focus-visible .tick {
+  animation: strokeIn 0.4s ease 0.3s var(--loop) backwards;
+}
+
+.icon:hover .column,
+.icon:focus-visible .column {
+  animation: barGrow 0.55s var(--spring) calc(var(--i) * 0.08s) var(--loop) backwards;
+}
+
+.icon:hover .roof,
+.icon:focus-visible .roof {
+  animation: roofDrop 0.6s var(--spring) 0.3s var(--loop) backwards;
+}
+
+.icon:hover .shine,
+.icon:focus-visible .shine {
+  animation: shineRun 0.9s ease var(--loop);
+}
+
+.icon:hover .light,
+.icon:focus-visible .light {
+  animation: lightOn 0.3s steps(2) calc(var(--i) * 0.12s) var(--loop) forwards;
+}
+
+@keyframes barGrow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes strokeIn {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes roofDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes shineRun {
+  0% {
+    opacity: 0;
+    translate: -2px 0;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 24px 0;
+  }
+}
+
+@keyframes lightOn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- 18. Часы сессии ---------- */
+.clock {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(20px, 5vw, 60px);
+  padding: clamp(18px, 3vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.dial {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.dialTrack,
+.dialSession {
+  fill: none;
+  stroke-width: 11;
+}
+
+.dialTrack {
+  stroke: rgba(143, 224, 230, 0.12);
+}
+
+.dialSession {
+  stroke: var(--accent);
+  stroke-linecap: round;
+}
+
+.clock[data-open] .dialSession {
+  filter: drop-shadow(0 0 7px var(--accent));
+}
+
+.dialTick {
+  stroke: rgba(143, 224, 230, 0.4);
+  stroke-width: 1.6;
+}
+
+.dialHand {
+  transition: transform 0.6s var(--spring);
+}
+
+.dialHand line {
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-width: 2.4;
+}
+
+.dialSun {
+  fill: var(--sun);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.dialHub {
+  fill: #fff;
+}
+
+.clockText {
+  min-width: 0;
+}
+
+.clockText p {
+  margin: 0;
+}
+
+.clockStatus {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 18px !important;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(20px, 2.6vw, 28px);
+  font-weight: 700;
+}
+
+.clockStatus::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--sun);
+}
+
+.clock[data-open] .clockStatus::before {
+  background: #4fd1a5;
+  animation: statusPulse 1.8s ease-out infinite;
+}
+
+@keyframes statusPulse {
+  from {
+    box-shadow: 0 0 0 0 rgba(79, 209, 165, 0.6);
+  }
+
+  to {
+    box-shadow: 0 0 0 13px rgba(79, 209, 165, 0);
+  }
+}
+
+.clockLabel {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.clockText strong {
+  display: block;
+  margin: 8px 0 12px;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(32px, 6vw, 62px);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ---------- 19. Карта из точек ---------- */
+.map {
+  position: relative;
+  padding: clamp(14px, 3vw, 30px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.map canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+.mapLabel {
+  min-height: 1.4em;
+  margin: 0 0 12px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ---------- 20. Гармошка ---------- */
+.folds {
+  display: flex;
+  gap: 8px;
+  height: clamp(360px, 44vw, 500px);
+}
+
+.fold {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  color: #fff;
+  text-decoration: none;
+  transition: flex-grow 0.75s var(--spring);
+}
+
+.fold:first-child {
+  flex-grow: 3;
+}
+
+.folds:hover .fold,
+.folds:focus-within .fold {
+  flex-grow: 1;
+}
+
+.folds .fold:hover,
+.folds .fold:focus-visible {
+  flex-grow: 3;
+}
+
+.fold img {
+  object-fit: cover;
+  transition: transform 1s var(--spring);
+}
+
+.fold:hover img {
+  transform: scale(1.06);
+}
+
+.fold::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(7, 21, 24, 0.86), rgba(7, 21, 24, 0.12) 62%);
+}
+
+.foldBody {
+  position: absolute;
+  z-index: 1;
+  left: 14px;
+  right: 14px;
+  bottom: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.foldBody strong {
+  font-family: var(--font-brand), sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* Ширина постоянная: при раскрытии полосы текст не перестраивается на ходу. */
+.foldBody span {
+  width: min(260px, 70vw);
+  font-size: 15px;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.3s ease,
+    transform 0.5s var(--spring);
+}
+
+.fold:first-child .foldBody span {
+  opacity: 1;
+  transform: none;
+}
+
+.folds:hover .fold:first-child:not(:hover) .foldBody span {
+  opacity: 0;
+}
+
+.fold:hover .foldBody span,
+.fold:focus-visible .foldBody span {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.18s;
+}
+
+/* ---------- 21. Живой заголовок ---------- */
+.title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.3em;
+  margin: 0;
+  padding: 26px 0;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(36px, 8vw, 104px);
+  font-weight: 800;
+  line-height: 1.1;
+  cursor: default;
+  user-select: none;
+}
+
+.titleWord {
+  display: inline-flex;
+}
+
+.titleWord > span {
+  display: inline-block;
+  transition:
+    transform 0.28s var(--spring),
+    color 0.2s ease;
+}
+
+/* ---------- 22. След из фото ---------- */
+.trail {
+  position: relative;
+  height: clamp(360px, 46vw, 520px);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  touch-action: pan-y;
+}
+
+.trail > p {
+  max-width: 14em;
+  margin: 0;
+  padding: 16px;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(24px, 4vw, 44px);
+  font-weight: 800;
+  line-height: 1.12;
+  text-align: center;
+}
+
+.trailCard {
+  position: absolute;
+  width: clamp(130px, 19vw, 230px);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.trailCard img {
+  object-fit: cover;
+}
+
+/* ---------- 23. Живая форма ---------- */
+.form {
+  max-width: 520px;
+  display: grid;
+  gap: 12px;
+  padding: clamp(20px, 4vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.field {
+  position: relative;
+}
+
+.field[data-wrong] {
+  animation: shake 0.45s ease;
+}
+
+.field input {
+  width: 100%;
+  padding: 24px 16px 9px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 500 17px var(--font-sans), sans-serif;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+}
+
+.field[data-wrong] input {
+  border-color: #ff8a7a;
+}
+
+.field label {
+  position: absolute;
+  top: 18px;
+  left: 17px;
+  color: var(--muted);
+  font-size: 17px;
+  pointer-events: none;
+  transform-origin: left top;
+  transition:
+    transform 0.25s var(--spring),
+    color 0.2s ease;
+}
+
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label {
+  color: var(--accent);
+  transform: translateY(-10px) scale(0.74);
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-7px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(7px);
+  }
+}
+
+.formNote {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.form[data-state="wrong"] .formNote {
+  color: #ff8a7a;
+}
+
+.send {
+  position: relative;
+  justify-self: start;
+  width: 180px;
+  height: 52px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #06262a;
+  font: 700 16px var(--font-sans), sans-serif;
+  cursor: pointer;
+  transition:
+    width 0.45s var(--spring),
+    background-color 0.3s ease;
+}
+
+.form[data-state="sending"] .send,
+.form[data-state="done"] .send {
+  width: 52px;
+}
+
+.form[data-state="done"] .send {
+  background: #4fd1a5;
+}
+
+.sendText {
+  transition: opacity 0.15s ease;
+}
+
+.form[data-state="sending"] .sendText,
+.form[data-state="done"] .sendText {
+  opacity: 0;
+}
+
+.sendSpin {
+  position: absolute;
+  inset: 14px;
+  border: 3px solid rgba(6, 38, 42, 0.25);
+  border-top-color: #06262a;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.form[data-state="sending"] .sendSpin {
+  opacity: 1;
+  animation: spinner 0.7s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sendTick {
+  position: absolute;
+  inset: 13px;
+  fill: none;
+  stroke: #06262a;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.sendTick path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.form[data-state="done"] .sendTick path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.35s ease 0.1s;
+}
+
+/* ---------- Телефон ---------- */
+@media (max-width: 820px) {
+  .icons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .clock {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .dial {
+    max-width: 280px;
+  }
+
+  .clockStatus {
+    justify-content: center;
+  }
+
+  .folds {
+    flex-direction: column;
+    height: 620px;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light {
+    opacity: 1;
+  }
+}

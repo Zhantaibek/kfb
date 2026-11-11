@@ -60,6 +60,8 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         API_URL: http://api:4000
+        # Публичный адрес учебного центра (kse-edu); вшивается в сборку сайта.
+        NEXT_PUBLIC_EDU_URL: ${NEXT_PUBLIC_EDU_URL:?Задайте NEXT_PUBLIC_EDU_URL — публичный адрес учебного центра (kse-edu)}
     container_name: kse-web
     environment:
       API_URL: http://api:4000

@@ -1,0 +1,998 @@
+/*
+ * Концепция 18 — «Плакат». Швейцарская типографика: белый лист, чёрный, один красный. Огромный кегль, тонкие линейки,
+ * сетка 12 колонок. Скругления минимальные (6px у фото и кнопок), отступы 4/8. Шрифт Inter Tight 400–900.
+ */
+.page {
+  --white: #fff;
+  --black: #0a0a0a;
+  --grey: #6b6b6b;
+  --hair: #d8d8d8;
+  --red: #e30613;
+  --red-dark: #b8000c;
+  --up: #0a7a3d;
+  --down: #e30613;
+
+  --pad: clamp(16px, 3vw, 40px);
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --r: 6px;
+
+  min-height: 100vh;
+  background: var(--white);
+  color: var(--black);
+  font-family: var(--pl-font), Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, p, ul, ol, dl, dd, address) {
+  margin: 0;
+}
+
+.page :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+
+.page :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(h1, h2) {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+}
+
+.page :where(a, summary):focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  top: -100px;
+  left: var(--s-4);
+  z-index: 100;
+  padding: var(--s-2) var(--s-4);
+  background: var(--black);
+  color: var(--white);
+}
+
+.skip:focus {
+  top: var(--s-4);
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+.flat {
+  color: var(--grey);
+}
+
+.empty,
+.caption {
+  color: var(--grey);
+  font-size: 14px;
+}
+
+/* Шапка — одна строка на чёрной линейке */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  padding: var(--s-3) var(--pad);
+  border-bottom: 2px solid var(--black);
+  background: var(--white);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  gap: var(--s-6);
+  margin-inline: auto;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.nav a {
+  padding-block: var(--s-1);
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.nav a:hover {
+  border-color: var(--red);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--s-6);
+  border-radius: var(--r);
+  background: var(--red);
+  color: var(--white);
+  font-weight: 700;
+  transition: background-color 0.15s ease;
+}
+
+.cta:hover {
+  background: var(--red-dark);
+}
+
+.menu {
+  display: none;
+  position: relative;
+}
+
+.menu summary {
+  padding: var(--s-2) var(--s-3);
+  border: 2px solid var(--black);
+  border-radius: var(--r);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu nav {
+  position: absolute;
+  top: calc(100% + var(--s-2));
+  right: 0;
+  display: grid;
+  min-width: 260px;
+  border: 2px solid var(--black);
+  background: var(--white);
+}
+
+.menu nav a {
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--hair);
+  font-weight: 600;
+}
+
+.menu nav a:hover {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* Афиша */
+.poster {
+  padding: var(--s-8) var(--pad) 0;
+}
+
+.posterTop {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--s-6);
+  align-items: start;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.posterTop > p:nth-child(1) {
+  grid-column: span 3;
+}
+
+.posterTop > p:nth-child(2) {
+  grid-column: span 3;
+}
+
+.posterTop h1 {
+  grid-column: 7 / -1;
+  font-size: clamp(32px, 4.4vw, 64px);
+  text-align: right;
+}
+
+.live,
+.idle {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: var(--s-2);
+  border-radius: 50%;
+  background: var(--up);
+}
+
+.idle {
+  background: var(--grey);
+}
+
+.giant {
+  margin: var(--s-6) 0 var(--s-8);
+  font-size: clamp(72px, 17.5vw, 300px);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.055em;
+  line-height: 1.02;
+  white-space: nowrap;
+}
+
+.ruler {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 2px solid var(--black);
+  border-bottom: 2px solid var(--black);
+}
+
+.ruler > div {
+  padding: var(--s-4) var(--s-4) var(--s-4) 0;
+}
+
+.ruler > div + div {
+  padding-left: var(--s-4);
+  border-left: 1px solid var(--black);
+}
+
+.ruler dt {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ruler dd {
+  font-size: clamp(24px, 2.6vw, 40px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+.ruler small {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* История индекса — чёрные столбики, последний красный. */
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 96px;
+  margin-bottom: var(--s-2);
+}
+
+.bars i {
+  flex: 1;
+  height: calc(var(--h) * 100%);
+  border-radius: 2px 2px 0 0;
+  background: var(--black);
+}
+
+.bars i[data-last] {
+  background: var(--red);
+}
+
+.barsCaption {
+  margin-bottom: var(--s-4) !important;
+  color: var(--grey);
+  font-size: 13px;
+}
+
+/* Оборот — полоса долей */
+.stack {
+  display: flex;
+  gap: 3px;
+  height: clamp(72px, 9vw, 140px);
+  margin-top: var(--s-6);
+}
+
+.stack i {
+  flex: var(--w) 0 0;
+  min-width: 4px;
+  border-radius: var(--r);
+}
+
+.page [data-tone="red"] {
+  background: var(--red);
+}
+
+.page [data-tone="black"] {
+  background: var(--black);
+}
+
+.page [data-tone="grey"] {
+  background: #9a9a9a;
+}
+
+.shares {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 6), minmax(0, 1fr));
+  margin-top: var(--s-4);
+  border-top: 1px solid var(--black);
+}
+
+.shares a {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-4) var(--s-4) var(--s-4) 0;
+}
+
+.shares li + li a {
+  padding-left: var(--s-4);
+  border-left: 1px solid var(--hair);
+}
+
+.shares i {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.shares b {
+  font-size: clamp(28px, 3vw, 44px);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.shares span {
+  display: grid;
+  font-weight: 700;
+}
+
+.shares small {
+  color: var(--grey);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.shares a:hover span {
+  color: var(--red);
+}
+
+/* Разделы */
+.section {
+  padding: var(--s-16) var(--pad) 0;
+}
+
+.sectionHead {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--s-4);
+  padding-bottom: var(--s-4);
+  border-bottom: 2px solid var(--black);
+}
+
+.sectionNo {
+  color: var(--red);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.sectionHead h2 {
+  font-size: clamp(36px, 5vw, 80px);
+}
+
+.arrowLink {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.arrowLink:hover {
+  color: var(--red);
+}
+
+/* Котировки — строки-афиши */
+.quotes li a {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr) minmax(0, 2fr);
+  align-items: baseline;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-2);
+  border-bottom: 1px solid var(--black);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.quotes li a:hover {
+  background: var(--black);
+  color: var(--white);
+}
+
+/* Доля в объёме — красная линия по нижней линейке строки. */
+.quotes li a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: calc(var(--share, 0) * 100%);
+  height: 4px;
+  background: var(--red);
+  transform-origin: left;
+  transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.quotes li a:hover .qName,
+.quotes li a:hover .flat {
+  color: #bdbdbd;
+}
+
+.quotes b {
+  font-size: clamp(28px, 3.6vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.qName {
+  color: var(--grey);
+  font-size: 15px;
+}
+
+.qPrice {
+  font-size: clamp(28px, 3.6vw, 56px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-align: right;
+}
+
+.qChange {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.caption {
+  margin-top: var(--s-3) !important;
+}
+
+/* Лента новостей */
+.railWrap {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.rail {
+  display: grid;
+  grid-auto-columns: minmax(280px, 360px);
+  grid-auto-flow: column;
+  gap: var(--s-6);
+  padding: var(--s-6) 0 var(--s-2);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+.railBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-top: var(--s-3);
+  border-top: 2px solid var(--black);
+}
+
+.railCount {
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.railCount span {
+  color: var(--grey);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.railButtons {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.railButtons button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 2px solid var(--black);
+  border-radius: var(--r);
+  background: var(--white);
+  color: var(--black);
+  font: inherit;
+  font-size: 22px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.railButtons button:hover:not(:disabled) {
+  background: var(--black);
+  color: var(--white);
+}
+
+.railButtons button:disabled {
+  border-color: var(--hair);
+  color: var(--hair);
+  cursor: default;
+}
+
+.railButtons button:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+.rail li {
+  scroll-snap-align: start;
+}
+
+.rail a {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.railPhoto {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--r);
+  background: var(--hair);
+}
+
+.railPhoto img {
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.1);
+  transition: filter 0.4s ease;
+}
+
+.rail a:hover .railPhoto img {
+  filter: none;
+}
+
+.railNo {
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.rail time {
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.rail b {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.rail a:hover b {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Срочно — красная полоса */
+.urgent {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: var(--s-6);
+  margin: var(--s-12) var(--pad) 0;
+  padding: var(--s-6);
+  border-radius: var(--r);
+  background: var(--red);
+  color: var(--white);
+}
+
+.urgent h2 {
+  font-size: 32px;
+}
+
+.urgent ul {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.urgent a {
+  display: grid;
+  gap: 2px;
+}
+
+.urgent b {
+  font-size: 20px;
+}
+
+.urgent a:hover b {
+  text-decoration: underline;
+}
+
+.urgent :focus-visible {
+  outline-color: var(--white);
+}
+
+/* Аукционы */
+.auctions li {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr) minmax(0, 2fr);
+  align-items: baseline;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-2);
+  border-bottom: 1px solid var(--black);
+}
+
+.auctions time {
+  color: var(--red);
+  font-size: clamp(32px, 4vw, 64px);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.auctions b {
+  font-size: 20px;
+}
+
+.tag {
+  justify-self: end;
+  padding: 2px var(--s-2);
+  border: 1px solid var(--black);
+  border-radius: var(--r);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Красный лист */
+.red {
+  margin-top: var(--s-16);
+  padding: var(--s-12) var(--pad);
+  background: var(--red);
+  color: var(--white);
+}
+
+.red .sectionHead {
+  border-color: var(--white);
+}
+
+.red .sectionNo {
+  color: var(--white);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.steps li {
+  display: grid;
+  align-content: start;
+  gap: var(--s-2);
+  padding: var(--s-6) var(--s-6) var(--s-6) 0;
+}
+
+.steps li + li {
+  padding-left: var(--s-6);
+  border-left: 1px solid rgb(255 255 255 / 0.6);
+}
+
+.stepNo {
+  font-size: clamp(80px, 10vw, 160px);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  line-height: 0.85;
+}
+
+.steps b {
+  font-size: 20px;
+}
+
+.redActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-top: var(--s-6);
+}
+
+.invert,
+.outline {
+  display: inline-flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 var(--s-6);
+  border: 2px solid var(--white);
+  border-radius: var(--r);
+  font-weight: 700;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.invert {
+  background: var(--white);
+  color: var(--red);
+}
+
+.invert:hover {
+  background: var(--black);
+  border-color: var(--black);
+  color: var(--white);
+}
+
+.outline:hover {
+  background: var(--white);
+  color: var(--red);
+}
+
+.red :focus-visible {
+  outline-color: var(--white);
+}
+
+/* Фото-полоса */
+.photoBand {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--s-6);
+  align-items: end;
+  padding: var(--s-16) var(--pad) 0;
+}
+
+.bandPhoto {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--r);
+}
+
+.bandPhoto img {
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.08);
+}
+
+.bandText {
+  display: grid;
+  gap: var(--s-3);
+  padding-bottom: var(--s-2);
+  border-bottom: 2px solid var(--black);
+}
+
+.bandText h2 {
+  font-size: clamp(48px, 6vw, 96px);
+}
+
+/* Подвал */
+.footer {
+  margin-top: var(--s-16);
+  padding: var(--s-8) var(--pad) var(--s-12);
+  background: var(--black);
+  color: var(--white);
+}
+
+.footBig {
+  font-size: clamp(96px, 22vw, 360px);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  line-height: 0.8;
+}
+
+.footGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-6);
+  margin-top: var(--s-8);
+  padding-top: var(--s-6);
+  border-top: 1px solid rgb(255 255 255 / 0.4);
+  font-size: 14px;
+}
+
+.footGrid address,
+.footGrid nav {
+  display: grid;
+  align-content: start;
+  gap: var(--s-1);
+  font-style: normal;
+}
+
+.footGrid a:hover {
+  color: var(--red);
+}
+
+.footer :focus-visible {
+  outline-color: var(--white);
+}
+
+/* Адаптив */
+@media (max-width: 1199px) {
+  .shares {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .shares li:nth-child(4) a {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .shares li:nth-child(n + 4) {
+    border-top: 1px solid var(--hair);
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .cta {
+    margin-left: auto;
+  }
+
+  .menu {
+    display: block;
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .steps li:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .posterTop > p:nth-child(1),
+  .posterTop > p:nth-child(2) {
+    grid-column: span 6;
+  }
+
+  .posterTop h1 {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .ruler {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ruler > div:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .ruler > div:nth-child(n + 3) {
+    border-top: 1px solid var(--black);
+  }
+
+  .sectionHead {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .sectionNo {
+    grid-column: 1 / -1;
+  }
+
+  .quotes li a,
+  .auctions li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--s-1) var(--s-4);
+  }
+
+  .qName {
+    grid-row: 2;
+  }
+
+  .shares {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shares li a,
+  .shares li + li a {
+    padding: var(--s-3) var(--s-3) var(--s-3) 0;
+    border-left: 0;
+  }
+
+  .shares li:nth-child(n + 3) {
+    border-top: 1px solid var(--hair);
+  }
+
+  .bars {
+    height: 64px;
+    gap: 2px;
+  }
+
+  .railCount {
+    font-size: 22px;
+  }
+
+  .qChange {
+    grid-row: 2;
+    grid-column: 2;
+  }
+
+  .auctions li > span:not(.tag) {
+    grid-row: 2;
+  }
+
+  .urgent,
+  .photoBand {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .steps li,
+  .steps li + li,
+  .steps li:nth-child(3) {
+    padding: var(--s-4) 0;
+    border-left: 0;
+    border-top: 1px solid rgb(255 255 255 / 0.6);
+  }
+
+  .footGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 479px) {
+  .brand span {
+    display: none;
+  }
+
+  .header {
+    gap: var(--s-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quotes li a::after,
+  .railButtons button,
+  .railPhoto img,
+  .quotes li a,
+  .cta,
+  .invert,
+  .outline {
+    transition: none;
+  }
+}

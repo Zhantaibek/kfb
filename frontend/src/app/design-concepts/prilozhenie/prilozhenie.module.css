@@ -1,0 +1,700 @@
+/*
+ * Концепция 41 — «Приложение». Интерфейс веб-приложения: боковое меню #fbfcfc, рабочая область #f4f7f8,
+ * белые карточки с линией #e3e9ea и радиусом 12px, текст #15202b, фирменная бирюза #2c7e87 / #57b6c0. Inter.
+ */
+.page {
+  --side: #fbfcfc;
+  --bg: #f4f7f8;
+  --card: #fff;
+  --line: #e3e9ea;
+  --ink: #15202b;
+  --ink-2: #4f5d66;
+  --ink-3: #8794a0;
+  --brand: #2c7e87;
+  --brand-2: #57b6c0;
+  --brand-soft: #e6f4f6;
+  --up: #0f8a52;
+  --up-soft: #e3f5ec;
+  --down: #c93a32;
+  --down-soft: #fbe7e5;
+
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ap-font), system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, p, ul, ol) {
+  margin: 0;
+  padding: 0;
+}
+
+/* У сайта свой шрифт заголовков — здесь всё набрано Inter. */
+.page :where(h1, h2) {
+  font-family: inherit;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a):focus-visible {
+  outline: 2px solid var(--brand-2);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 50;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: #fff !important;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+/* ---------- Боковое меню ---------- */
+.side {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100vh;
+  padding: 18px 14px;
+  border-right: 1px solid var(--line);
+  background: var(--side);
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+}
+
+.brand span {
+  display: grid;
+  line-height: 1.2;
+}
+
+.brand b {
+  font-size: 15px;
+}
+
+.brand small {
+  color: var(--ink-3);
+  font-size: 11px;
+}
+
+.sideSearch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink-3);
+}
+
+.sideSearch:hover {
+  border-color: var(--brand-2);
+}
+
+.sideSearch kbd {
+  margin-left: auto;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 11px;
+}
+
+.group {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.group p {
+  padding: 4px 10px;
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.group a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.group a:hover {
+  background: #eef2f3;
+  color: var(--ink);
+}
+
+.group a[aria-current] {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.sessionCard {
+  display: grid;
+  gap: 4px;
+  margin-top: auto;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.sessionCard span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.sessionCard i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+
+.sessionCard[data-open] i {
+  background: var(--up);
+  box-shadow: 0 0 0 3px var(--up-soft);
+}
+
+.sessionCard small {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+/* ---------- Верхняя строка ---------- */
+.main {
+  min-width: 0;
+}
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  height: 58px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  background: rgb(244 247 248 / 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.crumbs {
+  color: var(--ink-3);
+}
+
+.crumbs span {
+  margin: 0 6px;
+}
+
+.crumbs b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.topActions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn,
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn {
+  background: var(--brand);
+  color: #fff !important;
+}
+
+.btn:hover {
+  background: #246971;
+}
+
+.btnGhost {
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.btnGhost:hover {
+  border-color: var(--brand-2);
+}
+
+/* ---------- Рабочая область ---------- */
+.content {
+  display: grid;
+  gap: 16px;
+  max-width: 1280px;
+  padding: 28px 28px 96px;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.titleRow h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.titleRow p {
+  color: var(--ink-2);
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+a.card:hover {
+  border-color: var(--brand-2);
+  box-shadow: 0 6px 18px -12px rgb(21 32 43 / 0.3);
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kpis small {
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.kpis b {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpis span {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.kpis span.up,
+.kpis span.down {
+  font-weight: 600;
+}
+
+.kpis svg {
+  width: 100%;
+  height: 36px;
+  margin-top: 6px;
+  overflow: visible;
+}
+
+.kpis path {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.row3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cardHead h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cardHead span {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+.cardHead a {
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* График */
+.chart svg {
+  width: 100%;
+  height: 230px;
+  overflow: visible;
+}
+
+.line {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart figcaption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+/* Лидеры — полосы */
+.bars {
+  display: grid;
+  gap: 12px;
+}
+
+.bars span {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.bars small {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.bars i {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+}
+
+.empty {
+  color: var(--ink-3);
+}
+
+/* Таблица */
+.tableWrap {
+  overflow-x: auto;
+  margin: 0 -20px -18px;
+}
+
+.tableWrap table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 10px 20px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tableWrap thead th {
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tableWrap :is(td, th):nth-child(n + 3) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tableWrap tbody th a {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.tableWrap tbody td:nth-child(2) {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink-2);
+}
+
+.tableWrap tbody tr:hover {
+  background: #fafcfc;
+}
+
+.badge,
+.badgeUp,
+.badgeDown {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef2f3;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badgeUp {
+  background: var(--up-soft);
+  color: var(--up);
+}
+
+.badgeDown {
+  background: var(--down-soft);
+  color: var(--down);
+}
+
+/* Список аукционов */
+.list li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.listIcon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 16px;
+}
+
+.list li > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+}
+
+.list small {
+  overflow: hidden;
+  color: var(--ink-3);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ленты */
+.feed li + li {
+  border-top: 1px solid var(--line);
+}
+
+.feed a {
+  display: grid;
+  gap: 2px;
+  padding: 10px 0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.feed a:hover {
+  color: var(--brand);
+}
+
+.feed small {
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* Шаги-чеклист */
+.check {
+  display: grid;
+  gap: 8px;
+}
+
+.check a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.check a:hover {
+  border-color: var(--brand-2);
+  background: var(--brand-soft);
+}
+
+.check span {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.check b {
+  font-weight: 500;
+}
+
+/* Подвал */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 1100px) {
+  .kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .row,
+  .row3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* На узком экране боковое меню становится верхней полосой с прокруткой. */
+@media (max-width: 860px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    height: auto;
+    padding: 10px 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+  }
+
+  .brand small,
+  .sideSearch,
+  .sessionCard,
+  .group p {
+    display: none;
+  }
+
+  .side nav {
+    display: flex;
+  }
+
+  .group {
+    display: flex;
+    margin: 0;
+  }
+
+  .group a {
+    white-space: nowrap;
+  }
+
+  .top {
+    position: static;
+    padding: 0 16px;
+  }
+
+  .crumbs {
+    display: none;
+  }
+
+  .content {
+    padding: 20px 16px 96px;
+  }
+
+  .titleRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .topActions .btnGhost {
+    display: none;
+  }
+}

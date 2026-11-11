@@ -1,0 +1,1499 @@
+/* Концепция 25 — «Движение»: витрина анимаций. Цвета — фирменные бирюзовые КФБ на ночном фоне. */
+.page {
+  --bg: #071518;
+  --panel: #0e2428;
+  --line: rgba(143, 224, 230, 0.16);
+  --ink: #eaf6f6;
+  --muted: #9dbcc0;
+  --accent: #57b6c0;
+  --sun: #f2b35e;
+  --spring: cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Каркас ---------- */
+.demo {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 110px) 24px 0;
+}
+
+.demo:last-of-type {
+  padding-bottom: 130px;
+}
+
+.demoHead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 20px;
+  max-width: 760px;
+  margin-bottom: 36px;
+}
+
+.demoHead > :not(.demoN) {
+  grid-column: 2;
+}
+
+.demoN {
+  grid-row: 1 / span 3;
+  color: var(--accent);
+  font-family: var(--font-brand), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding-top: 12px;
+}
+
+.demoHead h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.demoHead p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.demoHead .where {
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.where b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.ghost {
+  padding: 10px 20px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: 600 14px var(--font-sans), sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ghost:hover {
+  background: rgba(143, 224, 230, 0.12);
+}
+
+.page button:focus-visible,
+.page a:focus-visible {
+  outline: 2px solid var(--sun);
+  outline-offset: 3px;
+}
+
+/* ---------- Барабаны ---------- */
+.odo {
+  display: inline-flex;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.odoCol {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.odoCol > span {
+  display: block;
+  transform: translateY(calc(var(--d) * -1em));
+  transition: transform 0.9s var(--spring);
+}
+
+.odoCol > span > span {
+  display: block;
+  height: 1em;
+}
+
+.odoIntro {
+  animation: odoIn 1.9s var(--spring) calc(0.4s + var(--i) * 0.07s) backwards;
+}
+
+@keyframes odoIn {
+  from {
+    transform: translateY(0);
+  }
+}
+
+/* ---------- 1. Индекс-хребет ---------- */
+.ridge {
+  --mx: 0;
+  --my: 0;
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  overflow: hidden;
+  background: linear-gradient(180deg, #06161f 0%, #0b2c3a 52%, #2c6470 100%);
+}
+
+.ridgeArt {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ridgeBody {
+  position: relative;
+  max-width: 1160px;
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(56px, 11vh, 110px) 24px 40px;
+}
+
+.kicker {
+  margin: 0 0 18px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ridgeBody h1 {
+  max-width: 13em;
+  margin: 0;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(38px, 6.2vw, 80px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+}
+
+.lead {
+  max-width: 34em;
+  margin: 20px 0 0;
+  color: #cfe4e6;
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.5;
+}
+
+.heroIndex {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 26px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.heroIndex strong {
+  color: #fff;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(28px, 3.4vw, 42px);
+  font-weight: 700;
+}
+
+/* Эффектов много: оглавление — одна строка с прокруткой вбок, чтобы не закрывать горы. */
+.toc {
+  display: flex;
+  gap: 8px;
+  margin: 26px -24px 0;
+  padding: 0 24px 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.toc a {
+  flex: none;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(7, 21, 24, 0.45);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+  transition: background-color 0.2s ease;
+}
+
+.toc a:hover {
+  background: rgba(87, 182, 192, 0.35);
+}
+
+.star {
+  fill: #fff;
+  opacity: 0.7;
+  animation: twinkle 3.4s ease-in-out infinite alternate;
+}
+
+.sun {
+  animation: sunRise 2.6s var(--spring) both;
+}
+
+.layer {
+  transition: translate 0.7s var(--spring);
+}
+
+.layerFar {
+  fill: #123c4a;
+  translate: calc(var(--mx) * -14px) calc(var(--my) * -6px);
+  animation: rise 1.5s var(--spring) 0.1s backwards;
+}
+
+.layerMid {
+  fill: #0d2e38;
+  translate: calc(var(--mx) * -30px) calc(var(--my) * -12px);
+  animation: rise 1.5s var(--spring) 0.25s backwards;
+}
+
+.layerFront {
+  translate: calc(var(--mx) * -56px) calc(var(--my) * -20px);
+}
+
+.ridgeFill {
+  animation: fadeIn 1.2s ease 1.5s backwards;
+}
+
+.ridgeLine {
+  fill: none;
+  stroke: #8fe0e6;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  filter: drop-shadow(0 0 8px rgba(143, 224, 230, 0.7));
+  animation: draw 2.4s cubic-bezier(0.65, 0, 0.35, 1) 0.4s backwards;
+}
+
+.ridgeDot {
+  fill: #fff;
+  animation: fadeIn 0.3s ease 2.7s backwards;
+}
+
+.ridgePing {
+  fill: none;
+  stroke: #8fe0e6;
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ping 2.2s ease-out 2.8s infinite backwards;
+}
+
+@keyframes twinkle {
+  to {
+    opacity: 0.15;
+  }
+}
+
+@keyframes sunRise {
+  from {
+    opacity: 0;
+    transform: translateY(190px);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(150px);
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ping {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(4.5);
+  }
+}
+
+/* ---------- 2. Табло ---------- */
+.board {
+  --cell: clamp(9px, calc((100vw - 120px) / 27), 30px);
+  display: grid;
+  justify-content: center;
+  padding: clamp(14px, 3vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #050f11;
+  box-shadow: inset 0 2px 24px rgba(0, 0, 0, 0.7);
+}
+
+.flapRow {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 5px;
+  color: #f4f0e4;
+}
+
+.flapRow > :nth-child(n + 9):nth-child(-n + 18) {
+  color: #ffd9a0;
+}
+
+.boardHead {
+  display: grid;
+  grid-template-columns: 8fr 10fr 9fr;
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: clamp(10px, 1.2vw, 13px);
+  font-weight: 600;
+}
+
+.boardHead span:not(:first-child) {
+  text-align: right;
+}
+
+.flap {
+  position: relative;
+  flex: none;
+  width: var(--cell);
+  height: calc(var(--cell) * 1.5);
+  perspective: 120px;
+  font: 700 calc(var(--cell) * 1.08) / calc(var(--cell) * 1.5) ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+.flapUp,
+.flapDown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  overflow: hidden;
+  background: #142a2e;
+  text-align: center;
+  backface-visibility: hidden;
+}
+
+.flapUp {
+  top: 0;
+  border-radius: 2px 2px 0 0;
+  border-bottom: 1px solid #050f11;
+  transform-origin: bottom;
+}
+
+.flapDown {
+  bottom: 0;
+  border-radius: 0 0 2px 2px;
+  transform-origin: top;
+}
+
+.flapUp > span,
+.flapDown > span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 200%;
+  white-space: pre;
+}
+
+.flapUp > span {
+  top: 0;
+}
+
+.flapDown > span {
+  bottom: 0;
+}
+
+.flipUp {
+  z-index: 2;
+  animation: flipUp 0.08s linear forwards;
+}
+
+.flipDown {
+  z-index: 2;
+  animation: flipDown 0.08s linear forwards;
+}
+
+@keyframes flipUp {
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes flipDown {
+  from {
+    transform: rotateX(90deg);
+  }
+}
+
+/* ---------- 3. Частицы ---------- */
+.particles {
+  display: block;
+  width: 100%;
+  height: clamp(220px, 34vw, 400px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: radial-gradient(ellipse at 50% 60%, #123b43 0%, var(--panel) 70%);
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+/* ---------- 4. Живой рейтинг ---------- */
+.rank {
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.rankTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.rankTabs button {
+  padding: 9px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 14px var(--font-sans), sans-serif;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.rankTabs button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #06262a;
+}
+
+.rankList {
+  --row: 58px;
+  position: relative;
+  height: calc(var(--rows) * var(--row));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rankList li {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--row);
+  display: grid;
+  grid-template-columns: 28px minmax(120px, 240px) minmax(0, 1fr) 150px;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  transform: translateY(calc(var(--place) * var(--row)));
+  transition: transform 0.8s var(--spring);
+  transition-delay: calc(var(--place) * 35ms);
+}
+
+.rankPlace {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.rankName {
+  min-width: 0;
+  display: grid;
+}
+
+.rankName small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rankBar {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2c7e87, #8fe0e6);
+  transform: scaleX(var(--bar));
+  transform-origin: left;
+  transition: transform 0.9s var(--spring);
+}
+
+.rankValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* ---------- 5. Тропа инвестора ---------- */
+.trail {
+  /* «Длинный» путь по кругу оттенков: ночь идёт к утру через сиреневый рассвет, а не через серый. */
+  --sky-a: color-mix(in oklch longer hue, #123c4a, #f6cf9a calc(var(--p) * 100%));
+  --sky-b: color-mix(in oklab, #0b2c3a, #bfe7ea calc(var(--p) * 100%));
+  height: 340vh;
+  margin: 0 calc(50% - 50vw);
+}
+
+.trailStage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  align-items: center;
+  gap: 24px;
+  padding: 24px max(24px, calc(50vw - 556px));
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--sky-b), var(--sky-a) 75%);
+}
+
+/* Горы нарисованы за пределами viewBox и уходят за края сцены. */
+.trailArt {
+  width: 100%;
+  max-height: calc(100svh - 48px);
+  align-self: end;
+  overflow: visible;
+}
+
+.trailSun {
+  fill: #ffe0ab;
+  opacity: calc(0.25 + var(--p) * 0.75);
+}
+
+.trailFar {
+  fill: color-mix(in oklab, #164653, #8fc0c8 calc(var(--p) * 100%));
+}
+
+.trailMount {
+  fill: color-mix(in oklab, #0d2e38, #2c7e87 calc(var(--p) * 100%));
+}
+
+.trailSnow {
+  fill: #f4fbfb;
+}
+
+.trailBase,
+.trailDone {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.trailBase {
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 3;
+  stroke-dasharray: 2 9;
+}
+
+.trailDone {
+  stroke: var(--sun);
+  stroke-width: 5;
+  stroke-dasharray: 1;
+}
+
+.station circle {
+  fill: #0d2e38;
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 2;
+  transition:
+    fill 0.3s ease,
+    stroke 0.3s ease;
+}
+
+.station text {
+  fill: #fff;
+  font: 700 16px var(--font-sans), sans-serif;
+  text-anchor: middle;
+}
+
+.station[data-done] circle {
+  fill: var(--sun);
+  stroke: #fff;
+}
+
+.station[data-done] text {
+  fill: #2b1a00;
+}
+
+.climber {
+  fill: #fff;
+}
+
+.climberHalo {
+  fill: rgba(255, 255, 255, 0.28);
+}
+
+.trailSteps {
+  position: relative;
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trailSteps li {
+  grid-area: 1 / 1;
+  padding: 26px;
+  border-radius: 14px;
+  background: rgba(7, 21, 24, 0.88);
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.6s var(--spring);
+}
+
+.trailSteps li[data-active] {
+  opacity: 1;
+  transform: none;
+}
+
+.trailSteps span {
+  color: var(--sun);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.trailSteps h3 {
+  margin: 8px 0;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.trailSteps p {
+  margin: 0;
+  color: #cfe4e6;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ---------- 6. Тюндюк ---------- */
+.tunduk {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 28px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 42%, #1a5a63 0%, var(--panel) 62%);
+}
+
+.tundukArt {
+  width: min(400px, 78vw);
+  height: auto;
+  overflow: visible;
+}
+
+.tundukCrown {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-width: 7;
+}
+
+.tundukCrown circle,
+.tundukCrown path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.tundukCrown path {
+  stroke: var(--sun);
+  stroke-width: 9;
+}
+
+.tundukRays line {
+  stroke: var(--sun);
+  stroke-linecap: round;
+  stroke-width: 5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.tundukArt[data-run] .tundukCrown {
+  animation: crownTurn 2.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+.tundukArt[data-run] .tundukCrown circle {
+  animation: stroke 1s ease forwards;
+}
+
+.tundukArt[data-run] .tundukCrown path {
+  animation: stroke 0.7s ease calc(0.5s + var(--i) * 0.14s) forwards;
+}
+
+.tundukArt[data-run] .tundukRays line {
+  animation: stroke 0.5s var(--spring) calc(2.1s + var(--i) * 0.018s) forwards;
+}
+
+.tundukArt[data-run] .tundukRays {
+  animation: raysTurn 40s linear 2.6s infinite;
+}
+
+.tundukWord {
+  margin: 0;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(16px, 2.2vw, 22px);
+  font-weight: 700;
+  text-align: center;
+  opacity: 0;
+}
+
+.tundukWord[data-run] {
+  animation: wordUp 0.9s var(--spring) 2.5s forwards;
+}
+
+@keyframes stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes crownTurn {
+  from {
+    transform: rotate(-120deg) scale(0.82);
+  }
+}
+
+@keyframes raysTurn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes wordUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- 7. Окно из клика ---------- */
+.iris {
+  position: relative;
+  height: clamp(320px, 52vw, 560px);
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--panel);
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.irisScene {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+
+.irisScene img {
+  object-fit: cover;
+}
+
+.irisScene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(7, 21, 24, 0.72), transparent 50%);
+}
+
+.irisScene strong {
+  position: absolute;
+  z-index: 1;
+  left: 26px;
+  bottom: 74px;
+  color: #fff;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(30px, 5vw, 58px);
+  font-weight: 800;
+}
+
+.irisScene[data-state="current"] {
+  z-index: 1;
+  visibility: visible;
+}
+
+.irisScene[data-state="opening"] {
+  z-index: 2;
+  visibility: visible;
+  animation: irisOpen 1s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes irisOpen {
+  from {
+    clip-path: circle(0% at var(--x) var(--y));
+  }
+
+  to {
+    clip-path: circle(150% at var(--x) var(--y));
+  }
+}
+
+.irisTabs {
+  position: absolute;
+  z-index: 3;
+  left: 26px;
+  right: 26px;
+  bottom: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.irisTabs button {
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(7, 21, 24, 0.5);
+  color: #fff;
+  font: 600 13px var(--font-sans), sans-serif;
+  cursor: pointer;
+}
+
+.irisTabs button[aria-pressed="true"] {
+  background: #fff;
+  color: #071518;
+}
+
+/* ---------- 8. Мелочи ---------- */
+.micro {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.microCell {
+  min-height: 210px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.magnetZone {
+  display: inline-block;
+  padding: 36px 56px;
+}
+
+.magnet,
+.liquid {
+  display: inline-block;
+  padding: 15px 30px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.magnet {
+  background: var(--accent);
+  color: #06262a;
+  transition: translate 0.45s var(--spring);
+}
+
+.liquid {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--accent);
+  color: var(--ink);
+  transition: color 0.35s ease;
+}
+
+.liquid::before {
+  content: "";
+  position: absolute;
+  left: -50%;
+  top: 150%;
+  width: 200%;
+  aspect-ratio: 1;
+  border-radius: 42%;
+  background: var(--accent);
+  transition: top 0.75s var(--spring);
+  animation: spin 5s linear infinite;
+}
+
+.liquid > span {
+  position: relative;
+}
+
+.liquid:hover {
+  color: #06262a;
+}
+
+.liquid:hover::before {
+  top: -60%;
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@property --beam {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.beam {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  width: min(100%, 300px);
+  padding: 24px;
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--ink);
+  text-decoration: none;
+  isolation: isolate;
+}
+
+.beam::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  border-radius: 16px;
+  background: conic-gradient(from var(--beam), transparent 70%, var(--accent) 88%, #fff 96%, transparent);
+  animation: beam 3.6s linear infinite;
+}
+
+.beam::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.beam strong {
+  font-size: 18px;
+}
+
+.beam span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@keyframes beam {
+  to {
+    --beam: 360deg;
+  }
+}
+
+.drums {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.drums span:first-child {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.drums strong {
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 700;
+}
+
+.drums small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---------- 9. Лента скорости ---------- */
+.tape {
+  margin: 0 calc(50% - 50vw);
+  padding: 16px 0;
+  overflow: hidden;
+  background: var(--accent);
+  color: #06262a;
+}
+
+.tapeRow {
+  display: flex;
+  width: max-content;
+  gap: 44px;
+  padding: 6px 0;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(30px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.tapeRow + .tapeRow {
+  color: transparent;
+  -webkit-text-stroke: 1.5px #06262a;
+}
+
+/* ---------- 10. Струна индекса ---------- */
+.string {
+  display: block;
+  width: 100%;
+  height: clamp(260px, 36vw, 420px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.string:active {
+  cursor: grabbing;
+}
+
+/* ---------- 11. Текст от прокрутки ---------- */
+.reading {
+  max-width: 980px;
+  margin: 0;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(28px, 5vw, 60px);
+  font-weight: 700;
+  line-height: 1.18;
+}
+
+.reading span {
+  color: rgba(234, 246, 246, 0.16);
+  transition: color 0.35s ease;
+}
+
+.reading span[data-lit] {
+  color: var(--ink);
+}
+
+/* ---------- 12. Пузыри рынка ---------- */
+.bubbleKeys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.bubbleKeys span::before {
+  content: "";
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--tone);
+}
+
+.bubbles [data-type="stock"] {
+  --tone: #57b6c0;
+}
+
+.bubbles [data-type="bond"] {
+  --tone: #f2b35e;
+}
+
+.bubbles [data-type="gcb"] {
+  --tone: #b9a4f2;
+}
+
+.bubbles [data-type="metal"] {
+  --tone: #e8d9a8;
+}
+
+.bubbleStage {
+  position: relative;
+  height: clamp(420px, 56vw, 560px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  touch-action: pan-y;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bubbleStage[data-ready] {
+  opacity: 1;
+}
+
+.bubble {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  border-radius: 50%;
+  background: var(--tone);
+  color: #06262a;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.bubble:active {
+  cursor: grabbing;
+}
+
+.bubble {
+  overflow: hidden;
+  padding: 0 8px;
+  text-align: center;
+}
+
+.bubble b,
+.bubble small {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bubble b {
+  font-size: 12px;
+  line-height: 1.15;
+}
+
+.bubble small {
+  font-size: 11px;
+}
+
+.bubble[data-small] b {
+  font-size: 10px;
+}
+
+.bubble[data-small] small {
+  display: none;
+}
+
+/* ---------- 13. Колода новостей ---------- */
+.deck {
+  display: grid;
+  justify-items: center;
+  gap: 28px;
+  overflow: hidden;
+  padding: 26px 0 8px;
+}
+
+.deckStack {
+  position: relative;
+  width: min(460px, 86vw);
+  height: 470px;
+}
+
+.deckCard {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 230px auto 1fr auto;
+  gap: 10px;
+  padding: 14px 14px 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #123038;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  transition:
+    transform 0.45s var(--spring),
+    translate 0.45s var(--spring),
+    rotate 0.45s var(--spring),
+    opacity 0.3s ease;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.deckCard[data-depth="0"] {
+  z-index: 4;
+  cursor: grab;
+}
+
+.deckCard[data-depth="1"] {
+  z-index: 3;
+  transform: translateY(-14px) scale(0.95) rotate(2deg);
+}
+
+.deckCard[data-depth="2"] {
+  z-index: 2;
+  transform: translateY(-26px) scale(0.9) rotate(-2.5deg);
+}
+
+.deckCard[data-depth="3"] {
+  z-index: 1;
+  transform: translateY(-26px) scale(0.86);
+  opacity: 0;
+  transition: none;
+}
+
+.deckCard[data-thrown="1"] {
+  translate: 130% 30px;
+  rotate: 16deg;
+  opacity: 0;
+}
+
+.deckCard[data-thrown="-1"] {
+  translate: -130% 30px;
+  rotate: -16deg;
+  opacity: 0;
+}
+
+.deckPhoto {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.deckPhoto img {
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.deckTag {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.deckCard h3 {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-brand), sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.deckCard a {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.deckNav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ---------- 14. Мозаика ---------- */
+.mosaic {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--lines), minmax(0, 1fr));
+  gap: 3px;
+  height: clamp(280px, 50vw, 560px);
+  perspective: 1400px;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.tile {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.7s var(--spring);
+}
+
+.tile > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  background-color: var(--panel);
+  backface-visibility: hidden;
+}
+
+.tile > span:last-child {
+  transform: rotateY(180deg);
+}
+
+/* ---------- 15. Луч ---------- */
+@property --beam-r {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 170px;
+}
+
+.torch {
+  --tx: 50%;
+  --ty: 50%;
+  position: relative;
+  height: clamp(320px, 50vw, 560px);
+  overflow: hidden;
+  border-radius: 14px;
+  background: #050f11;
+  touch-action: pan-y;
+  transition: --beam-r 0.5s var(--spring);
+}
+
+.torch:hover {
+  --beam-r: 240px;
+}
+
+.torchDark {
+  object-fit: cover;
+  filter: grayscale(1) brightness(0.32) contrast(1.25) sepia(0.5) hue-rotate(140deg);
+}
+
+.torchLit {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: radial-gradient(circle var(--beam-r) at var(--tx) var(--ty), #000 62%, transparent 100%);
+  mask-image: radial-gradient(circle var(--beam-r) at var(--tx) var(--ty), #000 62%, transparent 100%);
+}
+
+.torchLit img {
+  object-fit: cover;
+}
+
+.torchLit strong {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #fff;
+  font-family: var(--font-brand), sans-serif;
+  font-size: clamp(26px, 5vw, 58px);
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Телефон ---------- */
+@media (max-width: 820px) {
+  .demo {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .ridgeBody {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .trailStage {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    padding: 16px;
+  }
+
+  .trailArt {
+    max-height: 48svh;
+    align-self: auto;
+  }
+
+  .irisScene strong {
+    left: 16px;
+    bottom: 104px;
+  }
+
+  .irisTabs {
+    left: 16px;
+    right: 16px;
+    bottom: 14px;
+  }
+
+  .rankList {
+    --row: 64px;
+  }
+
+  .torch {
+    --beam-r: 100px;
+  }
+
+  .torch:hover {
+    --beam-r: 130px;
+  }
+
+  .rankList li {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    grid-template-rows: 1fr 8px;
+    gap: 0 10px;
+    padding-bottom: 8px;
+  }
+
+  .rankBar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    height: 6px;
+  }
+
+  .micro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Кто просил меньше анимаций: итоговое состояние без движения ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .page *,
+  .page *::before,
+  .page *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .tundukCrown circle,
+  .tundukCrown path,
+  .tundukRays line {
+    stroke-dashoffset: 0;
+  }
+
+  .tundukWord {
+    opacity: 1;
+  }
+
+  .tape {
+    overflow-x: auto;
+  }
+
+  .trail {
+    height: auto;
+  }
+
+  .trailStage {
+    position: static;
+    height: auto;
+  }
+
+  .trailSteps {
+    gap: 12px;
+  }
+
+  .trailSteps li {
+    grid-area: auto;
+    opacity: 1;
+    transform: none;
+  }
+}

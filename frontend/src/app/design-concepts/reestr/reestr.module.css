@@ -1,0 +1,810 @@
+/*
+ * Концепция 27 — «Реестр». Кремовая бумага #f3ecdc, чернила #2b2520, красная линия полей и печать #b3261e,
+ * синяя линовка #a9bcd8 и синие «рукописные» пометки #23408e. Шрифты: PT Serif (текст), PT Mono (цифры),
+ * Caveat (пометки от руки).
+ */
+.page {
+  --paper: #f3ecdc;
+  --paper-2: #ebe2cc;
+  --card: #fbf7ee;
+  --ink: #2b2520;
+  --ink-2: #5a5047;
+  --ink-3: #8a7e70;
+  --red: #b3261e;
+  --rule: #a9bcd8;
+  --rule-soft: rgb(169 188 216 / 0.45);
+  --blue-ink: #23408e;
+  --green: #2f6b3a;
+
+  --margin: 132px;
+  --wrap: min(1160px, calc(100% - 48px));
+
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgb(255 255 255 / 0.55), transparent 60%),
+    radial-gradient(900px 700px at 110% 30%, rgb(214 196 160 / 0.35), transparent 60%),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--rs-serif), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.page :where(h1, h2, p, ul, ol, dl, dd, figure) {
+  margin: 0;
+  padding: 0;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+/* У сайта свой шрифт заголовков — здесь книга набрана антиквой. */
+.page :where(h1, h2) {
+  font-family: inherit;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a, button):focus-visible {
+  outline: 2px dashed var(--red);
+  outline-offset: 4px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 50;
+  padding: 8px 14px;
+  background: var(--ink);
+  color: var(--paper) !important;
+}
+
+/* ---------- Корешок и закладки ---------- */
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding-top: 28px;
+  border-bottom: 3px double var(--ink);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+}
+
+.brand span {
+  display: grid;
+  line-height: 1.2;
+}
+
+.brand b {
+  font-size: 19px;
+}
+
+.brand small {
+  color: var(--ink-3);
+  font-family: var(--rs-mono), monospace;
+  font-size: 13px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.tabs a {
+  padding: 8px 14px 10px;
+  border: 1px solid rgb(43 37 32 / 0.25);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: var(--paper-2);
+  color: var(--ink-2);
+  font-size: 15px;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.tabs a:nth-child(3n + 1) {
+  background: #e7dcc2;
+}
+
+.tabs a:nth-child(3n + 2) {
+  background: #dfe5e0;
+}
+
+.tabs a:nth-child(3n) {
+  background: #eedad2;
+}
+
+.tabs a:hover {
+  transform: translateY(-3px);
+  color: var(--ink);
+}
+
+/* ---------- Лист с полями ---------- */
+.sheet {
+  position: relative;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding-left: var(--margin);
+  background: linear-gradient(90deg, transparent calc(var(--margin) - 28px), rgb(179 38 30 / 0.55) calc(var(--margin) - 28px), rgb(179 38 30 / 0.55) calc(var(--margin) - 27px), transparent calc(var(--margin) - 27px));
+}
+
+.margin {
+  position: absolute;
+  left: calc(var(--margin) * -1);
+  width: calc(var(--margin) - 44px);
+  color: var(--blue-ink);
+  font-family: var(--rs-hand), cursive;
+  font-size: 24px;
+  line-height: 1.1;
+  text-align: right;
+  transform: rotate(-4deg);
+}
+
+.hand {
+  color: var(--blue-ink);
+  font-family: var(--rs-hand), cursive;
+  font-size: 22px;
+}
+
+.up {
+  color: var(--green);
+}
+
+.down {
+  color: var(--red);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.sectionHead h2 {
+  font-size: clamp(26px, 3vw, 34px);
+  line-height: 1.15;
+}
+
+.sectionHead a {
+  color: var(--red);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.sectionHead a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------- Титульная запись ---------- */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr);
+  gap: 56px;
+  align-items: start;
+  padding: 72px 0 88px;
+}
+
+.hero > .margin {
+  top: 86px;
+}
+
+.heroText {
+  display: grid;
+  gap: 22px;
+}
+
+.kicker {
+  color: var(--red);
+  font-family: var(--rs-mono), monospace;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-size: clamp(40px, 5.4vw, 72px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+}
+
+.lead {
+  max-width: 560px;
+  color: var(--ink-2);
+  font-size: 19px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  font-size: 18px;
+}
+
+.links a {
+  border-bottom: 1px solid var(--red);
+  color: var(--red);
+}
+
+.links a:hover {
+  border-bottom-width: 2px;
+}
+
+/* Карточка записи сессии */
+.entry {
+  position: relative;
+  padding: 26px 28px 30px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 39px, var(--rule-soft) 39px 40px),
+    var(--card);
+  box-shadow:
+    0 1px 0 rgb(43 37 32 / 0.08),
+    0 18px 40px -22px rgb(60 40 20 / 0.45);
+}
+
+.entryHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px !important;
+  font-weight: 700;
+}
+
+.entryHead span {
+  color: var(--ink-3);
+  font-family: var(--rs-mono), monospace;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.entry dl div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  height: 40px;
+}
+
+.entry dt {
+  color: var(--ink-2);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.entry dl div::after {
+  content: "";
+  order: 1;
+  flex: 1;
+  border-bottom: 2px dotted rgb(43 37 32 / 0.35);
+}
+
+.entry dd {
+  order: 2;
+  font-family: var(--rs-mono), monospace;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.sign {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 18px !important;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.signature {
+  color: var(--blue-ink);
+  font-family: var(--rs-hand), cursive;
+  font-size: 34px;
+  line-height: 1;
+  transform: rotate(-6deg);
+}
+
+/* Печать: двойное кольцо, поворот, «впитавшиеся» чернила. */
+/* Стоит на углу листа, ниже строк записи — цифры остаются читаемыми. */
+.stamp {
+  position: absolute;
+  right: -40px;
+  bottom: -58px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2px;
+  width: 148px;
+  height: 148px;
+  padding: 18px;
+  border: 3px double var(--red);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 6px transparent, inset 0 0 0 7px rgb(179 38 30 / 0.7);
+  color: var(--red);
+  font-family: var(--rs-mono), monospace;
+  font-size: 9.5px;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.86;
+  mix-blend-mode: multiply;
+  transform: rotate(-14deg);
+  animation: rs-stamp 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.9s both;
+}
+
+.stamp b {
+  font-family: var(--rs-serif), serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+}
+
+.stamp[data-open] {
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 6px transparent, inset 0 0 0 7px rgb(47 107 58 / 0.7);
+  color: var(--green);
+}
+
+@keyframes rs-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-14deg) scale(1.7);
+  }
+}
+
+/* ---------- Таблица-книга ---------- */
+.ledger,
+.graph,
+.cards,
+.clips,
+.steps {
+  position: relative;
+  padding: 0 0 80px;
+}
+
+.tableWrap {
+  position: relative;
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.tableWrap th,
+.tableWrap td {
+  height: 44px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tableWrap :is(th, td) + :is(th, td) {
+  border-left: 1px solid rgb(179 38 30 / 0.28);
+}
+
+.tableWrap thead th {
+  border-bottom: 3px double var(--ink);
+  color: var(--ink-3);
+  font-family: var(--rs-mono), monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tableWrap tbody td:first-child,
+.tableWrap td:nth-child(n + 5) {
+  font-family: var(--rs-mono), monospace;
+}
+
+.tableWrap td:nth-child(n + 5),
+.tableWrap thead th:nth-child(n + 5) {
+  text-align: right;
+}
+
+.tableWrap tbody td:first-child {
+  color: var(--ink-3);
+}
+
+.tableWrap tbody th a {
+  font-weight: 700;
+  border-bottom: 1px solid transparent;
+}
+
+.tableWrap tbody tr:hover {
+  background: rgb(255 255 255 / 0.45);
+}
+
+.tableWrap tbody th a:hover {
+  border-color: var(--ink);
+}
+
+.issuer {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink-2);
+}
+
+/* Пометка на полях напротив первой строки таблицы. */
+.ledger > .margin {
+  top: 128px;
+}
+
+/* ---------- Миллиметровка ---------- */
+.paper {
+  padding: 24px 24px 14px;
+  background:
+    linear-gradient(rgb(76 140 110 / 0.28) 1px, transparent 1px) 0 0 / 50px 50px,
+    linear-gradient(90deg, rgb(76 140 110 / 0.28) 1px, transparent 1px) 0 0 / 50px 50px,
+    linear-gradient(rgb(76 140 110 / 0.12) 1px, transparent 1px) 0 0 / 10px 10px,
+    linear-gradient(90deg, rgb(76 140 110 / 0.12) 1px, transparent 1px) 0 0 / 10px 10px,
+    #f6f3e6;
+  border: 1px solid rgb(76 140 110 / 0.4);
+}
+
+.paper svg {
+  display: block;
+  width: 100%;
+  height: 260px;
+  overflow: visible;
+}
+
+.paper path {
+  fill: none;
+  stroke: var(--blue-ink);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.paper figcaption {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-top: 8px;
+  color: var(--ink-3);
+  font-family: var(--rs-mono), monospace;
+  font-size: 13px;
+}
+
+/* ---------- Картотека ---------- */
+.cards ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 22px;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-height: 190px;
+  padding: 18px 20px 40px;
+  border-top: 3px solid var(--red);
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 29px, var(--rule-soft) 29px 30px) 0 46px / 100% calc(100% - 46px) no-repeat,
+    var(--card);
+  box-shadow: 0 10px 24px -16px rgb(60 40 20 / 0.5);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px) rotate(-0.6deg);
+}
+
+.cardDate {
+  font-family: var(--rs-mono), monospace;
+  font-size: 22px;
+}
+
+.card b {
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.card span {
+  color: var(--ink-2);
+  font-size: 16px;
+}
+
+.cardStatus {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 0 8px;
+  border: 1.5px solid var(--red);
+  color: var(--red) !important;
+  font-family: var(--rs-mono), monospace;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  transform: rotate(-3deg);
+}
+
+.hole {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: inset 0 2px 3px rgb(60 40 20 / 0.35);
+}
+
+/* ---------- Вырезки ---------- */
+.clips ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 30px;
+  padding-top: 12px;
+}
+
+.clip {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  height: 100%;
+  padding: 14px 14px 22px;
+  background: #f9f6ec;
+  box-shadow: 0 14px 30px -18px rgb(60 40 20 / 0.55);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.25s ease;
+}
+
+.clip:hover {
+  transform: rotate(0deg) translateY(-4px);
+}
+
+.tape {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 96px;
+  height: 26px;
+  margin-left: -48px;
+  background: rgb(236 222 170 / 0.75);
+  box-shadow: 0 1px 2px rgb(60 40 20 / 0.15);
+  transform: rotate(-3deg);
+}
+
+.clipPhoto {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+
+.clipPhoto img {
+  object-fit: cover;
+  filter: grayscale(1) sepia(0.35) contrast(1.05);
+}
+
+.clip time {
+  color: var(--red);
+  font-family: var(--rs-mono), monospace;
+  font-size: 13px;
+}
+
+.clip b {
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.clip span:last-child {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: 16px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* ---------- Порядок действий ---------- */
+.steps > .margin {
+  top: 6px;
+}
+
+.steps h2 {
+  margin-bottom: 18px !important;
+  font-size: clamp(26px, 3vw, 34px);
+}
+
+.steps ol {
+  display: grid;
+  border-top: 1px solid var(--rule);
+}
+
+.steps li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.box {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--ink);
+  color: var(--blue-ink);
+  font-family: var(--rs-hand), cursive;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  transform: rotate(-3deg);
+}
+
+.steps li a {
+  display: grid;
+  gap: 2px;
+}
+
+.steps li b {
+  font-size: 21px;
+}
+
+.steps li a:hover b {
+  color: var(--red);
+}
+
+.steps li span {
+  color: var(--ink-2);
+  font-size: 16px;
+}
+
+/* ---------- Выходные данные ---------- */
+.footer {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: var(--wrap);
+  margin: 0 auto;
+  padding: 36px 0 110px;
+  border-top: 3px double var(--ink);
+  color: var(--ink-2);
+  font-size: 15px;
+  text-align: center;
+}
+
+.colophon {
+  color: var(--red);
+  font-family: var(--rs-mono), monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 22px;
+}
+
+.footer a {
+  border-bottom: 1px solid rgb(43 37 32 / 0.3);
+}
+
+.footer a:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.legal {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 960px) {
+  .page {
+    --margin: 40px;
+  }
+
+  .margin {
+    display: none;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .stamp {
+    right: 8px;
+    width: 124px;
+    height: 124px;
+  }
+
+  .clips ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    --margin: 22px;
+    --wrap: calc(100% - 32px);
+    font-size: 17px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .tabs {
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+
+  .hero {
+    padding: 44px 0 64px;
+  }
+
+  .entry {
+    padding: 22px 18px 26px;
+  }
+
+  .entry dt {
+    font-size: 15px;
+  }
+
+  .stamp {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    margin: 18px auto 0;
+  }
+
+  .sectionHead {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp {
+    animation: none;
+  }
+
+  .tabs a,
+  .card,
+  .clip {
+    transition: none;
+  }
+}

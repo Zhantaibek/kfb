@@ -6,6 +6,7 @@ import { insertAudit } from "../../db/repositories/cms.repository";
 import { AppError } from "../../middleware/error";
 import type { AdminSession, AuthSession, UserRole } from "../../../../shared/cms";
 import { decryptSecret, encryptSecret, generateSecret, otpauthUri, verifyCode } from "./totp";
+import { revokeSessions } from "./auth.service";
 
 /**
  * Двухфакторный вход сотрудников. После верного пароля сотрудник с 2FA получает не сессию, а «билет» на 5 минут;
@@ -115,6 +116,8 @@ export async function disableMfa(session: AdminSession, code: string) {
   if (config.mfaRequired) throw new AppError("Двухфакторный вход обязателен для сотрудников биржи", 400);
   await acceptCode(session.id, code, true);
   await prisma.user.update({ where: { id: session.id }, data: { totpSecret: null, totpEnabled: false, totpLastStep: null } });
+  // Остальные устройства выходят; текущему контроллер выдаёт новую cookie.
+  await revokeSessions(session.id);
   await insertAudit({ action: "update", entity: "users", detail: `2FA отключён: ${session.email}`, actor: session.email });
 }
 
@@ -123,6 +126,8 @@ export async function resetMfa(admin: AdminSession, userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
   if (!user) throw new Error("not-found");
   await prisma.user.update({ where: { id: userId }, data: { totpSecret: null, totpEnabled: false, totpLastStep: null } });
+  // Телефон потерян — все входы сотрудника отзываются.
+  await revokeSessions(userId);
   failures.delete(userId);
   await insertAudit({ action: "update", entity: "users", detail: `2FA сброшен: ${user.email}`, actor: admin.email });
 }
