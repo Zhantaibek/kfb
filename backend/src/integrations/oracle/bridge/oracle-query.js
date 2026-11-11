@@ -43,9 +43,11 @@ function text(rs, i) {
 }
 
 var out = new PrintStream(System.out, true, "UTF-8");
-Java.type("java.lang.Class").forName("oracle.jdbc.driver.OracleDriver");
-var conn = DriverManager.getConnection(env.get("ORACLE_URL"), env.get("ORACLE_USER"), env.get("ORACLE_PASSWORD"));
+var err = new PrintStream(System.err, true, "UTF-8");
+var conn = null;
 try {
+  Java.type("java.lang.Class").forName("oracle.jdbc.driver.OracleDriver");
+  conn = DriverManager.getConnection(env.get("ORACLE_URL"), env.get("ORACLE_USER"), env.get("ORACLE_PASSWORD"));
   var ps = conn.prepareStatement(sql);
   if (maxRows > 0) ps.setMaxRows(maxRows);
   for (var p = 0; p < params.length; p++) ps.setString(p + 1, params[p] === null ? null : String(params[p]));
@@ -76,6 +78,12 @@ try {
     rows.push(row);
   }
   out.println(JSON.stringify({ columns: columns, rows: rows }));
-} finally {
-  conn.close();
+} catch (e) {
+  // Только текст ошибки (ORA-…), без стека и без параметров подключения.
+  var message = e.getMessage ? e.getMessage() : String(e);
+  if (e.getCause && e.getCause()) message = e.getCause().getMessage();
+  err.println(String(message).replace(/^java\.\S+:\s*/, ""));
+  if (conn !== null) conn.close();
+  System.exit(1);
 }
+if (conn !== null) conn.close();
