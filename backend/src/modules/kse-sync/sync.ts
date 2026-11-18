@@ -3,7 +3,6 @@ import {
   KSE_ORIGIN,
   parseAuctionResults,
   parseIndex,
-  parseMembers,
   parseMfa,
   parseQuotes,
   parseRating,
@@ -61,8 +60,8 @@ export const sources: Source[] = [
       throw new Error("рейтинг пуст за последние годы");
     },
   },
-  { key: "finmarket", url: page("FinMarket"), load: async () => parseTablesPage(await fetchText(page("FinMarket"))) },
-  { key: "members", url: page("Members"), load: async () => parseMembers(await fetchText(page("Members"))) },
+  // «Финансовый рынок.KG» больше не берётся с kse.kg — выпуски и PDF в нашей базе (fin_market_issues, модуль finmarket).
+  // Участники торгов больше не берутся с kse.kg — они в нашей базе (business_catalog, модуль members).
 ];
 
 export const snapshotKeys = sources.map((source) => source.key);

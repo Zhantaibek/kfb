@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LivePage } from "@/components/live/LiveParts";
-import { loadSnapshot, type IndexData } from "@/lib/kse-live";
+import { loadIndexChart, loadSnapshot, type IndexData } from "@/lib/kse-live";
 import { IndexView, MarketLinks } from "@/components/live/LiveViews";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Индекс и капитализа
 
 /** Живые данные с kse.kg/ru/IndexAndCapitalization (обновляются раз в 15 минут). */
 export default async function Page() {
-  const snapshot = await loadSnapshot<IndexData>("index");
+  const [snapshot, monthly] = await Promise.all([loadSnapshot<IndexData>("index"), loadIndexChart()]);
   return (
     <LivePage
       title="Индекс и капитализация"
@@ -17,7 +17,7 @@ export default async function Page() {
       snapshot={snapshot}
       sourceUrl="https://www.kse.kg/ru/IndexAndCapitalization"
     >
-      {snapshot ? <IndexView data={snapshot.data} /> : null}
+      {snapshot ? <IndexView data={snapshot.data} monthly={monthly} /> : null}
       <MarketLinks current="/market/index" />
     </LivePage>
   );

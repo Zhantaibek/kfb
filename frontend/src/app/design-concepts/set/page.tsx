@@ -10,8 +10,8 @@ import { ConceptPage } from "../_shared/ConceptPage";
 import { ConceptSwitch } from "../_shared/ConceptSwitch";
 import { linkProps, longDate, nav, num, steps } from "../_shared/data";
 import { loadHomeData } from "../_shared/home-data";
-import { mapHeight, mapWidth, regionShapes, type RegionId } from "../karta/kgz-map";
-import { regionOf } from "../karta/regions";
+import { mapHeight, mapWidth, regionShapes, type RegionId } from "./kgz-map";
+import { regionOf } from "./regions";
 import { Carousel } from "./Carousel";
 import css from "./set.module.css";
 

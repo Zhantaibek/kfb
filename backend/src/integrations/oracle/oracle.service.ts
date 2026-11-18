@@ -22,12 +22,33 @@ export function bridgeErrorMessage(stderr: string) {
   return (cause ?? "неизвестная ошибка моста").replace(/^.*?Exception:\s*/, "").slice(0, 300);
 }
 
+/**
+ * Почему запрос не только для чтения; null — запрос допустим. Первый слой защиты (второй — транзакция
+ * SET TRANSACTION READ ONLY в самом мосте). Должна совпадать с readOnlyProblem в bridge/oracle-query.js.
+ */
+export function readOnlyProblem(sql: string): string | null {
+  if (!sql.trim()) return "пустой запрос";
+  if (sql.includes("--") || sql.includes("/*")) return "комментарии в запросе запрещены";
+  // Строки в кавычках не проверяем на слова: в них может быть любой текст.
+  const bare = sql.replace(/'(?:[^']|'')*'/g, " STR ");
+  if (bare.includes("'")) return "незакрытая кавычка";
+  if (bare.includes(";")) return "разрешена только одна команда (без «;»)";
+  if (!/^\s*select\b/i.test(bare)) return "разрешён только SELECT";
+  const word = bare.match(
+    /\b(insert|update|delete|merge|drop|alter|create|grant|revoke|truncate|rename|lock|commit|rollback|savepoint|execute|exec|call|begin|declare|into|dbms_\w+|utl_\w+)\b/i,
+  );
+  return word ? `запрещённое слово в запросе: ${word[1].toUpperCase()}` : null;
+}
+
 /** Строки моста { columns, rows } → массив объектов по именам колонок. */
 export function toObjects(output: BridgeOutput): OracleRow[] {
   return output.rows.map((row) => Object.fromEntries(output.columns.map((column, i) => [column, row[i] ?? null])));
 }
 
-export function queryOracle(sql: string, params: (string | number)[] = [], maxRows = 0): Promise<OracleRow[]> {
+/** timeoutMs — для долгих выборок (например, история торгов за все годы); по умолчанию минута. */
+export function queryOracle(sql: string, params: (string | number)[] = [], maxRows = 0, timeoutMs = oracleConfig.timeoutMs): Promise<OracleRow[]> {
+  const problem = readOnlyProblem(sql);
+  if (problem) return Promise.reject(new OracleBridgeError(`Только чтение: ${problem}`));
   if (!oracleConfigured()) return Promise.reject(new OracleBridgeError("Oracle не настроен: нет ORACLE_DB_HOST / SID / USER в .env"));
   const env = {
     ...process.env,
@@ -44,7 +65,7 @@ export function queryOracle(sql: string, params: (string | number)[] = [], maxRo
     execFile(
       oracleConfig.javaBin,
       args,
-      { env, timeout: oracleConfig.timeoutMs, maxBuffer: 64 * 1024 * 1024, encoding: "utf8", windowsHide: true },
+      { env, timeout: timeoutMs, maxBuffer: 64 * 1024 * 1024, encoding: "utf8", windowsHide: true },
       (error, stdout, stderr) => {
         if (error) {
           const reason = (error as NodeJS.ErrnoException).code === "ENOENT" ? `не найдена Java (${oracleConfig.javaBin})` : bridgeErrorMessage(stderr || error.message);

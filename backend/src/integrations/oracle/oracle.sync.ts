@@ -1,5 +1,9 @@
 import { prisma } from "../../db/prisma";
 import { oracleConfig, oracleConfigured } from "./oracle.config";
+import { syncRecentIndexValues } from "./oracle.index";
+import { syncQuotes } from "./oracle.quotes";
+import { syncRecentGcbAuctions } from "./oracle.auctions";
+import { syncRecentTradeDays } from "./oracle.tradedays";
 import { bishkekToday, lastTradingDay, loadDayTrades, type OracleTradesSnapshot } from "./oracle.trades";
 
 /**
@@ -26,6 +30,15 @@ async function syncOnce(): Promise<SyncResult> {
       create: { key: ORACLE_TRADES_KEY, data: snapshot, sourceUrl: SOURCE_URL, fetchedAt: now, checkedAt: now, error: null },
       update: { data: snapshot, sourceUrl: SOURCE_URL, fetchedAt: now, checkedAt: now, error: null },
     });
+    // Итоги по дням (trade_days, бывшая mod_tradestat): пустая таблица — вся история, иначе последняя неделя.
+    // Ошибка здесь не отменяет уже сохранённый снимок сделок — только пишется в журнал.
+    await syncRecentTradeDays().catch((error) => console.warn(`Oracle trade days: ${error instanceof Error ? error.message : error}`));
+    // Индекс KSE и капитализация (index_values, бывшая mod_cap_index).
+    await syncRecentIndexValues().catch((error) => console.warn(`Oracle index: ${error instanceof Error ? error.message : error}`));
+    // Котировки — лучшие заявки на покупку и продажу (quotes, бывшая mod_quotes).
+    await syncQuotes(now).catch((error) => console.warn(`Oracle quotes: ${error instanceof Error ? error.message : error}`));
+    // Результаты аукционов ГЦБ (gcb_auctions, бывшая mod_auction_result).
+    await syncRecentGcbAuctions().catch((error) => console.warn(`Oracle auctions: ${error instanceof Error ? error.message : error}`));
     return { ok: true, date: day, trades: snapshot.trades.length, deals: snapshot.totals.deals };
   } catch (error) {
     const message = (error instanceof Error ? error.message : String(error)).slice(0, 300);

@@ -85,15 +85,40 @@ function figureOffset(figure: HTMLElement) {
   };
 }
 
+/**
+ * Сдвиг фото не должен выводить его за поле редактора: границы считаются от места, где фото стоит без сдвига.
+ * Иначе фото с X = −596 улетало за левый край текста. Пока фото не в документе (ещё не вставлено) — без изменений.
+ */
+function fitOffset(figure: HTMLElement, x: number, y: number) {
+  const surface = figure.closest<HTMLElement>("[data-rte-surface]");
+  if (!surface || !figure.isConnected) return { x, y };
+  const prev = figure.style.transform;
+  figure.style.transform = "none";
+  const f = figure.getBoundingClientRect();
+  const s = surface.getBoundingClientRect();
+  figure.style.transform = prev;
+  if (!f.width || !s.width) return { x, y };
+  const minX = Math.min(0, s.left - f.left);
+  const maxX = Math.max(0, s.right - f.right);
+  const minY = Math.min(0, s.top - f.top);
+  const maxY = Math.max(0, s.bottom - f.bottom);
+  return {
+    x: Math.round(Math.min(maxX, Math.max(minX, x))),
+    y: Math.round(Math.min(maxY, Math.max(minY, y))),
+  };
+}
+
 function syncFigureWidth(figure: HTMLElement) {
   const img = figure.querySelector("img");
   if (!img) return;
   const width = figureWidth(figure);
-  const { x, y } = figureOffset(figure);
+  // Ширину ставим до расчёта границ: от неё зависит, сколько места остаётся для сдвига.
+  figure.style.width = `${width}%`;
+  const stored = figureOffset(figure);
+  const { x, y } = fitOffset(figure, stored.x, stored.y);
   figure.dataset.width = String(width);
   figure.dataset.ox = String(x);
   figure.dataset.oy = String(y);
-  figure.style.width = `${width}%`;
   figure.style.transform = `translate(${x}px, ${y}px)`;
   img.style.width = "100%";
   img.style.height = "auto";
@@ -880,6 +905,7 @@ export function RichTextEditor({ label = "Текст страницы", hint, va
       <div
         ref={surfaceRef}
         className={css.surface}
+        data-rte-surface=""
         contentEditable
         suppressContentEditableWarning
         onInput={() => {

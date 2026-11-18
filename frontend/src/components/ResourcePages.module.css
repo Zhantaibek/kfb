@@ -5,7 +5,33 @@
   margin-top: 22px;
 }
 
+.itemLink {
+  color: inherit;
+}
+
+.itemLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.site {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--brand-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.site:hover {
+  text-decoration: underline;
+}
+
 .item {
+  position: relative;
   display: block;
   padding: 16px;
   border-radius: 14px;

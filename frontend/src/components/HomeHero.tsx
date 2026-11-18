@@ -11,7 +11,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
-import { formatChange, formatSom } from "@/data/catalog";
+import { formatChange, formatSom, formatVolume } from "@/data/catalog";
 import { useTr } from "@/lib/use-tr";
 import styles from "./HomeHero.module.css";
 
@@ -307,7 +307,7 @@ export function HomeHero({ index, volume, listing }: Props) {
         <Link className={styles.stat} href="/market">
           <span className={styles.label}>{tr("Объём торгов")}</span>
           <span className={styles.value}>
-            <b>{formatSom(volume.value)}</b>
+            <b>{formatVolume(volume.value)}</b>
             <small>{tr("млн сом")}</small>
             <em className={tone(volume.change)}>{formatChange(volume.change)}</em>
           </span>

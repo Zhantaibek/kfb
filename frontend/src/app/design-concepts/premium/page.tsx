@@ -173,7 +173,7 @@ export default function PremiumConcept() {
             <div className={`${css.wrap} ${css.section}`}>
               <header className={css.head} data-reveal>
                 <p className={css.kicker}>Рынок · {market.sessionDate}</p>
-                <h2 id="p-market">Котировки и итоги сессии</h2>
+                <h2 id="p-market">Котировки и итоги торгов</h2>
                 <Link className={css.more} href="/market/quotes">
                   Все котировки →
                 </Link>

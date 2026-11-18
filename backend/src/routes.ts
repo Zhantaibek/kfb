@@ -7,6 +7,9 @@ import { adminAnalyticsRoutes } from "./modules/analytics/analytics.routes";
 import { marketDataHealth } from "./modules/kse-sync/sync";
 import { adminDisclosureRoutes, publicDisclosureRoutes } from "./modules/disclosure/disclosure.routes";
 import { adminOracleRoutes, publicOracleRoutes } from "./integrations/oracle/oracle.routes";
+import { newsArchiveRoutes } from "./modules/news-archive/news-archive.routes";
+import { membersRoutes } from "./modules/members/members.routes";
+import { finMarketRoutes } from "./modules/finmarket/finmarket.routes";
 
 export const api = Router();
 
@@ -37,5 +40,8 @@ api.use("/admin/disclosures", adminDisclosureRoutes);
 api.use("/public/disclosure", publicDisclosureRoutes);
 api.use("/admin/oracle", adminOracleRoutes);
 api.use("/public/oracle", publicOracleRoutes);
+api.use("/public/news", newsArchiveRoutes);
+api.use("/public/members", membersRoutes);
+api.use("/public/finmarket", finMarketRoutes);
 api.use("/auth", publicAuthRoutes);
 api.use("/public", publicCmsRoutes);

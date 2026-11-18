@@ -23,20 +23,34 @@ function plainToHtml(value: string) {
     .join("");
 }
 
+/**
+ * Сдвиг фото из редактора (ox/oy, px) на сайте — отступами, а не transform: transform только рисует картинку
+ * в другом месте, и она наезжала на текст и выходила за рамку новости. Отступ раздвигает текст и растягивает блок.
+ * Сдвиг только внутрь текста: вверх и наружу (отрицательные значения) не применяем.
+ */
+function offsetMargins(align: string, ox: number, oy: number) {
+  const out: string[] = [];
+  if (oy > 0) out.push(`margin-top:${oy}px`);
+  if ((align === "left" || align === "inline") && ox > 0) out.push(`margin-left:${ox}px`);
+  if ((align === "right" || align === "block-right") && ox < 0) out.push(`margin-right:${-ox}px`);
+  return out;
+}
+
 function applyFigureLayout(html: string) {
   const withFigures = html.replace(/<figure\b([^>]*)>/gi, (full, attrs: string) => {
     if (!/rte-figure/.test(attrs) && !/data-align|data-width/.test(attrs)) return full;
     const align = /data-align="([^"]*)"/.exec(attrs)?.[1] ?? "inline";
     const rawWidth = /data-width="(\d+)"/.exec(attrs)?.[1] ?? "100";
     const width = align === "full" ? "100" : rawWidth;
-    const ox = /data-ox="(-?\d+)"/.exec(attrs)?.[1] ?? "0";
-    const oy = /data-oy="(-?\d+)"/.exec(attrs)?.[1] ?? "0";
-    const layout = `width:${width}%;transform:translate(${ox}px, ${oy}px)`;
+    const ox = Number(/data-ox="(-?\d+)"/.exec(attrs)?.[1] ?? "0");
+    const oy = Number(/data-oy="(-?\d+)"/.exec(attrs)?.[1] ?? "0");
+    const layout = [`width:${width}%`, ...offsetMargins(align, ox, oy)].join(";");
     if (/\bstyle=/.test(attrs)) {
       return full.replace(/style="([^"]*)"/i, (_m, style: string) => {
         const cleaned = style
           .replace(/width\s*:\s*[^;]+;?/gi, "")
           .replace(/transform\s*:\s*[^;]+;?/gi, "")
+          .replace(/margin(-top|-left|-right)?\s*:\s*[^;]+;?/gi, "")
           .replace(/;+$/g, "")
           .trim();
         const next = [cleaned, layout].filter(Boolean).join(";");

@@ -302,7 +302,7 @@ export default async function TerminalConcept() {
                     ))}
                   </div>
                 </Pane>
-                <Pane title="Итоги сессии" value={data.session.label}>
+                <Pane title="Итоги торгов" value={data.session.label}>
                   <dl className={css.paneStats}>
                     {data.tradingRows.slice(0, 5).map((row) => (
                       <div key={row.label}>

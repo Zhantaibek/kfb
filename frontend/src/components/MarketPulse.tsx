@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { formatChange, formatSom, type Instrument, type InstrumentType } from "@/data/catalog";
+import { formatChange, formatSom, formatVolume, type Instrument, type InstrumentType } from "@/data/catalog";
 import { useMarketData } from "@/components/MarketDataProvider";
 import { instrumentHref, type MarketData, type TradeRow } from "@/lib/market-data";
+import { chartDate, niceScale } from "@/lib/chart-scale";
+import type { IndexChart } from "@/lib/kse-live";
 import { useTr } from "@/lib/use-tr";
 import styles from "./MarketPulse.module.css";
 
@@ -56,7 +58,7 @@ function historyDate(value: string) {
 }
 
 function sliceHistory(indexHistory: MarketData["indexHistory"], days: number) {
-  if (!days) return indexHistory;
+  if (!days || indexHistory.length < 2) return indexHistory;
   const end = historyDate(indexHistory[indexHistory.length - 1].date);
   const start = new Date(end);
   start.setDate(start.getDate() - days);
@@ -64,9 +66,35 @@ function sliceHistory(indexHistory: MarketData["indexHistory"], days: number) {
   return sliced.length >= 2 ? sliced : indexHistory.slice(-2);
 }
 
-/** Ломаная по реальным точкам: сглаживание сплайном рисовало бы между днями значения индекса, которых не было. */
+/**
+ * Плавная линия через реальные точки — монотонная кубическая кривая (Фриче — Карлсон). В отличие от обычного
+ * сплайна она не «перелетает» выше или ниже соседних точек на резких скачках, то есть не рисует значения индекса,
+ * которых не было: между двумя точками линия всегда остаётся в их пределах.
+ */
 function linePath(points: { x: number; y: number }[]) {
-  return points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
+  const n = points.length;
+  if (n < 3) return points.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  const dx = points.slice(1).map((p, i) => p.x - points[i].x);
+  const slope = points.slice(1).map((p, i) => (p.y - points[i].y) / (dx[i] || 1));
+  // Касательные в точках: 0 на экстремумах и плато, иначе — гармоническое среднее соседних наклонов.
+  const tangent = points.map((_, i) => {
+    if (i === 0) return slope[0];
+    if (i === n - 1) return slope[n - 2];
+    const a = slope[i - 1];
+    const b = slope[i];
+    if (a * b <= 0) return 0;
+    const wa = 2 * dx[i] + dx[i - 1];
+    const wb = dx[i] + 2 * dx[i - 1];
+    return (wa + wb) / (wa / a + wb / b);
+  });
+  let path = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const h = dx[i] / 3;
+    const p = points[i];
+    const q = points[i + 1];
+    path += ` C${(p.x + h).toFixed(1)},${(p.y + tangent[i] * h).toFixed(1)} ${(q.x - h).toFixed(1)},${(q.y - tangent[i + 1] * h).toFixed(1)} ${q.x.toFixed(1)},${q.y.toFixed(1)}`;
+  }
+  return path;
 }
 
 function lineGeometry(values: number[], width: number, height: number, pad = 10) {
@@ -100,41 +128,57 @@ export function Sparkline({ values, className }: { values: number[]; className?:
   );
 }
 
-const box = { width: 720, height: 240, left: 6, right: 58, top: 12, bottom: 30 };
+// Снизу место под подписи дат, повёрнутые наискосок (как на kse.kg).
+const box = { width: 720, height: 260, left: 64, right: 58, top: 12, bottom: 56 };
 
-function axisDate(value: string) {
-  const [day, month, year] = value.split("-");
-  return `${day}.${month}.${year.slice(2)}`;
-}
-
-function indexChart(series: { date: string; value: number }[]) {
+/**
+ * Геометрия графика индекса. Шкала — круглые деления (niceScale), даты — «ДД-ММ-ГГГГ».
+ * markers — редкие точки (по одной в месяц): у каждой кружок и своя подпись, как на главной kse.kg;
+ * иначе подписей не больше шести, чтобы не налезали.
+ */
+function indexChart(series: { date: string; value: number }[], markers: boolean) {
   const values = series.map((item) => item.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = max - min || max * 0.01 || 1;
-  const yMin = min - span * 0.1;
-  const yMax = max + span * 0.12;
-  const ySpan = yMax - yMin;
+  const scale = niceScale(values) ?? { domain: [Math.min(...values), Math.max(...values) || 1] as [number, number], ticks: [] as number[] };
+  const [yMin, yMax] = scale.domain;
+  const ySpan = yMax - yMin || 1;
   const innerW = box.width - box.left - box.right;
   const innerH = box.height - box.top - box.bottom;
+  const toY = (value: number) => box.top + innerH - ((value - yMin) / ySpan) * innerH;
   const points = series.map((item, index) => ({
     ...item,
     x: box.left + (index / Math.max(series.length - 1, 1)) * innerW,
-    y: box.top + innerH - ((item.value - yMin) / ySpan) * innerH,
+    y: toY(item.value),
   }));
   const line = linePath(points);
   const base = box.top + innerH;
   const last = points[points.length - 1];
   const area = `${line} L${last.x.toFixed(1)},${base} L${points[0].x.toFixed(1)},${base} Z`;
-  const yTicks = [0, 1, 2, 3].map((step) => ({
-    value: yMin + (ySpan * (step + 0.5)) / 4,
-    y: box.top + innerH - (innerH * (step + 0.5)) / 4,
-  }));
-  const count = Math.min(points.length, 5);
+  const yTicks = scale.ticks.map((value) => ({ value, y: toY(value) }));
+  const count = markers ? points.length : Math.min(points.length, 6);
   const xTicks = Array.from({ length: count }, (_, i) =>
     points[Math.round((i * (points.length - 1)) / Math.max(count - 1, 1))],
   ).filter((point, i, list) => list.indexOf(point) === i);
-  return { line, area, last, base, yTicks, xTicks, plotRight: box.width - box.right };
+  return { line, area, last, base, yTicks, xTicks, points, plotRight: box.width - box.right };
+}
+
+/** Что показывает график на главной: индекс KSE или капитализацию рынка (переключатель, как на kse.kg). */
+type Metric = "index" | "cap";
+
+/** Ряд для выбранного периода из истории нашей базы: 1Д/1Н/1М — по дням, 1Г — как на kse.kg, «Всё» — по месяцам. */
+function chartSeries(chart: IndexChart, periodId: (typeof periods)[number]["id"], days: number, metric: Metric = "index") {
+  const year = metric === "cap" ? chart.capitalization : chart.index;
+  if (periodId === "1y") return { series: year, markers: true };
+  if (periodId === "all") {
+    const allMonthly = metric === "cap" ? chart.capAllMonthly : chart.allMonthly;
+    const all = allMonthly?.length ? allMonthly : year;
+    return { series: all, markers: all.length <= 24 };
+  }
+  const daily = (metric === "cap" ? chart.capDaily : chart.daily) ?? [];
+  if (daily.length < 2) return { series: year, markers: true };
+  const end = new Date(`${daily[daily.length - 1].date}T00:00:00Z`);
+  const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+  const sliced = daily.filter((item) => new Date(`${item.date}T00:00:00Z`) >= start);
+  return { series: sliced.length >= 2 ? sliced : daily.slice(-2), markers: false };
 }
 
 function Badge({ item }: { item: Pick<Instrument, "ticker" | "type"> }) {
@@ -293,8 +337,8 @@ function SessionCard() {
   return (
     <article className={`${styles.card} ${styles.fill}`}>
       <header className={styles.cardHead}>
-        <h3>{tr("Итоги сессии")}</h3>
-        <Link href="/market/archive" aria-label={tr("Итоги сессии")}>
+        <h3>{tr("Итоги торгов")}</h3>
+        <Link href="/market/archive" aria-label={tr("Итоги торгов")}>
           <Arrow />
         </Link>
       </header>
@@ -306,7 +350,7 @@ function SessionCard() {
           <div key={item.label}>
             <dt>{tr(item.label)}</dt>
             <dd>
-              <b>{formatSom(item.value)}</b>
+              <b>{formatVolume(item.value)}</b>
               <em className={item.change < 0 ? styles.down : item.change > 0 ? styles.up : undefined}>
                 {formatChange(item.change)}
               </em>
@@ -469,11 +513,12 @@ function IndexStats() {
   const { indexHistory, index: indexKse, sessionDate } = useMarketData();
   const first = indexHistory[0];
   const last = indexHistory[indexHistory.length - 1];
-  const yearChange = ((last.index - first.index) / first.index) * 100;
+  // Данных нет — прочерки, а не нули.
+  const yearChange = first && last && first.index ? ((last.index - first.index) / first.index) * 100 : null;
   const stats = [
-    { label: "Изменение за сессию", value: formatChange(indexKse.change), tone: indexKse.change < 0 ? "down" : "up" },
-    { label: "Изменение за период", value: formatChange(yearChange), tone: yearChange < 0 ? "down" : "up" },
-    { label: "Капитализация", value: `${indexKse.capitalization.toLocaleString("ru-KG")} ${tr("млрд сом")}` },
+    { label: "Изменение за сессию", value: indexKse.value ? formatChange(indexKse.change) : "—", tone: indexKse.change < 0 ? "down" : "up" },
+    { label: "Изменение за период", value: yearChange === null ? "—" : formatChange(yearChange), tone: (yearChange ?? 0) < 0 ? "down" : "up" },
+    { label: "Капитализация", value: indexKse.capitalization ? `${indexKse.capitalization.toLocaleString("ru-KG")} ${tr("млрд сом")}` : "—" },
     { label: "Дата сессии", value: sessionDate },
   ];
   return (
@@ -518,19 +563,34 @@ export function MarketPulse() {
   const { indexHistory, index: indexKse, instruments } = market;
   const { gainers, losers } = moversOf(market);
   const [view, setView] = useState<View>("overview");
-  const [period, setPeriod] = useState<(typeof periods)[number]["id"]>("all");
+  // Есть история из нашей базы — по умолчанию год, как на главной kse.kg; иначе — всё, что есть в снимке.
+  const [period, setPeriod] = useState<(typeof periods)[number]["id"]>(market.indexChart ? "1y" : "all");
+  const [metric, setMetric] = useState<Metric>("index");
   const [tab, setTab] = useState("all");
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
 
   const selected = periods.find((item) => item.id === period) ?? periods[4];
   const anchor = indexHistory.at(-1)?.index || 1;
-  const series = sliceHistory(indexHistory, selected.days).map((item) => ({
-    date: item.date,
-    value: (item.index / anchor) * indexKse.value,
-  }));
-  const chart = indexChart(series);
-  const down = indexKse.change < 0;
+  // Капитализация — только по истории из нашей базы; без неё переключатель не показываем.
+  const showCap = metric === "cap" && Boolean(market.indexChart?.capitalization.length);
+  const fromBase = market.indexChart ? chartSeries(market.indexChart, selected.id, selected.days, showCap ? "cap" : "index") : null;
+  const series =
+    fromBase?.series ??
+    sliceHistory(indexHistory, selected.days).map((item) => ({
+      date: item.date,
+      value: (item.index / anchor) * indexKse.value,
+    }));
+  const markers = fromBase?.markers ?? false;
+  // Меньше двух точек — графика нет (данные ещё не загружены), вместо него подпись «Нет данных».
+  const chart = series.length > 1 ? indexChart(series, markers) : null;
+  // Изменение капитализации — к предыдущей точке ряда (по дням — к прошлому дню).
+  const capDaily = market.indexChart?.capDaily ?? [];
+  const capChange = capDaily.length > 1 ? ((capDaily[capDaily.length - 1].value - capDaily[capDaily.length - 2].value) / capDaily[capDaily.length - 2].value) * 100 : 0;
+  const headChange = showCap ? capChange : indexKse.change;
+  // Капитализация в заголовке — из того же ряда, что и график (млн → млрд сом); нет ряда — из снимка kse.kg.
+  const capNow = capDaily.length ? capDaily[capDaily.length - 1].value / 1000 : indexKse.capitalization;
+  const down = headChange < 0;
 
   const activeTab = tabs.find((item) => item.id === tab) ?? tabs[0];
   const needle = query.trim().toLowerCase();
@@ -574,11 +634,15 @@ export function MarketPulse() {
         <article className={`${styles.card} ${styles.chartCard}`}>
           <header className={styles.chartHead}>
             <div>
-              <small>KSE Index</small>
+              <small>{showCap ? tr("Капитализация, млрд сом") : "KSE Index"}</small>
               <p>
-                <b>{indexKse.value.toLocaleString("ru-KG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>
+                <b>
+                  {showCap
+                    ? capNow.toLocaleString("ru-KG", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+                    : indexKse.value.toLocaleString("ru-KG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </b>
                 <em className={down ? styles.down : styles.up}>
-                  {formatChange(indexKse.change)}
+                  {formatChange(headChange)}
                   <svg viewBox="0 0 16 16" aria-hidden="true">
                     <path d={down ? "M4 4l8 8M12 6v6H6" : "M4 12l8-8M6 4h6v6"} />
                   </svg>
@@ -598,7 +662,30 @@ export function MarketPulse() {
               ))}
             </div>
           </header>
-          <svg className={styles.chart} viewBox={`0 0 ${box.width} ${box.height}`} role="img" aria-label={tr("Динамика индекса KSE")}>
+          {market.indexChart?.capitalization.length ? (
+            // Переключатель «Индекс | Капитализация», как на главной kse.kg.
+            <div className={styles.metrics} role="tablist" aria-label={tr("Показатель графика")}>
+              {(
+                [
+                  ["index", "Индекс"],
+                  ["cap", "Капитализация"],
+                ] as const
+              ).map(([id, label]) => (
+                <button key={id} type="button" role="tab" aria-selected={metric === id} onClick={() => setMetric(id)}>
+                  {tr(label)}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {!chart ? (
+            <p className={styles.note}>{tr("Нет данных")}</p>
+          ) : (
+          <svg
+            className={styles.chart}
+            viewBox={`0 0 ${box.width} ${box.height}`}
+            role="img"
+            aria-label={tr(showCap ? "Динамика капитализации рынка" : "Динамика индекса KSE")}
+          >
             <defs>
               <linearGradient id="kse-board-fill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" className={styles.fillTop} />
@@ -606,28 +693,36 @@ export function MarketPulse() {
               </linearGradient>
             </defs>
             {chart.yTicks.map((tick) => (
-              <g key={tick.y}>
+              <g key={tick.value}>
                 <line x1={box.left} x2={chart.plotRight} y1={tick.y} y2={tick.y} className={styles.grid} />
                 <text x={box.width - 4} y={tick.y + 4} className={styles.axis} textAnchor="end">
-                  {Math.round(tick.value).toLocaleString("ru-KG")}
+                  {tick.value.toLocaleString("ru-KG", { maximumFractionDigits: 2 })}
                 </text>
               </g>
             ))}
-            {chart.xTicks.map((tick, i) => (
-              <text
-                key={tick.date}
-                x={tick.x}
-                y={box.height - 8}
-                className={styles.axis}
-                textAnchor={i === 0 ? "start" : i === chart.xTicks.length - 1 ? "end" : "middle"}
-              >
-                {axisDate(tick.date)}
-              </text>
+            {chart.xTicks.map((tick) => (
+              <g key={tick.date}>
+                {/* Даты «ДД-ММ-ГГГГ» наискосок — как на kse.kg, помещаются и при точке на каждый месяц. */}
+                <text
+                  x={tick.x}
+                  y={chart.base + 14}
+                  className={styles.axis}
+                  textAnchor="end"
+                  transform={`rotate(-35 ${tick.x} ${chart.base + 14})`}
+                >
+                  {chartDate(tick.date)}
+                </text>
+              </g>
             ))}
             <path d={chart.area} fill="url(#kse-board-fill)" />
             <path d={chart.line} className={styles.line} />
-            <circle cx={chart.last.x} cy={chart.last.y} r="4" className={styles.dot} />
+            {markers ? (
+              chart.points.map((point) => <circle key={point.date} cx={point.x} cy={point.y} r="2.5" className={styles.marker} />)
+            ) : (
+              <circle cx={chart.last.x} cy={chart.last.y} r="4" className={styles.dot} />
+            )}
           </svg>
+          )}
         </article>
         ) : null}
         {view === "index" ? <IndexStats /> : null}

@@ -11,6 +11,7 @@ import { applyLocale } from "@/lib/cms/locale";
 import { EDU_URL } from "@/lib/edu";
 import { mediaSrc } from "@/lib/cms/media-src";
 import type { CmsI18n } from "@/lib/cms/types";
+import type { ArchiveLatest, ArchiveNews } from "@/lib/kse-live";
 import { useLang, useTr } from "@/lib/use-tr";
 import styles from "@/app/page.module.css";
 import { AdminEditButton } from "@/components/AdminEditButton";
@@ -56,7 +57,8 @@ const services = [
   {
     title: "Товарно-сырьевой сектор",
     text: "Торги драгоценными металлами и биржевыми товарами.",
-    href: "/commodity",
+    // Отдельная площадка товарно-сырьевого сектора.
+    href: "https://ts.kse.kg/",
     icon: <path d="M3.5 20l1.5-5h6l1.5 5zM11.5 20l1.5-5h6l1.5 5zM7.5 13l1.5-5h6l1.5 5z" />,
   },
   {
@@ -111,6 +113,8 @@ export type HomeNews = {
   pinned?: boolean;
   company?: string;
   i18n?: CmsI18n;
+  /** Новость архива старого сайта: открывается по этой ссылке на kse.kg, а не на нашей странице. */
+  url?: string;
 };
 
 type Props = {
@@ -123,19 +127,40 @@ type Props = {
   companyNews?: HomeNews[];
   /** Срочные объявления: отдельный блок внизу, перед подвалом; пусто — блока нет. */
   urgent?: UrgentNotice[];
+  /** Свежие новости архива старого сайта на каждом языке — смешиваются с лентой по дате. */
+  archive?: ArchiveLatest;
 };
 
-export function HomeView({ news, companyNews = [], urgent = [], index, volume, listing }: Props) {
+/** Новость архива (дата ГГГГ-ММ-ДД) → карточка ленты (дата ДД.ММ.ГГГГ, как у новостей из админки). */
+function fromArchive(item: ArchiveNews): HomeNews {
+  return {
+    slug: item.slug,
+    tag: item.tag,
+    date: item.date.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$3.$2.$1"),
+    title: item.title,
+    excerpt: "",
+    company: item.company || undefined,
+    url: item.url,
+  };
+}
+
+export function HomeView({ news, companyNews = [], urgent = [], archive, index, volume, listing }: Props) {
   const tr = useTr();
   const lang = useLang();
   const localizedNews = news.map((item) => applyLocale(item, lang, ["title", "excerpt", "tag"]));
   const localizedCompanies = companyNews.map((item) => applyLocale(item, lang, ["title", "excerpt", "tag", "company"]));
-  const featured = localizedNews.find((item) => item.featured) ?? localizedNews[0];
   const [newsTab, setNewsTab] = useState<"exchange" | "company">("exchange");
-  const byDate = <T extends { date: string }>(items: T[]) =>
-    [...items].sort((a, b) => dateKey(b.date).localeCompare(dateKey(a.date))).slice(0, 4);
-  const exchangeItems = byDate(localizedNews.filter((item) => item.slug !== featured?.slug));
-  const companyItems = byDate(localizedCompanies);
+  const sortByDate = <T extends { date: string }>(items: T[]) => [...items].sort((a, b) => dateKey(b.date).localeCompare(dateKey(a.date)));
+  // 6 новостей в ленте; фото «Главного» слева растягивается под её высоту (page.module.css, .leadArt).
+  const byDate = <T extends { date: string }>(items: T[]) => sortByDate(items).slice(0, 6);
+  // Лента справа: новости из админки и свежие новости архива на языке сайта, по дате.
+  const archived = archive?.[lang as keyof ArchiveLatest] ?? { exchange: [], company: [], urgent: [] };
+  const allExchange = sortByDate([...localizedNews, ...archived.exchange.map(fromArchive)]);
+  // «Главное»: отмеченная или любая новость из админки с фото; нет такой — самая свежая новость (с фото здания биржи).
+  const featured =
+    localizedNews.find((item) => item.featured && item.photo) ?? localizedNews.find((item) => item.photo) ?? allExchange[0];
+  const exchangeItems = byDate(allExchange.filter((item) => item.slug !== featured?.slug));
+  const companyItems = byDate([...localizedCompanies, ...archived.company.map(fromArchive)]);
   const latest = newsTab === "company" ? companyItems : exchangeItems;
 
   return (
@@ -176,20 +201,39 @@ export function HomeView({ news, companyNews = [], urgent = [], index, volume, l
           </header>
           {featured ? (
             <div className={styles.newsBoard} data-stagger>
-              <Link className={styles.leadCard} href={`/news/${featured.slug}`}>
-                <span className={styles.leadArt}>
-                  {featured.photo ? (
-                    <Image src={mediaSrc(featured.photo)} alt="" fill sizes="720px" unoptimized />
-                  ) : null}
-                  <em>{tr("Главное")}</em>
-                </span>
-                <time>{pressDate(featured.date, lang)}</time>
-                <h3>{tr(featured.title)}</h3>
-                {featured.excerpt ? <p>{tr(featured.excerpt)}</p> : null}
-                <strong>
-                  {tr("Читать далее")} <span aria-hidden="true">→</span>
-                </strong>
-              </Link>
+              {(() => {
+                const lead = (
+                  <>
+                    <span className={styles.leadArt}>
+                      {/* Нет своего фото (новость архива) — фото здания биржи. */}
+                      <Image
+                        src={featured.photo ? mediaSrc(featured.photo) : "/hero/kse-entrance-garden.jpg"}
+                        alt=""
+                        fill
+                        sizes="720px"
+                        unoptimized
+                      />
+                      <em>{tr("Главное")}</em>
+                    </span>
+                    <time>{pressDate(featured.date, lang)}</time>
+                    <h3>{tr(featured.title)}</h3>
+                    {featured.excerpt ? <p>{tr(featured.excerpt)}</p> : null}
+                    <strong>
+                      {tr("Читать далее")} <span aria-hidden="true">{featured.url ? "↗" : "→"}</span>
+                    </strong>
+                  </>
+                );
+                // Новость архива открывается на старом сайте, в новой вкладке.
+                return featured.url ? (
+                  <a className={styles.leadCard} href={featured.url} target="_blank" rel="noopener noreferrer">
+                    {lead}
+                  </a>
+                ) : (
+                  <Link className={styles.leadCard} href={`/news/${featured.slug}`}>
+                    {lead}
+                  </Link>
+                );
+              })()}
               {exchangeItems.length || companyItems.length ? (
                 <div className={styles.latestCard}>
                   <div className={styles.latestHead}>
@@ -222,22 +266,42 @@ export function HomeView({ news, companyNews = [], urgent = [], index, volume, l
                     )}
                   </div>
                   <div className={styles.latestList}>
-                    {latest.map((item) => (
-                      <Link href={`/news/${item.slug}`} key={item.slug}>
-                        <span className={styles.latestThumb}>
-                          {item.photo ? <Image src={mediaSrc(item.photo)} alt="" fill sizes="96px" unoptimized /> : null}
-                        </span>
-                        <span className={styles.latestMeta}>
-                          <time>{pressDate(item.date, lang)}</time>
-                          {newsTab === "company" && item.company ? <span>{item.company}</span> : null}
-                        </span>
-                        <b>{tr(item.title)}</b>
-                        {item.excerpt ? <small>{tr(item.excerpt)}</small> : null}
-                        <span className={styles.latestArrow} aria-hidden="true">
-                          →
-                        </span>
-                      </Link>
-                    ))}
+                    {latest.map((item) => {
+                      const inner = (
+                        <>
+                          <span className={styles.latestThumb}>
+                            {item.photo ? (
+                              <Image src={mediaSrc(item.photo)} alt="" fill sizes="96px" unoptimized />
+                            ) : (
+                              // Нет фото — объёмная газета (public/brand/news-3d.svg) на фирменном фоне.
+                              <span className={styles.thumbPattern} aria-hidden="true">
+                                {/* eslint-disable-next-line @next/next/no-img-element -- статичный SVG, оптимизация не нужна */}
+                                <img src="/brand/news-3d.svg" alt="" />
+                              </span>
+                            )}
+                          </span>
+                          <span className={styles.latestMeta}>
+                            <time>{pressDate(item.date, lang)}</time>
+                            {newsTab === "company" && item.company ? <span>{item.company}</span> : null}
+                          </span>
+                          <b>{tr(item.title)}</b>
+                          {item.excerpt ? <small>{tr(item.excerpt)}</small> : null}
+                          <span className={styles.latestArrow} aria-hidden="true">
+                            {item.url ? "↗" : "→"}
+                          </span>
+                        </>
+                      );
+                      // Новость архива — полный текст на старом сайте, в новой вкладке.
+                      return item.url ? (
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" key={item.slug}>
+                          {inner}
+                        </a>
+                      ) : (
+                        <Link href={`/news/${item.slug}`} key={item.slug}>
+                          {inner}
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               ) : null}
@@ -268,7 +332,19 @@ export function HomeView({ news, companyNews = [], urgent = [], index, volume, l
         </section>
 
         <ResourceRail />
-        <UrgentNotices items={urgent} />
+        {/* Срочные из админки и срочные из архива старого сайта на языке сайта (ссылка на kse.kg). */}
+        <UrgentNotices
+          items={[
+            ...urgent,
+            ...archived.urgent.map((item) => ({
+              slug: item.slug,
+              date: item.date.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$3.$2.$1"),
+              title: item.title,
+              excerpt: "",
+              url: item.url,
+            })),
+          ]}
+        />
       </main>
     </div>
   );

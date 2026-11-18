@@ -207,6 +207,18 @@
     max-width: 100%;
     overflow-x: auto;
   }
+  /* На телефоне сдвиг фото из редактора (в пикселях широкого экрана) не применяем — фото во всю ширину. */
+  .prose :global(figure.rte-figure) {
+    float: none !important;
+    width: 100% !important;
+    margin: 1rem 0 !important;
+    transform: none !important;
+  }
+}
+
+/* Фото со сдвигом не выходит за края текста новости. */
+.prose {
+  overflow-x: clip;
 }
 
 /* Редактор оборачивает пункт списка и ячейку в абзац — без лишних отступов между пунктами. */

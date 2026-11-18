@@ -151,6 +151,40 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
+/* Переключатель «Индекс | Капитализация» над графиком: две половины на всю ширину, выбранная — белая. */
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-top: 12px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--pill-track);
+}
+
+.metrics button {
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.metrics button[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--brand-strong, var(--ink));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.metrics button:focus-visible {
+  outline: 2px solid var(--up);
+  outline-offset: 2px;
+}
+
 .chart {
   display: block;
   width: 100%;
@@ -184,13 +218,20 @@
 
 .axis {
   fill: var(--ink-muted);
-  font-size: 12px;
+  font-size: 9.5px;
   font-variant-numeric: tabular-nums;
 }
 
 .dot {
   fill: var(--brand);
   stroke: var(--surface);
+  stroke-width: 2;
+}
+
+/* Точки помесячного графика (как на kse.kg): белый кружок с обводкой цвета линии. */
+.marker {
+  fill: var(--surface);
+  stroke: var(--brand);
   stroke-width: 2;
 }
 
@@ -426,7 +467,7 @@ a.row:hover {
   padding: 14px 16px 8px;
 }
 
-/* Итоги сессии */
+/* Итоги торгов */
 .sessionMeta {
   margin: 4px 0 0;
   color: var(--ink-muted);

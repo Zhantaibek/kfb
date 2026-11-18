@@ -13,6 +13,8 @@ export type UrgentNotice = {
   title: string;
   excerpt: string;
   i18n?: CmsI18n;
+  /** Объявление из архива старого сайта: полный текст по этой ссылке на kse.kg. */
+  url?: string;
 };
 
 /**
@@ -36,18 +38,34 @@ export function UrgentNotices({ items }: { items: UrgentNotice[] }) {
         <AdminEditButton href="/admin/news" />
       </header>
       <ul className={css.list}>
-        {notices.map((item) => (
-          <li key={item.slug}>
-            <Link href={`/news/${item.slug}`} className={css.item}>
+        {notices.map((item) => {
+          const inner = (
+            <>
               <time>{item.date}</time>
               <span className={css.body}>
                 <b>{item.title}</b>
                 {item.excerpt ? <span>{item.excerpt}</span> : null}
               </span>
-              <span className={css.more}>{tr("Подробнее")} →</span>
-            </Link>
-          </li>
-        ))}
+              <span className={css.more}>
+                {tr("Подробнее")} {item.url ? "↗" : "→"}
+              </span>
+            </>
+          );
+          return (
+            <li key={item.slug}>
+              {/* Объявление из архива старого сайта — полный текст на kse.kg, в новой вкладке. */}
+              {item.url ? (
+                <a href={item.url} target="_blank" rel="noopener noreferrer" className={css.item}>
+                  {inner}
+                </a>
+              ) : (
+                <Link href={`/news/${item.slug}`} className={css.item}>
+                  {inner}
+                </Link>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

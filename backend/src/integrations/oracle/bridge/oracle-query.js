@@ -1,9 +1,9 @@
 /*
- * Мост к Oracle 8i. Запускается движком jjs (Nashorn) из Java 8 со старым JDBC-драйвером classes12.zip —
+ * Мост к Oracle 8i. Запускается движком Nashorn из Java 8 со старым JDBC-драйвером classes12.zip —
  * только он ещё умеет подключаться к 8i (node-oracledb и Instant Client 19c получают ORA-03134).
- * Компилировать ничего не нужно.
+ * Компилировать ничего не нужно:
  *
- *   jjs -cp classes12.zip;nls_charset12.zip oracle-query.js
+ *   java -cp classes12.zip;nls_charset12.zip jdk.nashorn.tools.Shell oracle-query.js
  *
  * Вход — переменные окружения (так пароль не виден в списке процессов):
  *   ORACLE_URL      jdbc:oracle:thin:@host:port:sid
@@ -13,6 +13,13 @@
  *   ORACLE_MAX_ROWS ограничение числа строк (необязательно)
  * Выход — UTF-8 JSON в stdout: { "columns": [...], "rows": [[...], ...] }; ошибка — текст в stderr и код 1.
  * Числа отдаются строками (без потери точности), даты — «ГГГГ-ММ-ДД ЧЧ:ММ:СС», пусто — null.
+ *
+ * ТОЛЬКО ЧТЕНИЕ. Мост не может изменить данные биржи — защита в два слоя:
+ *  1. Текст запроса: ровно один SELECT, без «;», без комментариев и без слов, которыми что-то меняют или
+ *     запускают (INSERT, UPDATE, DELETE, DROP, ALTER, FOR UPDATE, вызовы DBMS_/UTL_ и т. п.).
+ *  2. Сама база: запрос выполняется внутри транзакции SET TRANSACTION READ ONLY — Oracle сам отклонит любую
+ *     запись (ORA-01456), даже если проверка текста что-то пропустит. В конце — всегда ROLLBACK, COMMIT не вызывается.
+ * Та же проверка текста есть в Node (oracle.service.ts) — запрос отклоняется ещё до запуска Java.
  */
 var System = Java.type("java.lang.System");
 var DriverManager = Java.type("java.sql.DriverManager");
@@ -21,14 +28,34 @@ var JString = Java.type("java.lang.String");
 var PrintStream = Java.type("java.io.PrintStream");
 var SimpleDateFormat = Java.type("java.text.SimpleDateFormat");
 
-var env = System.getenv();
-var sql = env.get("ORACLE_SQL");
-// Только чтение: мост не должен ничего менять в Oracle. Драйвер 8i не поддерживает setReadOnly, поэтому
-// пропускаем ровно один SELECT без «;» (вторую команду через точку с запятой не приписать).
-if (!sql || !/^\s*(select|with)\b/i.test(sql) || sql.indexOf(";") >= 0) {
-  System.err.println("ORACLE_SQL must be a single SELECT");
+var out = new PrintStream(System.out, true, "UTF-8");
+var err = new PrintStream(System.err, true, "UTF-8");
+
+function fail(message) {
+  err.println(message);
   System.exit(1);
 }
+
+/** Почему запрос не только для чтения; null — запрос допустим. Должна совпадать с readOnlyProblem в oracle.service.ts. */
+function readOnlyProblem(sql) {
+  if (!sql || !String(sql).trim()) return "пустой запрос";
+  sql = String(sql);
+  if (sql.indexOf("--") >= 0 || sql.indexOf("/*") >= 0) return "комментарии в запросе запрещены";
+  // Строки в кавычках не проверяем на слова: в них может быть любой текст.
+  var bare = sql.replace(/'(?:[^']|'')*'/g, " STR ");
+  if (bare.indexOf("'") >= 0) return "незакрытая кавычка";
+  if (bare.indexOf(";") >= 0) return "разрешена только одна команда (без «;»)";
+  if (!/^\s*select\b/i.test(bare)) return "разрешён только SELECT";
+  var forbidden = /\b(insert|update|delete|merge|drop|alter|create|grant|revoke|truncate|rename|lock|commit|rollback|savepoint|execute|exec|call|begin|declare|into|dbms_\w+|utl_\w+)\b/i;
+  var word = bare.match(forbidden);
+  return word ? "запрещённое слово в запросе: " + word[1].toUpperCase() : null;
+}
+
+var env = System.getenv();
+var sql = env.get("ORACLE_SQL");
+var problem = readOnlyProblem(sql);
+if (problem !== null) fail("Только чтение: " + problem);
+
 var params = env.get("ORACLE_PARAMS") ? JSON.parse(env.get("ORACLE_PARAMS")) : [];
 var maxRows = env.get("ORACLE_MAX_ROWS") ? parseInt(env.get("ORACLE_MAX_ROWS"), 10) : 0;
 var dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -42,12 +69,26 @@ function text(rs, i) {
   return String(value).replace(/\s+$/, "");
 }
 
-var out = new PrintStream(System.out, true, "UTF-8");
-var err = new PrintStream(System.err, true, "UTF-8");
+function closeQuietly(conn) {
+  if (conn === null) return;
+  try {
+    conn.rollback();
+  } catch (ignored) {}
+  try {
+    conn.close();
+  } catch (ignored) {}
+}
+
 var conn = null;
 try {
   Java.type("java.lang.Class").forName("oracle.jdbc.driver.OracleDriver");
   conn = DriverManager.getConnection(env.get("ORACLE_URL"), env.get("ORACLE_USER"), env.get("ORACLE_PASSWORD"));
+  // Без автокоммита и в транзакции только для чтения: база сама запретит любую запись.
+  conn.setAutoCommit(false);
+  var guard = conn.createStatement();
+  guard.execute("SET TRANSACTION READ ONLY");
+  guard.close();
+
   var ps = conn.prepareStatement(sql);
   if (maxRows > 0) ps.setMaxRows(maxRows);
   for (var p = 0; p < params.length; p++) ps.setString(p + 1, params[p] === null ? null : String(params[p]));
@@ -77,13 +118,14 @@ try {
     }
     rows.push(row);
   }
+  rs.close();
+  ps.close();
   out.println(JSON.stringify({ columns: columns, rows: rows }));
 } catch (e) {
   // Только текст ошибки (ORA-…), без стека и без параметров подключения.
   var message = e.getMessage ? e.getMessage() : String(e);
   if (e.getCause && e.getCause()) message = e.getCause().getMessage();
-  err.println(String(message).replace(/^java\.\S+:\s*/, ""));
-  if (conn !== null) conn.close();
-  System.exit(1);
+  closeQuietly(conn);
+  fail(String(message).replace(/^java\.\S+:\s*/, ""));
 }
-if (conn !== null) conn.close();
+closeQuietly(conn);

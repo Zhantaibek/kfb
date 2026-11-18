@@ -91,7 +91,9 @@ export function SiteChrome({ children }: { children: ReactNode }) {
           if (list.length) timers.push(window.setTimeout(() => releaseItems(list), 1600));
         }
       },
-      { threshold: 0.14, rootMargin: "0px 0px -12% 0px" },
+      // Порог 0: блок появляется, как только его верх входит в экран. Доля высоты (было 0.14) не срабатывала
+      // у длинных блоков (список из десятков строк выше экрана) — они оставались невидимыми до прокрутки.
+      { threshold: 0, rootMargin: "0px 0px -12% 0px" },
     );
 
     nodes.forEach((node) => observer.observe(node));

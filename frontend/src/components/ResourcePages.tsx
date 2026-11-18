@@ -8,6 +8,7 @@ import type { CmsPartner } from "@/lib/cms/types";
 import ui from "@/app/ui.module.css";
 import { useTr } from "@/lib/use-tr";
 import styles from "./ResourcePages.module.css";
+import { siteHost } from "./ResourceRail";
 
 /** /about/partners — все партнёры из админки. */
 export function ResourceDirectory({ partners }: { partners: CmsPartner[] }) {
@@ -26,15 +27,23 @@ export function ResourceDirectory({ partners }: { partners: CmsPartner[] }) {
       />
       <div className={styles.list}>
         {list.map((item) => (
-          <Link className={styles.item} href={`/about/partners/${item.slug}`} key={item.slug}>
+          // Карточка ведёт на страницу партнёра (растянутая ссылка в заголовке), отдельная ссылка — на его сайт.
+          <div className={styles.item} key={item.slug}>
             <span>
               <b>
-                {item.mark} · {item.caption}
+                <Link className={styles.itemLink} href={`/about/partners/${item.slug}`}>
+                  {item.mark} · {item.caption}
+                </Link>
               </b>
               <small>{item.name}</small>
               <p>{item.lead}</p>
+              {item.site ? (
+                <a className={styles.site} href={item.site} target="_blank" rel="noopener noreferrer">
+                  {tr("Сайт")}: {siteHost(item.site)} ↗
+                </a>
+              ) : null}
             </span>
-          </Link>
+          </div>
         ))}
       </div>
     </main>

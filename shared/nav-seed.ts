@@ -57,7 +57,7 @@ export const defaultFooterNav: NavSeedNode[] = [
     href: "/listing",
     i18n: { ky: { label: "Багыттар" }, en: { label: "Business lines" } },
     children: [
-      { id: "menu-foot-2-1", label: "Товарно-сырьевой сектор", href: "/commodity", i18n: { ky: { label: "Товар-чийки зат сектору" }, en: { label: "Commodities sector" } } },
+      { id: "menu-foot-2-1", label: "Товарно-сырьевой сектор", href: "https://ts.kse.kg/", i18n: { ky: { label: "Товар-чийки зат сектору" }, en: { label: "Commodities sector" } } },
       { id: "menu-foot-2-2", label: "Листинг", href: "/listing", i18n: { ky: { label: "Листинг" }, en: { label: "Listing" } } },
       { id: "menu-foot-2-3", label: "Центр раскрытия информации", href: "/disclosure", i18n: { ky: { label: "Маалыматты ачыктоо борбору" }, en: { label: "Disclosure centre" } } },
       { id: "menu-foot-2-4", label: "Тарифы", href: "/tariffs", i18n: { ky: { label: "Тарифтер" }, en: { label: "Fees" } } },
@@ -138,7 +138,8 @@ export const defaultHeaderNav: NavSeedNode[] = [
     label: "Направления",
     href: "/listing",
     children: [
-      { id: "menu-dir-commodity", label: "Товарно-сырьевой сектор", href: "/commodity" },
+      // Товарно-сырьевой сектор — отдельная площадка ts.kse.kg, как и на старом сайте.
+      { id: "menu-dir-commodity", label: "Товарно-сырьевой сектор", href: "https://ts.kse.kg/" },
       { id: "menu-dir-listing", label: "Листинг", href: "/listing" },
       { id: "menu-dir-disclosure", label: "Центр раскрытия информации", href: "/disclosure" },
       { id: "menu-dir-tariffs", label: "Тарифы", href: "/tariffs" },
@@ -146,8 +147,6 @@ export const defaultHeaderNav: NavSeedNode[] = [
       { id: "menu-dir-finmarket", label: "Финансовый рынок KG", href: "/finmarket" },
       { id: "menu-dir-news", label: "Пресс-клуб", href: "/press-club" },
       { id: "menu-dir-25", label: "25 лет ЗАО КФБ", href: "/about/25-years" },
-      { id: "menu-dir-sustainable", label: "Сектор устойчивого развития", href: "/sustainable" },
-      { id: "menu-dir-gcb-invest", label: "Инвестиции в ГЦБ", href: "/gcb/invest" },
     ],
   },
   {

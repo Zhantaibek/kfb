@@ -13,6 +13,7 @@ export function LivePage({
   lead,
   snapshot,
   sourceUrl,
+  emptyText,
   children,
 }: {
   title: string;
@@ -20,6 +21,8 @@ export function LivePage({
   lead?: string;
   snapshot: Snapshot<unknown> | null;
   sourceUrl: string;
+  /** Текст, когда данных нет, — вместо сообщения про загрузку с kse.kg. */
+  emptyText?: string;
   children?: ReactNode;
 }) {
   return (
@@ -35,6 +38,8 @@ export function LivePage({
       />
       {snapshot ? (
         children
+      ) : emptyText ? (
+        <p className={css.empty}>{emptyText}</p>
       ) : (
         <p className={css.empty}>
           Данные ещё не загружены с kse.kg — обновление идёт раз в 15 минут. Пока можно открыть{" "}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { PageIntro } from "@/components/Forms";
 import { NewsList } from "@/components/NewsList";
+import { NewsArchive } from "@/components/NewsArchive";
 import { PublicMain } from "@/components/PublicMain";
 import type { CmsIssuer, CmsListingEntry, CmsNews, DisclosureEvent } from "@/lib/cms/types";
 import ui from "@/app/ui.module.css";
@@ -116,6 +117,8 @@ export function IssuerView({ issuer, news, listing, disclosures }: Props) {
       {tab === "Новости компании" ? (
         <div>
           {news.length ? <NewsList items={news} /> : null}
+          {/* Корпоративные новости компании с прежнего сайта: заголовки, полный текст — на kse.kg. */}
+          <NewsArchive issuerSlug={issuer.slug} />
           {disclosures.length ? (
             <>
               <h2>Раскрытие существенных фактов</h2>

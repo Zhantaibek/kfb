@@ -8,26 +8,35 @@ datasource db {
 }
 
 model News {
-  id         String   @id
-  slug       String   @unique
-  date       String
-  tag        String
-  kind       String
-  status     String
-  title      String
-  excerpt    String
-  body       String
-  photo      String
-  issuerSlug String?
-  issuer     Issuer?  @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
-  i18n       Json     @default("{}")
+  id          String   @id
+  slug        String   @unique
+  date        String
+  tag         String
+  kind        String
+  status      String
+  title       String
+  excerpt     String
+  body        String
+  photo       String
+  issuerSlug  String?
+  issuer      Issuer?  @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
+  i18n        Json     @default("{}")
   /// Прикреплённые документы: [{ name, url, ext, size }] — файлы лежат в uploads.
-  attachments Json    @default("[]")
-  createdAt  DateTime @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime @map("updated_at") @db.Timestamptz(6)
+  attachments Json     @default("[]")
+  /// Blog_Entries.blogentry_id старой базы (рубрика старого блога — в kind/tag).
+  legacyId    Int?     @unique @map("legacy_id")
+  /// Архивная новость со старого сайта: у нас только заголовок и дата, полный текст — по этой ссылке на kse.kg.
+  /// Пусто — обычная новость нового сайта, читается целиком у нас.
+  sourceUrl   String?  @map("source_url")
+  /// Язык новости: ru | ky | en. Архив старого сайта вёлся отдельными записями на каждом языке;
+  /// новости нового сайта — русские с переводами в i18n.
+  lang        String   @default("ru")
+  createdAt   DateTime @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @map("updated_at") @db.Timestamptz(6)
 
   @@index([status, updatedAt(sort: Desc)])
   @@index([issuerSlug])
+  @@index([lang, kind, date])
   @@map("news")
 }
 
@@ -72,6 +81,33 @@ model Media {
   @@map("media")
 }
 
+/// Документы сайта (PDF, DOC, XLS…): стратегии, устав, положения, регламенты — по разделам и страницам.
+/// Сам файл лежит в uploads (как у медиатеки), здесь — описание и ссылка. section — раздел (strategy, charter,
+/// regulations…), pagePath — страница, где документ показывается (/about/strategy), lang — язык файла,
+/// period — срок действия («до 2025», «2026–2030»), docDate — дата утверждения; i18n — названия на ky/en.
+model SiteDocument {
+  id        String    @id
+  section   String
+  pagePath  String    @default("") @map("page_path")
+  title     String
+  lang      String    @default("ru")
+  period    String    @default("")
+  docDate   DateTime? @map("doc_date") @db.Date
+  fileUrl   String    @map("file_url")
+  fileName  String    @default("") @map("file_name")
+  fileType  String    @default("application/pdf") @map("file_type")
+  fileSize  Int?      @map("file_size")
+  sortOrder Int       @default(0) @map("order")
+  status    String    @default("published")
+  i18n      Json      @default("{}")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([section, status, sortOrder])
+  @@index([pagePath])
+  @@map("site_documents")
+}
+
 model Page {
   id        String   @id
   path      String   @unique
@@ -80,6 +116,8 @@ model Page {
   body      String
   status    String
   i18n      Json     @default("{}")
+  /// pages.page_id старой базы.
+  legacyId  Int?     @unique @map("legacy_id")
   updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
 
   @@index([status])
@@ -113,18 +151,18 @@ model Request {
 }
 
 model User {
-  id       String @id
-  name     String
-  email    String @unique
-  role     String
-  password String
+  id             String  @id
+  name           String
+  email          String  @unique
+  role           String
+  password       String
   /// Двухфакторный вход: зашифрованный секрет TOTP, включён ли, шаг последнего принятого кода.
-  totpSecret   String?  @map("totp_secret")
-  totpEnabled  Boolean  @default(false) @map("totp_enabled")
-  totpLastStep Int?     @map("totp_last_step")
+  totpSecret     String? @map("totp_secret")
+  totpEnabled    Boolean @default(false) @map("totp_enabled")
+  totpLastStep   Int?    @map("totp_last_step")
   /// Версия сессий: записывается в cookie при входе. Выход, смена пароля и сброс 2FA увеличивают её —
   /// все выданные раньше cookie сотрудника перестают действовать.
-  sessionVersion Int    @default(0) @map("session_version")
+  sessionVersion Int     @default(0) @map("session_version")
 
   @@map("users")
 }
@@ -205,39 +243,55 @@ model Issuer {
   count            String            @default("")
   price            String            @default("")
   status           String            @default("")
+  /// Поля из старой базы (brep_companies): сфера, аудитор, число выпусков.
+  sphere           String            @default("")
+  auditor          String            @default("")
+  issuesCount      String            @default("") @map("issues_count")
+  /// brep_companies.brep_company_id старой базы — для повторного импорта без дублей.
+  legacyId         Int?              @unique @map("legacy_id")
   sortOrder        Int               @map("order")
   updatedAt        DateTime          @map("updated_at") @db.Timestamptz(6)
   listing          ListingEntry[]
   news             News[]
   sustainableBonds SustainableBond[]
+  securities       Security[]
+  reports          Report[]
+  disclosures      DisclosureEvent[]
 
   @@index([sortOrder])
   @@map("issuers")
-  disclosures      DisclosureEvent[]
 }
 
 model ListingEntry {
-  id          String   @id
-  code        String   @unique
-  category    String
-  sortOrder   Int      @map("order")
-  name        String
-  issuerSlug  String?  @map("issuer_slug")
-  issuer      Issuer?  @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
-  security    String   @default("")
-  price       String   @default("")
-  cap         String   @default("")
-  count       String   @default("")
-  doc         String   @default("")
-  symbols     String   @default("")
-  industry    String   @default("")
-  activity    String   @default("")
-  listedAt    String   @default("") @map("listed_at")
-  auditor     String   @default("")
-  registrar   String   @default("")
-  marketMaker String   @default("") @map("market_maker")
-  documents   Json     @default("[]")
-  updatedAt   DateTime @map("updated_at") @db.Timestamptz(6)
+  id             String     @id
+  code           String     @unique
+  category       String
+  sortOrder      Int        @map("order")
+  name           String
+  issuerSlug     String?    @map("issuer_slug")
+  issuer         Issuer?    @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
+  security       String     @default("")
+  price          String     @default("")
+  cap            String     @default("")
+  count          String     @default("")
+  doc            String     @default("")
+  symbols        String     @default("")
+  industry       String     @default("")
+  activity       String     @default("")
+  listedAt       String     @default("") @map("listed_at")
+  auditor        String     @default("")
+  registrar      String     @default("")
+  marketMaker    String     @default("") @map("market_maker")
+  documents      Json       @default("[]")
+  /// Поля из старой базы (ls_companies): переводы (*_eng), погашение и доходность облигаций, примечание.
+  i18n           Json       @default("{}")
+  redemptionDate String     @default("") @map("redemption_date")
+  couponYield    String     @default("") @map("coupon_yield")
+  note           String     @default("")
+  /// ls_companies.ls_company_id старой базы.
+  legacyId       Int?       @unique @map("legacy_id")
+  updatedAt      DateTime   @map("updated_at") @db.Timestamptz(6)
+  securities     Security[]
 
   @@index([category, sortOrder])
   @@index([issuerSlug])
@@ -385,4 +439,374 @@ model DisclosureEvent {
 
   @@index([issuerSlug, date])
   @@map("disclosure_events")
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Сущности старой базы сайта kse.kg (MySQL), перенесённые в нашу схему. Пока только структура — данные импортируются
+// отдельно. В каждой таблице legacy_id: ключ строки старой базы, чтобы повторный импорт обновлял, а не дублировал.
+// Суммы — Decimal, даты — Date (в старой базе многое хранилось строками).
+// ---------------------------------------------------------------------------------------------------------------
+
+/// Ценная бумага: ISIN, тикер, вид, эмитент и бумага листинга.
+/// Из старой базы: ls_trade_symbols, ls_securities, quik_securities.
+model Security {
+  id          String             @id
+  isin        String?            @unique
+  symbol      String             @unique
+  name        String             @default("")
+  /// stock | bond | gko | gkv | metal | other
+  kind        String             @default("other")
+  /// Класс инструмента в QUIK (например, EQBR) и валюта номинала.
+  classCode   String             @default("") @map("class_code")
+  faceUnit    String             @default("") @map("face_unit")
+  nominal     Decimal?           @db.Decimal(20, 4)
+  issuerSlug  String?            @map("issuer_slug")
+  issuer      Issuer?            @relation(fields: [issuerSlug], references: [slug], onDelete: SetNull, onUpdate: Cascade)
+  listingCode String?            @map("listing_code")
+  listing     ListingEntry?      @relation(fields: [listingCode], references: [code], onDelete: SetNull, onUpdate: Cascade)
+  legacyId    Int?               @unique @map("legacy_id")
+  updatedAt   DateTime           @map("updated_at") @db.Timestamptz(6)
+  tradeDays   SecurityTradeDay[]
+  quotes      Quote[]
+
+  @@index([issuerSlug])
+  @@index([listingCode])
+  @@map("securities")
+}
+
+/// Отчёт эмитента (файл): квартальный, годовой, баланс, проспект и т. п.
+/// Из старой базы: brep_reports (source = business), ls_reports (source = listing).
+model Report {
+  id          String    @id
+  issuerSlug  String    @map("issuer_slug")
+  /// Отчёты не удаляются вместе с эмитентом: сначала их нужно убрать явно.
+  issuer      Issuer    @relation(fields: [issuerSlug], references: [slug], onDelete: Restrict, onUpdate: Cascade)
+  /// business | listing
+  source      String
+  /// quarterly | annual | news | balance | prospect | fin_rep | cash_flow | cap_rep | analytics | corporate |
+  /// auditreport | historyreport | emission | opinion | sustainable
+  type        String
+  year        Int?
+  quarter     Int?
+  /// Период как в старой базе («3 квартал 2026», «Годовой отчет 2025»).
+  periodLabel String    @default("") @map("period_label")
+  reportDate  DateTime? @map("report_date") @db.Date
+  /// Актуальная версия (в старой базе status 1 — текущий, 2 — архив).
+  isCurrent   Boolean   @default(true) @map("is_current")
+  fileUrl     String    @map("file_url")
+  fileName    String    @default("") @map("file_name")
+  fileType    String    @default("") @map("file_type")
+  fileSize    Int?      @map("file_size")
+  uploadedAt  DateTime  @map("uploaded_at") @db.Timestamptz(6)
+  /// Ключ строки старой базы; уникален вместе с source (brep и ls нумеровались отдельно).
+  legacyId    Int?      @map("legacy_id")
+
+  @@unique([source, legacyId])
+  @@index([issuerSlug, type, reportDate])
+  @@map("reports")
+}
+
+/// Выпуски «Финансовый рынок.KG» (PDF). Из старой базы: mod_fin_market.
+model FinMarketIssue {
+  id          String   @id
+  title       String
+  description String   @default("")
+  date        DateTime @db.Date
+  fileUrl     String   @map("file_url")
+  fileSize    Int?     @map("file_size")
+  legacyId    Int?     @unique @map("legacy_id")
+
+  @@index([date])
+  @@map("fin_market_issues")
+}
+
+/// Бизнес-каталог. Из старой базы: mod_bc_entries.
+model CatalogEntry {
+  id          String    @id
+  name        String
+  group       String    @default("")
+  title       String    @default("")
+  description String    @default("")
+  status      String    @default("published")
+  date        DateTime? @db.Date
+  legacyId    Int?      @unique @map("legacy_id")
+
+  @@map("business_catalog")
+}
+
+/// Подписчики Telegram-бота. Из старой базы: telegram.
+model TelegramSubscriber {
+  id        String   @id
+  username  String   @default("")
+  chatId    String   @unique @map("chat_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("telegram_subscribers")
+}
+
+/// Итоги торгов за день (млн сом) и изменение к прошлому дню, %. Из старой базы: mod_tradestat (ts_results — пустой дубль).
+model TradeDay {
+  id                      String   @id
+  date                    DateTime @unique @db.Date
+  totalVolume             Decimal  @map("total_volume") @db.Decimal(20, 4)
+  primaryVolume           Decimal  @default(0) @map("primary_volume") @db.Decimal(20, 4)
+  secondaryVolume         Decimal  @default(0) @map("secondary_volume") @db.Decimal(20, 4)
+  listingVolume           Decimal  @default(0) @map("listing_volume") @db.Decimal(20, 4)
+  nonListingVolume        Decimal  @default(0) @map("non_listing_volume") @db.Decimal(20, 4)
+  totalChangePercent      Decimal? @map("total_change_percent") @db.Decimal(20, 4)
+  primaryChangePercent    Decimal? @map("primary_change_percent") @db.Decimal(20, 4)
+  secondaryChangePercent  Decimal? @map("secondary_change_percent") @db.Decimal(20, 4)
+  listingChangePercent    Decimal? @map("listing_change_percent") @db.Decimal(20, 4)
+  nonListingChangePercent Decimal? @map("non_listing_change_percent") @db.Decimal(20, 4)
+  /// kse (старая база) | oracle (торговая система)
+  source                  String   @default("kse")
+  legacyId                Int?     @unique @map("legacy_id")
+
+  @@map("trade_days")
+}
+
+/// Итоги торгов за месяц (month 1–12) или год (month = 0). Из старой базы: mod_trade_archive.
+model TradeMonth {
+  id               String  @id
+  year             Int
+  month            Int
+  /// Объём торгов, сом.
+  totalVolume      Decimal @map("total_volume") @db.Decimal(20, 4)
+  securitiesCount  BigInt  @default(0) @map("securities_count")
+  dealsCount       Int     @default(0) @map("deals_count")
+  /// Разбивка, тыс. сом.
+  primaryVolume    Decimal @default(0) @map("primary_volume") @db.Decimal(20, 4)
+  secondaryVolume  Decimal @default(0) @map("secondary_volume") @db.Decimal(20, 4)
+  listingVolume    Decimal @default(0) @map("listing_volume") @db.Decimal(20, 4)
+  nonListingVolume Decimal @default(0) @map("non_listing_volume") @db.Decimal(20, 4)
+  legacyId         Int?    @unique @map("legacy_id")
+
+  @@unique([year, month])
+  @@map("trade_months")
+}
+
+/// Итоги по бумаге за день: сделки, количество, сумма, цены. Из старой базы: mod_trade_last; сюда же — мост Oracle.
+model SecurityTradeDay {
+  id         String    @id
+  date       DateTime  @db.Date
+  isin       String
+  securityId String?   @map("security_id")
+  security   Security? @relation(fields: [securityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  dealsCount Int       @default(0) @map("deals_count")
+  quantity   BigInt    @default(0)
+  /// Сумма сделок в валюте инструмента.
+  volume     Decimal   @db.Decimal(20, 4)
+  minPrice   Decimal?  @map("min_price") @db.Decimal(20, 4)
+  maxPrice   Decimal?  @map("max_price") @db.Decimal(20, 4)
+  openPrice  Decimal?  @map("open_price") @db.Decimal(20, 4)
+  closePrice Decimal?  @map("close_price") @db.Decimal(20, 4)
+  /// kse | oracle
+  source     String    @default("kse")
+
+  @@unique([date, isin])
+  @@index([securityId, date])
+  @@map("security_trade_days")
+}
+
+/// Лучшие заявки на покупку и продажу по бумаге. Из старой базы: mod_quotes, mod_quotes_salym, quik_orders (сводно).
+model Quote {
+  id         String    @id
+  symbol     String    @unique
+  isin       String    @default("")
+  securityId String?   @map("security_id")
+  security   Security? @relation(fields: [securityId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  buyAmount  Decimal?  @map("buy_amount") @db.Decimal(20, 4)
+  buyPrice   Decimal?  @map("buy_price") @db.Decimal(20, 4)
+  sellAmount Decimal?  @map("sell_amount") @db.Decimal(20, 4)
+  sellPrice  Decimal?  @map("sell_price") @db.Decimal(20, 4)
+  updatedAt  DateTime  @map("updated_at") @db.Timestamptz(6)
+
+  @@index([securityId])
+  @@map("quotes")
+}
+
+/// Значение индекса за день: KSE (с капитализацией, сом) и мировые индексы (DJI, RTSI, KASE…).
+/// Из старой базы: mod_cap_index (code = KSE), mod_indeces.
+model IndexValue {
+  id             String   @id
+  code           String
+  date           DateTime @db.Date
+  value          Decimal  @db.Decimal(20, 4)
+  changePercent  Decimal? @map("change_percent") @db.Decimal(20, 4)
+  capitalization Decimal? @db.Decimal(24, 4)
+  legacyId       Int?     @map("legacy_id")
+
+  @@unique([code, date])
+  @@map("index_values")
+}
+
+/// Курс валюты НБКР за день. Из старой базы: mod_currency.
+model CurrencyRate {
+  id            String   @id
+  code          String
+  date          DateTime @db.Date
+  rate          Decimal  @db.Decimal(20, 6)
+  changePercent Decimal? @map("change_percent") @db.Decimal(20, 4)
+  legacyId      Int?     @unique @map("legacy_id")
+
+  @@unique([code, date])
+  @@map("currency_rates")
+}
+
+/// Итоги аукциона ГЦБ (суммы — тыс. сом, доходность и купон — %). Из старой базы: mod_auction_result.
+model GcbAuction {
+  id           String   @id
+  date         DateTime @db.Date
+  securityCode String   @map("security_code")
+  supply       Decimal? @db.Decimal(20, 4)
+  demand       Decimal? @db.Decimal(20, 4)
+  satisfied    Decimal? @db.Decimal(20, 4)
+  minYield     Decimal? @map("min_yield") @db.Decimal(20, 4)
+  maxYield     Decimal? @map("max_yield") @db.Decimal(20, 4)
+  avgYield     Decimal? @map("avg_yield") @db.Decimal(20, 4)
+  couponRate   Decimal? @map("coupon_rate") @db.Decimal(20, 4)
+  legacyId     Int?     @unique @map("legacy_id")
+
+  @@unique([date, securityCode])
+  @@map("gcb_auctions")
+}
+
+/// Объём ГЦБ в обращении за день (kind: gko | gkv). Из старой базы: mod_volume_gko, mod_volume_gkv.
+model GcbVolume {
+  id       String   @id
+  kind     String
+  date     DateTime @db.Date
+  volume   Decimal  @db.Decimal(20, 4)
+  legacyId Int?     @map("legacy_id")
+
+  @@unique([kind, date])
+  @@map("gcb_volumes")
+}
+
+/// Аукционы нот НБКР: спрос, предложение, доходность (kind — срок). Из старой базы: gkv_3, nbkr_not.
+model NbkrBillResult {
+  id       String   @id
+  kind     String
+  date     DateTime @db.Date
+  ask      Decimal? @db.Decimal(20, 4)
+  bid      Decimal? @db.Decimal(20, 4)
+  minYield Decimal? @map("min_yield") @db.Decimal(20, 4)
+  maxYield Decimal? @map("max_yield") @db.Decimal(20, 4)
+  avgYield Decimal? @map("avg_yield") @db.Decimal(20, 4)
+
+  @@unique([kind, date])
+  @@map("nbkr_bill_results")
+}
+
+/// Цены сырья (золото, нефть Brent/Light): bid/ask или цена. Из старой базы: cg, Blog_Entries_eng (это котировки).
+model CommodityPrice {
+  id    String   @id
+  code  String
+  date  DateTime @db.Date
+  price Decimal? @db.Decimal(20, 4)
+  bid   Decimal? @db.Decimal(20, 4)
+  ask   Decimal? @db.Decimal(20, 4)
+
+  @@unique([code, date])
+  @@map("commodity_prices")
+}
+
+/// Годовой рейтинг участников торгов (брокеров). Из старой базы: members_rating_info.
+model MemberRating {
+  id                 String   @id
+  year               Int
+  memberShort        String   @map("member_short")
+  memberFull         String   @default("") @map("member_full")
+  volume             Decimal  @default(0) @db.Decimal(24, 4)
+  instrumentsCount   Decimal  @default(0) @map("instruments_count") @db.Decimal(20, 4)
+  marketDealsCount   Decimal  @default(0) @map("market_deals_count") @db.Decimal(20, 4)
+  marketDealsVolume  Decimal  @default(0) @map("market_deals_volume") @db.Decimal(24, 4)
+  factorVolume       Decimal? @map("factor_volume") @db.Decimal(20, 6)
+  factorAmount       Decimal? @map("factor_amount") @db.Decimal(20, 6)
+  factorInstruments  Decimal? @map("factor_instruments") @db.Decimal(20, 6)
+  factorMarketAmount Decimal? @map("factor_market_amount") @db.Decimal(20, 6)
+  factorMarketVolume Decimal? @map("factor_market_volume") @db.Decimal(20, 6)
+  amount             Int      @default(0)
+  factor             Decimal? @db.Decimal(20, 6)
+
+  @@unique([year, memberShort])
+  @@map("member_ratings")
+}
+
+// --- QUIK: снимки QUIK Module API (классы, бумаги, параметры, сделки, заявки). Из старой базы: quik_*. ---
+
+model QuikClass {
+  id               String   @id
+  tradeDate        DateTime @map("trade_date") @db.Date
+  classCode        String   @map("class_code")
+  className        String   @default("") @map("class_name")
+  firmsId          String   @default("") @map("firms_id")
+  flags            String   @default("")
+  classType        String   @default("") @map("class_type")
+  classSubType     String   @default("") @map("class_sub_type")
+  commonBehavior   String   @default("") @map("common_behavior")
+  specificBehavior String   @default("") @map("specific_behavior")
+  updatedAt        DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([classCode, tradeDate])
+  @@map("quik_classes")
+}
+
+model QuikSecurity {
+  id        String   @id
+  tradeDate DateTime @map("trade_date") @db.Date
+  classCode String   @map("class_code")
+  secCode   String   @map("sec_code")
+  faceUnit  String   @default("") @map("face_unit")
+  shortName String   @default("") @map("short_name")
+  fullName  String   @default("") @map("full_name")
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([classCode, secCode, tradeDate])
+  @@map("quik_securities")
+}
+
+model QuikParam {
+  id            String   @id
+  tradeDate     DateTime @map("trade_date") @db.Date
+  classCode     String   @map("class_code")
+  secCode       String   @map("sec_code")
+  status        String   @default("")
+  tradingStatus String   @default("") @map("trading_status")
+  updatedAt     DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([classCode, secCode, tradeDate])
+  @@map("quik_params")
+}
+
+model QuikTrade {
+  id        String   @id
+  classCode String   @map("class_code")
+  secCode   String   @map("sec_code")
+  price     Decimal  @db.Decimal(20, 6)
+  quantity  Decimal  @db.Decimal(20, 4)
+  value     Decimal  @db.Decimal(24, 4)
+  tradedAt  DateTime @map("traded_at") @db.Timestamptz(6)
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([classCode, secCode, tradedAt, price, quantity, value])
+  @@map("quik_trades")
+}
+
+model QuikOrder {
+  id        String   @id
+  orderNum  String   @unique @map("order_num")
+  classCode String   @map("class_code")
+  secCode   String   @map("sec_code")
+  price     Decimal  @db.Decimal(20, 6)
+  quantity  Decimal  @db.Decimal(20, 4)
+  value     Decimal  @db.Decimal(24, 4)
+  /// buy | sell
+  operation String   @default("")
+  state     String   @default("")
+  orderedAt DateTime @map("ordered_at") @db.Timestamptz(6)
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(6)
+
+  @@index([classCode, secCode])
+  @@map("quik_orders")
 }

@@ -1,4 +1,5 @@
 import { prisma } from "../../db/prisma";
+import { memberRow } from "../members/members.routes";
 import { parseListingDocuments } from "../../../../shared/cms";
 
 /**
@@ -89,16 +90,17 @@ function doc(kind: SearchKind, title: string, href: string, parts: unknown[], me
 async function buildIndex(): Promise<Doc[]> {
   const [pages, news, issuers, listing, people, menu, hubs, slides, quotes, members, partners] = await Promise.all([
     prisma.page.findMany({ where: { status: "published" } }),
-    prisma.news.findMany({ where: { status: "published" } }),
+    prisma.news.findMany({ where: { status: "published", sourceUrl: null } }),
     prisma.issuer.findMany(),
     prisma.listingEntry.findMany(),
     prisma.managementPerson.findMany({ where: { status: "published" } }),
     prisma.menuItem.findMany(),
     prisma.homeHub.findMany(),
     prisma.slide.findMany(),
-    // Котировки — живые данные с kse.kg (modules/kse-sync).
-    prisma.kseSnapshot.findUnique({ where: { key: "quotes" } }),
-    prisma.kseSnapshot.findUnique({ where: { key: "members" } }),
+    // Котировки — из торговой системы (мост Oracle, снимок oracle-quotes).
+    prisma.kseSnapshot.findUnique({ where: { key: "oracle-quotes" } }),
+    // Участники торгов — наша база (business_catalog, перенесено из бэкапа старого сайта).
+    prisma.catalogEntry.findMany({ where: { group: "Members", status: "published" } }),
     prisma.partner.findMany({ where: { status: "published" } }),
   ]);
 
@@ -148,8 +150,7 @@ async function buildIndex(): Promise<Doc[]> {
       doc("instruments", `${row.symbol} — ${row.name}`, `/market/quotes?q=${encodeURIComponent(row.symbol)}`, [row.isin], price ? `${price} сом` : undefined),
     );
   }
-  const memberRows = ((members?.data as { rows?: { name: string; details: string; suspended: string }[] } | null)?.rows ?? []);
-  for (const row of memberRows) {
+  for (const row of members.map((entry) => memberRow(entry.name, entry.title, entry.description))) {
     docs.push(doc("members", row.name, "/members", [row.details], row.suspended ? "Доступ к торгам приостановлен" : "Участник торгов"));
   }
   for (const row of partners) {

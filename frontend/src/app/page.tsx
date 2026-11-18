@@ -2,6 +2,7 @@ import { HomeView } from "@/components/HomeView";
 import { isGeneralNews } from "@/lib/cms/types";
 import { findIssuer, loadIssuerData, loadPublicContent } from "@/lib/cms/public";
 import { loadMarketData } from "@/lib/market-data";
+import { loadArchiveLatest } from "@/lib/kse-live";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ function bishkekSession() {
 }
 
 export default async function Home() {
-  const [content, issuerData, market] = await Promise.all([loadPublicContent(), loadIssuerData(), loadMarketData()]);
+  const [content, issuerData, market, archive] = await Promise.all([loadPublicContent(), loadIssuerData(), loadMarketData(), loadArchiveLatest()]);
   // Рынок — живые данные kse.kg (или демо, пока их нет).
   const { instruments } = market;
   const count = (type: string) => instruments.filter((item) => item.type === type).length;
@@ -88,6 +89,8 @@ export default async function Home() {
             i18n: item.i18n,
             company: (item.issuerSlug && findIssuer(issuerData, item.issuerSlug)?.name) || item.tag,
           }))}
+        // Свежие новости архива старого сайта (заголовки со ссылкой на kse.kg) — смешиваются с лентой по дате.
+        archive={archive}
         session={{ ...session, hours: market.sessionHours, date: market.sessionDate }}
         index={{
           value: market.index.value,

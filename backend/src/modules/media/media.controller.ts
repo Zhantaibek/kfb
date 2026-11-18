@@ -1,10 +1,13 @@
 import type { Request, Response } from "express";
 import multer from "multer";
 import { requireSession } from "../auth/auth.service";
-import { invalidatePublicContent } from "../../store/public-cache";
+import { invalidatePublicContent } from "../../validation/public-cache";
 import { saveUpload, uploadMaxBytes } from "./media.service";
 
-export const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: uploadMaxBytes } });
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: uploadMaxBytes },
+});
 
 export async function postUpload(req: Request, res: Response) {
   const session = await requireSession(req);

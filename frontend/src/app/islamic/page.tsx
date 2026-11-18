@@ -23,9 +23,16 @@ export default function IslamicPage() {
           Стратегическое соглашение с Международным институтом NAHDA предусматривает обучение участников, цифровую
           инфраструктуру размещения и отдельные правила листинга исламских инструментов.
         </p>
-        <Link className={ui.primary} href="/news/nahda-islamic-ecosystem" style={{ marginTop: 16, display: "inline-flex" }}>
-          Читать новость
-        </Link>
+        {/* Новость о соглашении — в архиве старого сайта kse.kg. */}
+        <a
+          className={ui.primary}
+          href="https://www.kse.kg/ru/RussianNewsBlog/9426"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ marginTop: 16, display: "inline-flex" }}
+        >
+          Читать новость ↗
+        </a>
       </article>
     </PublicMain>
   );

@@ -68,7 +68,8 @@ export function createSeedStore(): CmsStore {
         title: "INDEX KSE",
         text: "главный индикатор рынка капитала Кыргызстана",
         href: "/market",
-        value: "8 410.39",
+        // Без условного значения индекса: настоящее — в блоках рынка (живые данные).
+        value: "KSE",
         photo: "/carousel/trading.jpg",
         order: 1,
       },
