@@ -1,0 +1,709 @@
+/*
+ * Концепция 37 — «Чертёж». Технический язык: белый лист, чёрный #0a0a0a, серые #666/#a1a1a1, линии #eaeaea,
+ * сетка 64px на первом экране, метки «+» в углах ячеек. Один цветовой акцент — фирменная бирюза #2c7e87 (статус,
+ * ссылки при наведении). Geist + Geist Mono, радиусы 6–8px.
+ */
+.page {
+  --ink: #0a0a0a;
+  --ink-2: #4d4d4d;
+  --ink-3: #8f8f8f;
+  --line: #eaeaea;
+  --line-2: #d4d4d4;
+  --bg-2: #fafafa;
+  --brand: #2c7e87;
+  --up: #0f8a52;
+  --down: #d1342e;
+
+  --frame: min(1180px, calc(100% - 48px));
+
+  min-height: 100vh;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--ch-font), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page :where(h1, h2, p, ul, ol) {
+  margin: 0;
+  padding: 0;
+}
+
+/* У сайта свой шрифт заголовков — здесь всё набрано Geist. */
+.page :where(h1, h2) {
+  font-family: inherit;
+}
+
+.page :where(ul, ol) {
+  list-style: none;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page :where(a):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 50;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff !important;
+}
+
+.mono {
+  font-family: var(--ch-mono), ui-monospace, monospace;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+.flat {
+  color: var(--ink-3);
+}
+
+/* ---------- Кнопки ---------- */
+.btnDark,
+.btnOutline,
+.btnLight,
+.btnGhostLight,
+.btnDarkSm,
+.btnOutlineSm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.btnDark,
+.btnOutline,
+.btnLight,
+.btnGhostLight {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 15px;
+}
+
+.btnDarkSm,
+.btnOutlineSm {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.btnDark,
+.btnDarkSm {
+  background: var(--ink);
+  color: #fff !important;
+}
+
+.btnDark:hover,
+.btnDarkSm:hover {
+  background: #383838;
+}
+
+.btnOutline,
+.btnOutlineSm {
+  border: 1px solid var(--line-2);
+  background: #fff;
+}
+
+.btnOutline:hover,
+.btnOutlineSm:hover {
+  border-color: var(--ink);
+}
+
+.btnLight {
+  background: #fff;
+  color: var(--ink) !important;
+}
+
+.btnGhostLight {
+  border: 1px solid rgb(255 255 255 / 0.3);
+  color: #fff !important;
+}
+
+.btnGhostLight:hover {
+  border-color: #fff;
+}
+
+/* ---------- Шапка ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--line);
+  background: rgb(255 255 255 / 0.85);
+  backdrop-filter: saturate(180%) blur(8px);
+}
+
+.headInner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: var(--frame);
+  height: 64px;
+  margin: 0 auto;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  gap: 22px;
+  margin-right: auto;
+  margin-left: 12px;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.nav a:hover {
+  color: var(--ink);
+}
+
+/* ---------- Рамка страницы: вертикальные линии по краям ---------- */
+.frame {
+  width: var(--frame);
+  margin: 0 auto;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+}
+
+/* ---------- Первый экран на сетке ---------- */
+.hero {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  padding: 104px 24px 88px;
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 64px 64px;
+  text-align: center;
+}
+
+/* Сетка растворяется к краям и к низу. */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 70% at 50% 40%, transparent 30%, #fff 85%);
+  pointer-events: none;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink-2);
+  font-family: var(--ch-mono), monospace;
+  font-size: 13px;
+}
+
+.status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+
+.status i[data-open] {
+  background: var(--brand);
+  box-shadow: 0 0 0 3px rgb(44 126 135 / 0.2);
+}
+
+.hero h1 {
+  max-width: 900px;
+  font-size: clamp(38px, 5.4vw, 68px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+}
+
+.hero h1 span {
+  display: block;
+  color: var(--ink-3);
+}
+
+.lead {
+  max-width: 560px;
+  color: var(--ink-2);
+  font-size: 18px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ---------- Ячейки ---------- */
+.cells {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.cell {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 170px;
+  padding: 26px 24px;
+  transition: background-color 0.15s ease;
+}
+
+.cell + .cell {
+  border-left: 1px solid var(--line);
+}
+
+/* Метка «+» на пересечении линий. */
+.cell::before {
+  content: "+";
+  position: absolute;
+  top: -12px;
+  left: -6px;
+  color: var(--ink-3);
+  font-family: var(--ch-mono), monospace;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.cell:hover {
+  background: var(--bg-2);
+}
+
+.cell small {
+  color: var(--ink-3);
+  font-family: var(--ch-mono), monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cell b {
+  font-family: var(--ch-mono), monospace;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.cell span {
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.cell svg {
+  width: 100%;
+  height: 40px;
+  margin-top: 8px;
+  overflow: visible;
+}
+
+.cell path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---------- Блоки ---------- */
+.block {
+  padding: 64px 32px;
+  border-bottom: 1px solid var(--line);
+}
+
+.blockHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.blockHead h2 {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.blockHead > span {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.headLink,
+.blockLink {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.headLink:hover,
+.blockLink:hover {
+  color: var(--brand);
+}
+
+.blockLink {
+  display: inline-block;
+  margin-top: 16px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.tableWrap table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tableWrap tbody tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.tableWrap thead th {
+  background: var(--bg-2);
+  color: var(--ink-3);
+  font-family: var(--ch-mono), monospace;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.tableWrap :is(td, th):nth-child(n + 3) {
+  font-family: var(--ch-mono), monospace;
+  text-align: right;
+}
+
+.tableWrap tbody th a {
+  font-family: var(--ch-mono), monospace;
+  font-weight: 500;
+}
+
+.tableWrap tbody th a:hover {
+  color: var(--brand);
+}
+
+.tableWrap tbody td:nth-child(2) {
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink-2);
+}
+
+.tableWrap tbody tr:hover {
+  background: var(--bg-2);
+}
+
+/* Сервисы сеткой без зазоров */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.grid li {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.grid a {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  height: 100%;
+  padding: 26px;
+  transition: background-color 0.15s ease;
+}
+
+.grid a:hover {
+  background: var(--bg-2);
+}
+
+.gridIcon {
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+.grid b {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.grid a > span {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+/* Шаги */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.steps li + li {
+  border-left: 1px solid var(--line);
+}
+
+.steps a {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  height: 100%;
+  padding: 24px;
+  transition: background-color 0.15s ease;
+}
+
+.steps a:hover {
+  background: var(--bg-2);
+}
+
+.steps .mono {
+  color: var(--brand);
+  font-size: 13px;
+}
+
+.steps b {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.steps a > span:last-child {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+/* Новости */
+.news {
+  border-top: 1px solid var(--line);
+}
+
+.news a {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.news time {
+  color: var(--ink-3);
+  font-size: 13px;
+}
+
+.news b {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.news a:hover b {
+  color: var(--brand);
+}
+
+.news a > span {
+  color: var(--ink-3);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Финал */
+.final {
+  display: grid;
+  justify-items: center;
+  gap: 24px;
+  padding: 88px 24px;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px) 0 0 / 48px 48px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.06) 1px, transparent 1px) 0 0 / 48px 48px,
+    var(--ink);
+  color: #fff;
+  text-align: center;
+}
+
+.final h2 {
+  max-width: 720px;
+  font-size: clamp(30px, 3.8vw, 46px);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+
+/* ---------- Подвал ---------- */
+.footer {
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.footInner {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px 40px;
+  width: var(--frame);
+  margin: 0 auto;
+  padding: 36px 0 20px;
+}
+
+.footer b {
+  color: var(--ink);
+}
+
+.footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.footer a:hover {
+  color: var(--ink);
+}
+
+.legal {
+  width: var(--frame);
+  margin: 0 auto;
+  padding-bottom: 100px;
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 960px) {
+  .nav {
+    display: none;
+  }
+
+  .btnOutlineSm {
+    margin-left: auto;
+  }
+
+  .cells {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cell:nth-child(3) {
+    border-left: 0;
+  }
+
+  .cell:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .steps li:nth-child(3) {
+    border-left: 0;
+  }
+
+  .steps li:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    --frame: calc(100% - 24px);
+  }
+
+  .hero {
+    padding: 72px 16px 64px;
+  }
+
+  .block {
+    padding: 48px 16px;
+  }
+
+  .cells,
+  .grid,
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cell + .cell,
+  .steps li + li {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .news a {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .footInner {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell,
+  .grid a,
+  .steps a {
+    transition: none;
+  }
+}

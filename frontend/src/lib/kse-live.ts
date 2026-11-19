@@ -49,6 +49,8 @@ export type Quotes = {
     symbol: string;
     isin: string;
     name: string;
+    /** Вид бумаги (в котировках из торговой системы): акции, облигации, ГЦБ. */
+    kind?: "stock" | "bond" | "gcb";
     buyAmount: number | null;
     buyPrice: number | null;
     sellAmount: number | null;
@@ -95,6 +97,96 @@ export function fmt(value: number | null | undefined, digits?: number) {
   return digits === undefined
     ? numberFormat.format(value)
     : value.toLocaleString("ru-RU", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+type ChartPoint = { date: string; value: number };
+/** index / capitalization — 12 месяцев, максимум за месяц; daily — по дням за ~13 месяцев; allMonthly — максимум за месяц за всю историю. Даты — ГГГГ-ММ-ДД. */
+export type IndexChart = {
+  index: ChartPoint[];
+  capitalization: ChartPoint[];
+  daily?: ChartPoint[];
+  allMonthly?: ChartPoint[];
+  /** Капитализация, млн сом: по дням и максимум за месяц за всю историю. */
+  capDaily?: ChartPoint[];
+  capAllMonthly?: ChartPoint[];
+};
+
+/**
+ * Точки графиков индекса и капитализации за 12 месяцев — максимум за каждый месяц, как на главной kse.kg.
+ * Считаются по нашей базе (история из торговой системы); недоступно — null, страница покажет снимок kse.kg.
+ */
+export async function loadIndexChart(): Promise<IndexChart | null> {
+  try {
+    const response = await fetch(`${apiUrl}/api/public/oracle/index-chart`, { cache: "no-store" });
+    if (!response.ok) return null;
+    const data = (await response.json()) as IndexChart;
+    return data.index.length > 1 ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Котировки по ценным бумагам из торговой системы (Oracle, обновляются синхронизацией моста) — лучшие заявки
+ * на покупку и продажу с видом бумаги. Нет данных или API недоступен — null.
+ */
+export async function loadOracleQuotes(): Promise<{ data: Quotes; fetchedAt: string } | null> {
+  try {
+    const response = await fetch(`${apiUrl}/api/public/oracle/quotes`, { cache: "no-store" });
+    return response.ok ? ((await response.json()) as { data: Quotes; fetchedAt: string }) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Участники торгов из нашей базы (business_catalog — перенесено из бэкапа старого сайта). Недоступно — null. */
+export async function loadMembers(): Promise<Members | null> {
+  try {
+    const response = await fetch(`${apiUrl}/api/public/members`, { cache: "no-store" });
+    return response.ok ? ((await response.json()) as Members) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Результаты аукционов ГЦБ из нашей базы (заполняется мостом из аукционной системы Oracle). Недоступно — null. */
+export async function loadGcbAuctions(): Promise<AuctionResults | null> {
+  try {
+    const response = await fetch(`${apiUrl}/api/public/oracle/auctions`, { cache: "no-store" });
+    return response.ok ? ((await response.json()) as AuctionResults) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Архивная новость старого сайта для главной: открывается по url на kse.kg. Дата — ГГГГ-ММ-ДД. */
+export type ArchiveNews = { slug: string; date: string; title: string; tag: string; url: string; company: string };
+export type ArchiveLatest = Record<"ru" | "ky" | "en", { exchange: ArchiveNews[]; company: ArchiveNews[]; urgent: ArchiveNews[] }>;
+
+/**
+ * Свежие новости архива старого сайта на всех языках сайта — для главной, где они смешиваются по дате
+ * с новостями из админки. Недоступно — пустые списки (на главной останутся новости из админки).
+ */
+export async function loadArchiveLatest(): Promise<ArchiveLatest> {
+  const get = async (lang: string, kind: "exchange" | "company" | "urgent") => {
+    try {
+      const response = await fetch(`${apiUrl}/api/public/news/archive/latest?lang=${lang}&kind=${kind}&limit=7`, { cache: "no-store" });
+      return response.ok ? ((await response.json()) as ArchiveNews[]) : [];
+    } catch {
+      return [];
+    }
+  };
+  const langs = ["ru", "ky", "en"] as const;
+  const lists = await Promise.all(langs.flatMap((lang) => [get(lang, "exchange"), get(lang, "company"), get(lang, "urgent")]));
+  return Object.fromEntries(
+    langs.map((lang, i) => [lang, { exchange: lists[i * 3], company: lists[i * 3 + 1], urgent: lists[i * 3 + 2] }]),
+  ) as ArchiveLatest;
+}
+
+/** Объём торгов в млн сом — как в источнике, до 4 знаков (0,0676, а не 0,07). */
+export function fmtVolume(value: number | null | undefined) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "—";
+  return value.toLocaleString("ru-RU", { maximumFractionDigits: 4 });
 }
 
 /** «2026-09-24» → «24.09.2026». */

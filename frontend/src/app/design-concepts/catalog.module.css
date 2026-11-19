@@ -1,0 +1,158 @@
+/* Каталог концепций — нейтральная служебная страница. */
+.page {
+  min-height: 100vh;
+  padding: clamp(32px, 6vw, 72px) clamp(16px, 4vw, 48px) 80px;
+  background: #f3f4f3;
+  color: #151918;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.head,
+.grid {
+  max-width: 1280px;
+  margin-inline: auto;
+}
+
+.kicker {
+  margin: 0 0 12px;
+  color: #276f77;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.head h1 {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.lead {
+  max-width: 46em;
+  margin: 16px 0 0;
+  color: #55605e;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.current {
+  display: inline-block;
+  margin-top: 16px;
+  color: #276f77;
+  font-weight: 700;
+}
+
+.current:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #dfe3e2;
+  border-radius: 12px;
+  background: #fff;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+.card:hover {
+  border-color: #276f77;
+  transform: translateY(-2px);
+}
+
+.card:focus-visible {
+  outline: 3px solid #276f77;
+  outline-offset: 3px;
+}
+
+.thumb {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-bottom: 1px solid #dfe3e2;
+  background: #e8ebea;
+}
+
+.thumb img {
+  object-fit: cover;
+  object-position: top;
+}
+
+.meta {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 20px 22px 24px;
+}
+
+.n {
+  color: #6b7573;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.name {
+  font-family: var(--font-display), sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.idea {
+  color: #4a5452;
+  line-height: 1.55;
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.keys span {
+  padding: 3px 10px;
+  border: 1px solid #dfe3e2;
+  border-radius: 999px;
+  color: #4a5452;
+  font-size: 13px;
+}
+
+.open {
+  margin-top: 8px;
+  color: #276f77;
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}

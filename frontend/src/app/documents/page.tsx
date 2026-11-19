@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/Forms";
-import { regulations } from "@/data/catalog";
 import { CmsPageView } from "@/components/CmsPageView";
 import { findPageByPath, loadPublicContent } from "@/lib/cms/public";
 import ui from "@/app/ui.module.css";
@@ -26,15 +25,10 @@ export default async function DocumentsPage() {
         title="Нормативная база"
         lead="Правила биржевой и депозитарной деятельности, листинг и раскрытие информации."
       />
-      <div className={ui.list}>
-        {regulations.map((item) => (
-          <article className={ui.row} key={item.title}>
-            <small>{item.group}</small>
-            <h3>{item.title}</h3>
-            <p>Документ готовится к публикации.</p>
-          </article>
-        ))}
-      </div>
+      {/* Документов в админке ещё нет — без выдуманного списка. */}
+      <article className={ui.card}>
+        <p>Документы готовятся к публикации.</p>
+      </article>
     </PublicMain>
   );
 }

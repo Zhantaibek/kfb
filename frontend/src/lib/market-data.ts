@@ -1,18 +1,17 @@
-import * as demo from "@/data/catalog";
-import type { Instrument, InstrumentType } from "@/data/catalog";
-import { loadSnapshot, type IndexData, type Quotes, type TablesPage, type TradeResults } from "@/lib/kse-live";
+import { sessionHours, type Instrument, type InstrumentType } from "@/data/catalog";
+import { loadIndexChart, loadSnapshot, type IndexChart, type IndexData, type Quotes, type TablesPage, type TradeResults } from "@/lib/kse-live";
 
 /**
- * Данные рынка для главной, бегущей строки и подвала. Собираются на сервере из снимков kse.kg
- * в тех же формах, что и демо-каталог (data/catalog.ts), — поэтому блоки сайта почти не меняются.
- * Нет снимков (kse.kg ещё не синхронизирован или недоступен) — отдаём демо-каталог.
+ * Данные рынка для главной, бегущей строки и подвала. Собираются на сервере из снимков kse.kg и нашей базы.
+ * Нет снимков (kse.kg ещё не синхронизирован или API недоступен) — пустые данные: блоки показывают «—»,
+ * выдуманных цифр на сайте нет.
  */
 
 export type TradeRow = { ticker: string; name: string; price: number; volume: number; deals: number };
 export type Auction = { date: string; type: string; volume: string; status: string };
 
 export type MarketData = {
-  /** true — настоящие данные kse.kg, false — демо. */
+  /** true — настоящие данные kse.kg, false — данных пока нет (всё пустое). */
   live: boolean;
   fetchedAt?: string;
   sessionDate: string;
@@ -29,21 +28,25 @@ export type MarketData = {
   weekLeaders: TradeRow[];
   /** Итоги недели по всем сделкам: объём (тыс. сом), число сделок и бумаг. */
   weekTotal: { volume: number; deals: number; papers: number };
+  /** История индекса KSE из нашей базы (торговая система) — для графика на главной; нет — график по indexHistory. */
+  indexChart: IndexChart | null;
 };
 
-export const demoMarket: MarketData = {
+/** Данных нет — пустые значения (никаких условных цифр). */
+export const emptyMarket: MarketData = {
   live: false,
-  sessionDate: demo.sessionDate,
-  sessionHours: demo.sessionHours,
-  index: demo.indexKse,
-  indexHistory: demo.indexHistory,
-  tradingRows: demo.tradingRows.map((row) => ({ ...row })),
-  stats: { volumeMln: demo.stats.volumeMln, volumeChange: demo.stats.volumeChange, trades: demo.stats.trades },
-  instruments: demo.instruments,
-  auctions: demo.auctions,
+  sessionDate: "—",
+  sessionHours,
+  index: { value: 0, change: 0, capitalization: 0 },
+  indexHistory: [],
+  tradingRows: [],
+  stats: { volumeMln: 0, volumeChange: 0, trades: 0 },
+  instruments: [],
+  auctions: [],
   lastTrades: [],
   weekLeaders: [],
   weekTotal: { volume: 0, deals: 0, papers: 0 },
+  indexChart: null,
 };
 
 /** Вид бумаги по названию из котировок kse.kg. */
@@ -61,7 +64,7 @@ function splitName(full: string) {
   return at > 0 ? { company: full.slice(0, at).trim(), kind: full.slice(at + 1).trim() } : { company: full, kind: "" };
 }
 
-/** «06.10.2026» / «2026-10-06» → «06-10-2026» (формат demo.indexHistory). */
+/** «06.10.2026» / «2026-10-06» → «06-10-2026» (формат indexHistory). */
 function dashDate(value: string) {
   const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (iso) return `${iso[3]}-${iso[2]}-${iso[1]}`;
@@ -79,13 +82,14 @@ function toTradeRows(trades: TradeResults["periods"][number]["trades"]): TradeRo
 }
 
 export async function loadMarketData(): Promise<MarketData> {
-  const [trades, index, quotes, schedule] = await Promise.all([
+  const [trades, index, quotes, schedule, indexChart] = await Promise.all([
     loadSnapshot<TradeResults>("trade-results"),
     loadSnapshot<IndexData>("index"),
     loadSnapshot<Quotes>("quotes"),
     loadSnapshot<TablesPage>("auction-schedule"),
+    loadIndexChart(),
   ]);
-  if (!trades || !index || !quotes) return demoMarket;
+  if (!trades || !index || !quotes) return { ...emptyMarket, indexChart };
 
   const last = trades.data.periods.find((period) => period.id === "last") ?? trades.data.periods[0];
   const week = trades.data.periods.find((period) => period.id === "week");
@@ -133,8 +137,8 @@ export async function loadMarketData(): Promise<MarketData> {
   return {
     live: true,
     fetchedAt: trades.fetchedAt,
-    sessionDate: (last?.title.match(/\d{2}\.\d{2}\.\d{4}/)?.[0] ?? demo.sessionDate),
-    sessionHours: demo.sessionHours,
+    sessionDate: last?.title.match(/\d{2}\.\d{2}\.\d{4}/)?.[0] ?? "—",
+    sessionHours,
     index: { value, change: prev ? ((value - prev) / prev) * 100 : 0, capitalization: Math.round(capMlrd * 10) / 10 },
     indexHistory: series.map((row) => ({
       date: dashDate(row.date),
@@ -156,10 +160,11 @@ export async function loadMarketData(): Promise<MarketData> {
       deals: (week?.trades ?? []).reduce((sum, row) => sum + (row.deals ?? 0), 0),
       papers: new Set((week?.trades ?? []).map((row) => row.symbol)).size,
     },
+    indexChart,
   };
 }
 
-/** Куда ведёт тикер: для живых данных — котировки с поиском по нему, для демо — демо-страница бумаги. */
-export function instrumentHref(market: Pick<MarketData, "live">, ticker: string) {
-  return market.live ? `/market/quotes?q=${encodeURIComponent(ticker)}` : `/market/${ticker}`;
+/** Куда ведёт тикер: котировки с поиском по нему. */
+export function instrumentHref(_market: Pick<MarketData, "live">, ticker: string) {
+  return `/market/quotes?q=${encodeURIComponent(ticker)}`;
 }

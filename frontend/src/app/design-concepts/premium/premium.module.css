@@ -1,0 +1,1059 @@
+/* Концепция 1 — Premium Corporate: портал биржи. Тёмно-синий, слоновая кость, фирменная бирюза. */
+.page {
+  --p-navy: #0f2233;
+  --p-ink: #14212b;
+  --p-muted: #5e6b74;
+  --p-line: #dfe3e6;
+  --p-bg: #f7f6f2;
+  --p-paper: #ffffff;
+  --p-teal: #2c7e87;
+  --p-gold: #b8955c;
+  --p-up: #17845a;
+  --p-down: #c0453f;
+  min-height: 100vh;
+  background: var(--p-bg);
+  color: var(--p-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.page h1,
+.page h2,
+.page h3 {
+  margin: 0;
+  font-family: var(--p-serif), Georgia, serif;
+  font-variant-numeric: lining-nums;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+}
+
+.page a:focus-visible,
+.page summary:focus-visible {
+  outline: 2px solid var(--p-teal);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 60;
+  padding: 10px 14px;
+  background: var(--p-navy);
+  color: #fff;
+}
+
+.skip:focus {
+  top: 8px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.wrap {
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 3.5vw, 40px);
+}
+
+.up {
+  color: var(--p-up);
+  font-weight: 700;
+}
+
+.down {
+  color: var(--p-down);
+  font-weight: 700;
+}
+
+.flat {
+  color: var(--p-muted);
+  font-weight: 700;
+}
+
+/* Служебная строка и шапка */
+.utility {
+  background: var(--p-navy);
+  color: #c6d0d8;
+  font-size: 13px;
+}
+
+.utility .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  align-items: center;
+  padding-block: 8px;
+}
+
+.utility span {
+  margin-right: auto;
+}
+
+.utility a:hover {
+  color: #fff;
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #4fd1a0;
+  box-shadow: 0 0 0 0 rgba(79, 209, 160, 0.6);
+  animation: p-pulse 2.2s ease-out infinite;
+}
+
+@keyframes p-pulse {
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px rgba(79, 209, 160, 0);
+  }
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--p-line);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+}
+
+/* При прокрутке шапка получает тень (scroll-driven animation, без JS). */
+@supports (animation-timeline: scroll()) {
+  .header {
+    animation: p-header-shadow linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 160px;
+  }
+}
+
+@keyframes p-header-shadow {
+  to {
+    border-bottom-color: transparent;
+    box-shadow: 0 10px 30px rgba(15, 34, 51, 0.1);
+  }
+}
+
+.header .wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 76px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  gap: 26px;
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nav a {
+  position: relative;
+  padding: 26px 0;
+  color: #34434d;
+}
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--p-teal);
+  transform: scaleX(0);
+  transition: transform 0.2s;
+}
+
+.nav a:hover {
+  color: var(--p-ink);
+}
+
+.nav a:hover::after {
+  transform: scaleX(1);
+}
+
+.headerCta {
+  padding: 11px 20px;
+  background: var(--p-teal);
+  color: #fff;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.headerCta:hover {
+  background: var(--p-navy);
+}
+
+.menu {
+  display: none;
+  margin-left: auto;
+}
+
+.menu summary {
+  padding: 9px 16px;
+  border: 1px solid var(--p-ink);
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.menu nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 76px;
+  display: grid;
+  padding: 8px clamp(16px, 3.5vw, 40px) 20px;
+  border-bottom: 1px solid var(--p-line);
+  background: #fff;
+}
+
+.menu nav a {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--p-line);
+  font-family: var(--p-serif), Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* Первый экран */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fff;
+}
+
+.heroImg {
+  z-index: -2;
+  object-fit: cover;
+  object-position: 60% 60%;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(10, 24, 36, 0.86) 0%, rgba(10, 24, 36, 0.62) 46%, rgba(10, 24, 36, 0.12) 100%);
+}
+
+.heroInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 48px;
+  align-items: end;
+  padding-block: clamp(72px, 10vw, 136px) clamp(48px, 6vw, 80px);
+}
+
+.kicker {
+  margin: 0 0 14px;
+  color: var(--p-gold);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.heroText h1 {
+  max-width: 12em;
+  font-size: clamp(44px, 5.6vw, 80px);
+}
+
+.heroText p:not(.kicker) {
+  max-width: 34em;
+  margin: 22px 0 0;
+  color: #d9e1e6;
+  font-size: clamp(16px, 1.3vw, 19px);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.btnLight,
+.btnOutline {
+  display: inline-flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 26px;
+  font-weight: 700;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+/* Кнопки заливаются цветом слева направо. */
+.btnLight {
+  background: linear-gradient(90deg, var(--p-gold) 50%, #fff 50%) 100% 0 / 201% 100%;
+  color: var(--p-navy);
+  transition: background-position 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btnLight:hover {
+  background-position: 0 0;
+}
+
+.btnOutline {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: linear-gradient(90deg, #fff 50%, transparent 50%) 100% 0 / 201% 100%;
+  transition:
+    background-position 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.3s;
+}
+
+.btnOutline:hover {
+  background-position: 0 0;
+  color: var(--p-navy);
+}
+
+.hero a:focus-visible {
+  outline-color: #fff;
+}
+
+.marketCard {
+  display: grid;
+  gap: 6px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.97);
+  color: var(--p-ink);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  transform-style: preserve-3d;
+}
+
+/* Наклон за курсором задаёт data-tilt (motion.css); содержимое чуть «всплывает» над карточкой. */
+.marketCard > * {
+  transform: translateZ(24px);
+}
+
+.cardLabel {
+  color: var(--p-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cardValue {
+  font-family: var(--p-serif), Georgia, serif;
+  font-size: 40px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.1;
+}
+
+.cardValue span {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 15px;
+}
+
+.marketCard svg {
+  width: 100%;
+  height: 90px;
+  margin-block: 6px;
+}
+
+.area {
+  fill: rgba(44, 126, 135, 0.12);
+}
+
+.line {
+  fill: none;
+  stroke: var(--p-teal);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.marketCard dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+  border-top: 1px solid var(--p-line);
+}
+
+.marketCard dl div {
+  padding-top: 12px;
+}
+
+.marketCard dt {
+  color: var(--p-muted);
+  font-size: 12px;
+}
+
+.marketCard dd {
+  margin: 2px 0 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Лента котировок */
+.tape {
+  overflow: hidden;
+  border-bottom: 1px solid var(--p-line);
+  background: #fff;
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+
+.tape ul {
+  display: flex;
+  width: max-content;
+  margin: 0;
+  padding: 14px 0;
+  animation: p-marquee 48s linear infinite;
+  list-style: none;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tape li {
+  padding-right: 40px;
+}
+
+.tape:hover ul {
+  animation-play-state: paused;
+}
+
+@keyframes p-marquee {
+  to {
+    translate: -50% 0;
+  }
+}
+
+.tape b {
+  margin-right: 6px;
+}
+
+/* Общие секции */
+.section {
+  padding-block: clamp(64px, 8vw, 104px) 0;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 4px 24px;
+  margin-bottom: 32px;
+}
+
+.head .kicker {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--p-teal);
+}
+
+.head h2 {
+  font-size: clamp(32px, 3.6vw, 48px);
+}
+
+.more {
+  margin-left: auto;
+  color: var(--p-teal);
+  font-weight: 700;
+}
+
+.more:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Аудитории */
+.audiences {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.audiences a {
+  display: grid;
+  height: 100%;
+  background: var(--p-paper);
+  border: 1px solid var(--p-line);
+  transition:
+    border-color 0.3s,
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s;
+}
+
+.audiences a:hover {
+  border-color: var(--p-teal);
+  transform: translateY(-6px);
+  box-shadow: 0 22px 44px rgba(15, 34, 51, 0.12);
+}
+
+.audPhoto,
+.newsPhoto,
+.newsThumb,
+.eduPhoto {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--p-line);
+}
+
+.audPhoto {
+  aspect-ratio: 16 / 10;
+}
+
+.audPhoto img,
+.newsPhoto img,
+.newsThumb img,
+.eduPhoto img {
+  object-fit: cover;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.audiences a:hover img,
+.newsLead:hover img,
+.newsList a:hover img {
+  transform: scale(1.07);
+}
+
+.audBody {
+  display: grid;
+  gap: 8px;
+  padding: 22px 24px 26px;
+}
+
+.audBody b {
+  font-family: var(--p-serif), Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.audBody span {
+  color: var(--p-muted);
+}
+
+.audBody em {
+  color: var(--p-teal);
+  font-style: normal;
+  font-weight: 700;
+  transition: translate 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.audiences a:hover em {
+  translate: 8px 0;
+}
+
+/* Рынок */
+.marketSection {
+  margin-top: clamp(64px, 8vw, 104px);
+  padding-bottom: clamp(56px, 7vw, 88px);
+  background: var(--p-paper);
+  border-block: 1px solid var(--p-line);
+}
+
+.marketSection .section {
+  padding-top: clamp(56px, 7vw, 88px);
+}
+
+.marketGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 40px;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th {
+  padding: 0 12px 12px 0;
+  border-bottom: 2px solid var(--p-ink);
+  color: var(--p-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: 13px 12px 13px 0;
+  border-bottom: 1px solid var(--p-line);
+}
+
+.table tbody tr:hover {
+  background: #f1f6f6;
+}
+
+.table td:first-child a {
+  color: var(--p-teal);
+  font-weight: 800;
+}
+
+.table td:first-child a:hover {
+  text-decoration: underline;
+}
+
+.num {
+  text-align: right !important;
+}
+
+.sparkUp,
+.sparkDown {
+  width: 80px;
+  height: 24px;
+}
+
+.sparkUp path,
+.sparkDown path {
+  fill: none;
+  stroke-width: 1.6;
+}
+
+.sparkUp path {
+  stroke: var(--p-up);
+}
+
+.sparkDown path {
+  stroke: var(--p-down);
+}
+
+.marketSide {
+  display: grid;
+  align-content: start;
+  gap: 28px;
+}
+
+.marketSide h3 {
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+.movers,
+.sectors {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.movers li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--p-line);
+  font-variant-numeric: tabular-nums;
+}
+
+.movers li span:first-child {
+  font-weight: 700;
+}
+
+.sectors li {
+  display: grid;
+  grid-template-columns: 96px 1fr 40px;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.sectors li span:last-child {
+  text-align: right;
+  font-weight: 700;
+}
+
+.sectorBar {
+  height: 8px;
+  background: #edf0f1;
+}
+
+.sectorBar i {
+  display: block;
+  height: 100%;
+  background: var(--p-teal);
+}
+
+/* Новости */
+.newsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 40px;
+}
+
+.newsLead {
+  display: grid;
+  gap: 10px;
+}
+
+.newsPhoto {
+  aspect-ratio: 16 / 9;
+  margin-bottom: 8px;
+}
+
+.newsMeta {
+  display: block;
+  color: var(--p-teal);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.newsTitle {
+  font-family: var(--p-serif), Georgia, serif;
+  font-size: clamp(28px, 2.6vw, 38px);
+  font-weight: 600;
+  line-height: 1.12;
+}
+
+.newsExcerpt {
+  color: var(--p-muted);
+}
+
+.newsLead:hover .newsTitle,
+.newsList a:hover .newsSmall {
+  color: var(--p-teal);
+}
+
+.newsList {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.newsList a {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--p-line);
+}
+
+.newsList li:first-child a {
+  padding-top: 0;
+}
+
+.newsThumb {
+  aspect-ratio: 4 / 3;
+}
+
+.newsSmall {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--p-serif), Georgia, serif;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Цифры на фото */
+.facts {
+  position: relative;
+  isolation: isolate;
+  margin-top: clamp(64px, 8vw, 104px);
+  overflow: hidden;
+  color: #fff;
+}
+
+.factsImg {
+  z-index: -2;
+  object-fit: cover;
+  /* запас по высоте для параллакса */
+  scale: 1.35;
+}
+
+.facts::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(12, 28, 40, 0.8);
+}
+
+.factsInner {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  padding-block: clamp(48px, 6vw, 80px);
+}
+
+.factsInner div {
+  display: grid;
+  gap: 6px;
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.factsInner b {
+  font-family: var(--p-serif), Georgia, serif;
+  font-size: clamp(44px, 4.4vw, 64px);
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  line-height: 1;
+}
+
+.factsInner span {
+  color: #c9d3da;
+}
+
+/* События и раскрытие */
+.twoCol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 56px;
+}
+
+.events,
+.feed,
+.docs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.events li {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--p-line);
+}
+
+.date {
+  display: grid;
+  place-items: center;
+  height: 72px;
+  background: var(--p-navy);
+  color: #d9e1e6;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.date b {
+  font-family: var(--p-serif), Georgia, serif;
+  font-size: 30px;
+  line-height: 1;
+  color: #fff;
+}
+
+.events li > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.events small,
+.feed small {
+  color: var(--p-muted);
+  font-size: 13px;
+}
+
+.feed a {
+  display: grid;
+  gap: 2px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--p-line);
+}
+
+.feed a:hover span {
+  color: var(--p-teal);
+}
+
+.feed + .more {
+  display: inline-block;
+  margin-top: 16px;
+}
+
+/* Учебный центр */
+.edu {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+}
+
+.eduPhoto {
+  aspect-ratio: 4 / 3;
+}
+
+.edu h2 {
+  font-size: clamp(32px, 3.4vw, 46px);
+}
+
+.edu h2 + p {
+  margin: 16px 0 28px;
+  color: var(--p-muted);
+}
+
+.edu h3 {
+  margin-bottom: 8px;
+  font-size: 22px;
+}
+
+.docs a {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--p-line);
+  font-weight: 600;
+}
+
+.docs small {
+  flex: none;
+  color: var(--p-muted);
+  font-weight: 400;
+}
+
+.docs a:hover span {
+  color: var(--p-teal);
+}
+
+/* Подвал */
+.footer {
+  margin-top: clamp(64px, 8vw, 104px);
+  padding-block: 56px 88px;
+  background: var(--p-navy);
+  color: #b9c5ce;
+  font-size: 14px;
+}
+
+.footGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 32px;
+}
+
+.footGrid > * {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.footGrid b,
+.footName {
+  color: #fff;
+  font-weight: 700;
+}
+
+.footName {
+  margin: 10px 0 0;
+}
+
+.footGrid p {
+  margin: 0;
+}
+
+.footGrid a:hover {
+  color: #fff;
+}
+
+.demo {
+  margin: 40px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  color: #8796a1;
+  font-size: 13px;
+}
+
+/* Адаптив */
+@media (max-width: 1150px) {
+  .nav,
+  .headerCta {
+    display: none;
+  }
+
+  .menu {
+    display: block;
+  }
+}
+
+@media (max-width: 960px) {
+  .heroInner,
+  .marketGrid,
+  .newsGrid,
+  .twoCol,
+  .edu {
+    grid-template-columns: 1fr;
+  }
+
+  .audiences {
+    grid-template-columns: 1fr;
+  }
+
+  .factsInner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .footGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .utility a:not(:first-of-type) {
+    display: none;
+  }
+
+  .newsList a {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+
+  .newsSmall {
+    font-size: 18px;
+  }
+
+  .footGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page * {
+    transition: none !important;
+  }
+
+  .dot,
+  .tape ul {
+    animation: none;
+  }
+
+  .tape {
+    overflow-x: auto;
+  }
+}

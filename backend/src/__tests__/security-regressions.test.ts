@@ -8,7 +8,7 @@ import { menuItemSchema, userItemSchema } from "../validation/cms";
 
 const editor = { id: "u-editor", email: "editor@kse.kg", name: "Редактор", role: "editor" as const };
 const requestWith = (token: string) => ({ cookies: { [config.cookieName]: token } }) as unknown as Request;
-const lookup = (row: { email: string; role: string } | null) => async () => row;
+const lookup = (row: { email: string; role: string; sessionVersion?: number } | null) => async () => row;
 
 test("сессия удалённого сотрудника не действует, даже с верной подписью", async () => {
   assert.equal(await verifiedSession(requestWith(encodeSession(editor)), lookup(null)), null);
@@ -20,6 +20,17 @@ test("сессия сотрудника с изменённой ролью не 
 
 test("сессия действующего сотрудника принимается", async () => {
   assert.deepEqual(await verifiedSession(requestWith(encodeSession(editor)), lookup({ email: "Editor@KSE.kg", role: "editor" })), editor);
+});
+
+test("cookie, выданная до выхода или смены пароля (старая версия сессий), отклоняется", async () => {
+  const row = { email: "editor@kse.kg", role: "editor", sessionVersion: 3 };
+  assert.equal(await verifiedSession(requestWith(encodeSession(editor, 2)), lookup(row)), null);
+  assert.equal(await verifiedSession(requestWith(encodeSession(editor)), lookup(row)), null);
+});
+
+test("cookie с текущей версией сессий принимается", async () => {
+  const row = { email: "editor@kse.kg", role: "editor", sessionVersion: 3 };
+  assert.deepEqual(await verifiedSession(requestWith(encodeSession(editor, 3)), lookup(row)), editor);
 });
 
 test("картинка проверяется по содержимому, а не только по заявленному типу", () => {

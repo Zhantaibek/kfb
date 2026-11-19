@@ -41,6 +41,15 @@ services:
       MFA_REQUIRED: ${MFA_REQUIRED:-}
       # Синхронизация раскрытия информации с kse.kg (off — выключить).
       DISCLOSURE_SYNC: ${DISCLOSURE_SYNC:-}
+      # Итоги торгов из торговой системы (Oracle 8i): ORACLE_SYNC=on — включить; сервер должен видеть сеть биржи.
+      ORACLE_SYNC: ${ORACLE_SYNC:-}
+      ORACLE_SYNC_MINUTES: ${ORACLE_SYNC_MINUTES:-5}
+      ORACLE_DB_HOST: ${ORACLE_DB_HOST:-}
+      ORACLE_DB_PORT: ${ORACLE_DB_PORT:-1521}
+      ORACLE_DB_SID: ${ORACLE_DB_SID:-}
+      ORACLE_DB_USER: ${ORACLE_DB_USER:-}
+      ORACLE_DB_PASSWORD: ${ORACLE_DB_PASSWORD:-}
+      JAVA_BIN: /usr/bin/java
       # Первый админ на чистой базе (демо admin/admin в production не создаётся).
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
@@ -60,6 +69,8 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         API_URL: http://api:4000
+        # Публичный адрес учебного центра (kse-edu); вшивается в сборку сайта.
+        NEXT_PUBLIC_EDU_URL: ${NEXT_PUBLIC_EDU_URL:?Задайте NEXT_PUBLIC_EDU_URL — публичный адрес учебного центра (kse-edu)}
     container_name: kse-web
     environment:
       API_URL: http://api:4000

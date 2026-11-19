@@ -71,6 +71,54 @@
   color: var(--on-brand);
 }
 
+/* Разделы-переключатель (котировки: Все / Акции / Облигации / ГЦБ) — серая дорожка, активный белый, число сверху. */
+.segments {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 4px;
+  border-radius: 16px;
+  background: var(--pill-track);
+}
+
+.segments button {
+  min-height: 40px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.segments button[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--brand-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.segmentsLabel {
+  margin: 0 0 6px;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+/* Под переключателем — отдельной строкой (вкладки годов, поиск). */
+.segmentsLabel + .segments {
+  display: flex;
+  width: fit-content;
+}
+
+.segments sup {
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
 .chartCard {
   padding: 18px 18px 8px;
   border: 1px solid var(--card-border);
@@ -158,6 +206,8 @@
   font-size: 14px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+  /* Адрес, телефоны, почта — каждая на своей строке, как в карточке на старом сайте. */
+  white-space: pre-line;
 }
 
 .member small {

@@ -1907,6 +1907,8 @@
 .leadArt {
   position: relative;
   display: block;
+  /* Не меньше 16:9; если лента справа выше — фото тянется вниз, а не оставляет пустоту над «Читать далее». */
+  flex: 1 0 auto;
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
@@ -2064,6 +2066,31 @@
   overflow: hidden;
   border-radius: 12px;
   background: color-mix(in srgb, var(--brand) 14%, var(--surface));
+}
+
+/* Заглушка новости без фото: рисунок газеты по центру на мягком фирменном градиенте. */
+.thumbPattern {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--brand-text);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--brand) 22%, var(--surface)),
+    color-mix(in srgb, var(--brand) 8%, var(--surface))
+  );
+}
+
+.thumbPattern img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+}
+
+/* Наведение на новость: общий «зум» картинок не нужен заглушке — сдвигаем газету чуть вверх. */
+.latestList a:hover .thumbPattern img {
+  transform: translateY(-2px) scale(1.04);
 }
 
 .latestCard time {

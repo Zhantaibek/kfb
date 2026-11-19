@@ -16,6 +16,7 @@ export default async function Page() {
       lead="Аукционы по размещению средств из счёта смягчения в депозиты — по срокам."
       snapshot={snapshot}
       sourceUrl="https://www.kse.kg/ru/MfaResult"
+      emptyText="Результатов аукционов по депозитам пока нет."
     >
       {snapshot ? <DepositsView data={snapshot.data} /> : null}
       <MarketLinks current="/gcb/deposits" />

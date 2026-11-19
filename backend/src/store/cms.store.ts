@@ -39,7 +39,7 @@ export function orderedHubs(store: Pick<CmsStore, "hubs">) {
 export  
 
  
- function publishedManagement(store: Pick<CmsStore, "management">) {
+   function publishedManagement(store: Pick<CmsStore, "management">) {
   return [...store.management]
     .filter((item) => item.status === "published")
     .sort((a, b) => a.order - b.order);

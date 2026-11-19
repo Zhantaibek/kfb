@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { NewsList } from "@/components/NewsList";
+import { NewsArchive } from "@/components/NewsArchive";
 import { PageIntro } from "@/components/Forms";
 import { isGeneralNews } from "@/lib/cms/types";
 import { loadPublicContent } from "@/lib/cms/public";
@@ -24,6 +25,8 @@ export default async function NewsPage() {
         lead="Новости биржи и срочные объявления. Сообщения эмитентов публикуются на страницах компаний."
       />
       <NewsList items={items} />
+      {/* Новости прежнего сайта: только заголовки, полный текст — на kse.kg. */}
+      <NewsArchive />
     </PublicMain>
   );
 }

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e2ecee"/>
+    </linearGradient>
+    <linearGradient id="paperBack" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4f5"/>
+      <stop offset="1" stop-color="#c9d9dc"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fb6ba"/>
+      <stop offset="1" stop-color="#7f989d"/>
+    </linearGradient>
+    <linearGradient id="head" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2c7e87"/>
+      <stop offset="1" stop-color="#57b6c0"/>
+    </linearGradient>
+    <linearGradient id="photo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fd6dc"/>
+      <stop offset="1" stop-color="#57b6c0"/>
+    </linearGradient>
+    <filter id="blur" x="-30%" y="-100%" width="160%" height="300%">
+      <feGaussianBlur stdDeviation="3.2"/>
+    </filter>
+  </defs>
+
+  <!-- тень на поверхности -->
+  <ellipse cx="62" cy="104" rx="40" ry="6.5" fill="#0b2a2e" opacity=".28" filter="url(#blur)"/>
+
+  <!-- задний лист -->
+  <g transform="matrix(0.96 -0.16 0.1 0.97 38 26)">
+    <rect x="3" y="3" width="58" height="66" rx="2" fill="url(#edge)"/>
+    <rect width="58" height="66" rx="2" fill="url(#paperBack)"/>
+    <rect x="6" y="7" width="46" height="5" rx="1" fill="#9fb6ba" opacity=".7"/>
+    <rect x="6" y="17" width="46" height="2" rx="1" fill="#b5c8cb"/>
+    <rect x="6" y="22" width="46" height="2" rx="1" fill="#b5c8cb"/>
+    <rect x="6" y="27" width="30" height="2" rx="1" fill="#b5c8cb"/>
+  </g>
+
+  <!-- передний лист: толщина (смещённая подложка) и первая полоса -->
+  <g transform="matrix(1 -0.1 0.09 1 20 36)">
+    <rect x="3.5" y="3.5" width="60" height="66" rx="2" fill="url(#edge)"/>
+    <rect width="60" height="66" rx="2" fill="url(#paper)"/>
+    <!-- шапка -->
+    <rect x="6" y="6" width="48" height="8" rx="1.5" fill="url(#head)"/>
+    <rect x="9" y="8.6" width="20" height="2.8" rx="1" fill="#ffffff" opacity=".85"/>
+    <!-- заголовок -->
+    <rect x="6" y="18" width="48" height="3.2" rx="1" fill="#1d4f55"/>
+    <rect x="6" y="23.5" width="34" height="3.2" rx="1" fill="#1d4f55" opacity=".75"/>
+    <!-- фото с графиком -->
+    <rect x="6" y="31" width="23" height="18" rx="1.5" fill="url(#photo)"/>
+    <path d="M8 45 L13 40 L17 42.5 L22 36 L27 38" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- колонка текста -->
+    <rect x="32" y="31" width="22" height="2" rx="1" fill="#9fb6ba"/>
+    <rect x="32" y="35.2" width="22" height="2" rx="1" fill="#9fb6ba"/>
+    <rect x="32" y="39.4" width="22" height="2" rx="1" fill="#9fb6ba"/>
+    <rect x="32" y="43.6" width="22" height="2" rx="1" fill="#9fb6ba"/>
+    <rect x="32" y="47.8" width="14" height="2" rx="1" fill="#9fb6ba"/>
+    <!-- нижние строки -->
+    <rect x="6" y="54" width="48" height="2" rx="1" fill="#b5c8cb"/>
+    <rect x="6" y="58.2" width="48" height="2" rx="1" fill="#b5c8cb"/>
+    <rect x="6" y="62.4" width="30" height="2" rx="1" fill="#b5c8cb"/>
+    <!-- блик -->
+    <path d="M0 0 H60 L0 30 Z" fill="#ffffff" opacity=".25"/>
+  </g>
+</svg>

@@ -20,7 +20,7 @@ import {
 export const authRoutes = Router();
 authRoutes.get("/session", asyncHandler(getSession));
 authRoutes.post("/session", validateBody(loginSchema), asyncHandler(login));
-authRoutes.delete("/session", logout);
+authRoutes.delete("/session", asyncHandler(logout));
 authRoutes.post("/session/mfa", validateBody(mfaLoginSchema), asyncHandler(loginMfa));
 // Настройка 2FA своей учётной записи и сброс чужого (только администратор).
 authRoutes.get("/mfa", asyncHandler(getMfa));
@@ -32,7 +32,7 @@ authRoutes.post("/users/:id/mfa-reset", asyncHandler(resetUserMfa));
 export const publicAuthRoutes = Router();
 publicAuthRoutes.get("/session", asyncHandler(getPublicSession));
 publicAuthRoutes.post("/session", validateBody(loginSchema), asyncHandler(loginUser));
-publicAuthRoutes.delete("/session", logoutUser);
+publicAuthRoutes.delete("/session", asyncHandler(logoutUser));
 publicAuthRoutes.post("/session/mfa", validateBody(mfaLoginSchema), asyncHandler(loginMfa));
  
  

@@ -37,29 +37,30 @@
   color-scheme: dark;
   --brand: #57b6c0;
   --brand-fill: #2c7e87;
-  --brand-soft: rgba(87, 182, 192, 0.14);
+  /* Тёмная тема — нейтральный графит, без зелёного оттенка; бирюзовый остаётся только акцентом (кнопки, ссылки). */
+  --brand-soft: rgba(87, 182, 192, 0.12);
   --brand-strong: #cdebf0;
-  --brand-text: #57b6c0;
+  --brand-text: #6cc3cc;
   --on-brand: #0b2a2e;
-  --brand-deep: #e6f5f7;
-  --ink: #e4f4f3;
-  --ink-muted: #86aeab;
-  --line: rgba(87, 182, 192, 0.16);
-  --bg: #0a1515;
-  --surface: #122121;
-  --header-bg: rgba(10, 21, 21, 0.9);
+  --brand-deep: #eef1f4;
+  --ink: #e9ecef;
+  --ink-muted: #9aa3ad;
+  --line: rgba(255, 255, 255, 0.09);
+  --bg: #0e1013;
+  --surface: #171a1f;
+  --header-bg: rgba(14, 16, 19, 0.9);
   --pill-track: rgba(255, 255, 255, 0.06);
   --inverse: #57b6c0;
-  --inverse-fg: #0a1515;
+  --inverse-fg: #0e1013;
   --up: #3dce98;
   --down: #f0717c;
   --radius: 16px;
-  --shadow: 0 28px 70px rgba(0, 0, 0, 0.45);
-  --card-border: rgba(87, 182, 192, 0.18);
+  --shadow: 0 28px 70px rgba(0, 0, 0, 0.5);
+  --card-border: rgba(255, 255, 255, 0.08);
   --hero: #57b6c0;
-  --ticker-bg: #051010;
-  --ticker-fg: #d2efed;
-  --glow: 0 16px 48px rgba(87, 182, 192, 0.28);
+  --ticker-bg: #090a0c;
+  --ticker-fg: #dfe3e7;
+  --glow: 0 16px 48px rgba(0, 0, 0, 0.35);
 }
 
 /* Базовые правила сайта — в слое base: CSS-модули страниц всегда их перекрывают. */
@@ -95,8 +96,9 @@
     background: linear-gradient(180deg, color-mix(in srgb, var(--brand) 8%, var(--bg)) 0%, var(--bg) 46%);
   }
 
+  /* В тёмной теме фон ровный, без бирюзового градиента. */
   [data-theme="dark"] body::before {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--brand) 10%, var(--bg)) 0%, var(--bg) 42%);
+    background: var(--bg);
   }
 
   body::after {

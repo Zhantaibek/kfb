@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { config } from "../../config";
 import { isStaffRole } from "../../../../shared/cms";
-import { authenticate, cookieOptions, encodeSession, requireAdmin, requireSessionForSetup, verifiedSession } from "./auth.service";
+import { authenticate, cookieOptions, readSession, requireAdmin, requireSessionForSetup, revokeSessions, sessionToken, verifiedSession } from "./auth.service";
 import { completeLogin, disableMfa, enableMfa, issueTicket, mfaStatus, resetMfa, startSetup } from "./mfa.service";
 
 /** Для сайта: кто вошёл. Посетитель без входа — это норма, поэтому 200 и user: null, а не 401 в консоли. */
@@ -36,7 +36,7 @@ export async function login(req: Request, res: Response) {
     res.json({ mfa: "code", ticket: issueTicket(session.id) });
     return;
   }
-  res.cookie(config.cookieName, encodeSession(session), cookieOptions());
+  res.cookie(config.cookieName, await sessionToken(session), cookieOptions());
   res.json({ user: session, mfaSetupRequired: config.mfaRequired });
 }
 
@@ -44,7 +44,7 @@ export async function login(req: Request, res: Response) {
 export async function loginMfa(req: Request, res: Response) {
   const body = req.body as { ticket: string; code: string };
   const session = await completeLogin(body.ticket, body.code);
-  res.cookie(config.cookieName, encodeSession(session), cookieOptions());
+  res.cookie(config.cookieName, await sessionToken(session), cookieOptions());
   res.json({ user: session });
 }
 
@@ -59,7 +59,7 @@ export async function setupMfa(req: Request, res: Response) {
 export async function confirmMfa(req: Request, res: Response) {
   const session = await enableMfa(await requireSessionForSetup(req), (req.body as { code: string }).code);
   // Текущий вход подтверждён кодом — обновляем cookie, чтобы не входить заново.
-  res.cookie(config.cookieName, encodeSession(session), cookieOptions());
+  res.cookie(config.cookieName, await sessionToken(session), cookieOptions());
   res.json({ user: session });
 }
 
@@ -67,7 +67,7 @@ export async function turnOffMfa(req: Request, res: Response) {
   const session = await requireSessionForSetup(req);
   await disableMfa(session, (req.body as { code: string }).code);
   const { mfa: _mfa, ...plain } = session;
-  res.cookie(config.cookieName, encodeSession(plain), cookieOptions());
+  res.cookie(config.cookieName, await sessionToken(plain), cookieOptions());
   res.json({ ok: true });
 }
 
@@ -76,7 +76,14 @@ export async function resetUserMfa(req: Request, res: Response) {
   res.json({ ok: true });
 }
 
-export function logout(_req: Request, res: Response) {
+/** Выход отзывает все cookie сотрудника (и на других устройствах), а не только стирает её в этом браузере. */
+async function revokeCurrent(req: Request) {
+  const session = readSession(req);
+  if (session) await revokeSessions(session.id);
+}
+
+export async function logout(req: Request, res: Response) {
+  await revokeCurrent(req);
   res.clearCookie(config.cookieName, { path: "/" });
   res.json({ ok: true });
 }
@@ -85,7 +92,8 @@ export function logout(_req: Request, res: Response) {
 // ту же, что и в /api/admin/session. Кабинетов инвестора и эмитента нет.
 export const loginUser = login;
 
-export function logoutUser(_req: Request, res: Response) {
+export async function logoutUser(req: Request, res: Response) {
+  await revokeCurrent(req);
   res.clearCookie(config.cookieName, { path: "/" });
   // Cookie прежнего кабинета инвестора — стираем, если осталась в браузере.
   res.clearCookie(config.userCookieName, { path: "/" });

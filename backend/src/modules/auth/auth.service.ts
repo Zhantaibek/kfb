@@ -12,7 +12,8 @@ function signToken(payload: string) {
   return `${payload}.${signature}`;
 }
 
-function readToken(token: string): AuthSession | null {
+/** Подпись, срок и состав сессии; sv — версия сессий сотрудника на момент входа (см. sessionVersion в schema.prisma). */
+function parseToken(token: string): { session: AuthSession; sv: number } | null {
   const split = token.lastIndexOf(".");
   if (split <= 0) return null;
   const payload = token.slice(0, split);
@@ -22,26 +23,46 @@ function readToken(token: string): AuthSession | null {
   const right = Buffer.from(expected);
   if (left.length !== right.length || !timingSafeEqual(left, right)) return null;
   try {
-    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as AuthSession & { exp?: number };
+    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as AuthSession & { exp?: number; sv?: number };
     if (!session.email || !session.role || (session.exp && session.exp < Date.now())) return null;
     // mfa — только true: у обычной cookie поля нет, сессии без 2FA выглядят как прежде.
-    return { id: session.id, email: session.email, name: session.name, role: session.role, ...(session.mfa === true ? { mfa: true } : {}) };
+    return {
+      session: { id: session.id, email: session.email, name: session.name, role: session.role, ...(session.mfa === true ? { mfa: true } : {}) },
+      sv: Number.isInteger(session.sv) ? Number(session.sv) : 0,
+    };
   } catch {
     return null;
   }
 }
 
-export function encodeSession(session: AuthSession) {
-  const payload = Buffer.from(JSON.stringify({ ...session, exp: Date.now() + config.cookieMaxAgeMs }), "utf8").toString(
+/** version — текущая sessionVersion сотрудника; для cookie входа её даёт sessionToken(). */
+export function encodeSession(session: AuthSession, version = 0) {
+  const payload = Buffer.from(JSON.stringify({ ...session, sv: version, exp: Date.now() + config.cookieMaxAgeMs }), "utf8").toString(
     "base64url",
   );
   return signToken(payload);
 }
 
+/** Cookie сессии с текущей версией сессий сотрудника из базы. */
+export async function sessionToken(session: AuthSession) {
+  const user = await prisma.user.findUnique({ where: { id: session.id }, select: { sessionVersion: true } });
+  return encodeSession(session, user?.sessionVersion ?? 0);
+}
+
+/** Отзывает все выданные сотруднику cookie: выход, смена пароля, сброс или отключение 2FA. */
+export async function revokeSessions(userId: string) {
+  await prisma.user.updateMany({ where: { id: userId }, data: { sessionVersion: { increment: 1 } } });
+}
+
 export function readCookieSession(req: Request, cookieName: string): AuthSession | null {
   const token = req.cookies?.[cookieName] as string | undefined;
   if (!token) return null;
-  return readToken(token);
+  return parseToken(token)?.session ?? null;
+}
+
+function cookieVersion(req: Request): number {
+  const token = req.cookies?.[config.cookieName] as string | undefined;
+  return (token && parseToken(token)?.sv) || 0;
 }
 
 export function readSession(req: Request): AdminSession | null {
@@ -80,18 +101,21 @@ function fail(name: "Unauthorized" | "Forbidden", message: string): never {
 }
 
 /**
- * Сессия, подтверждённая базой: пользователь ещё существует, e-mail и роль совпадают с подписанной cookie.
+ * Сессия, подтверждённая базой: пользователь ещё существует, e-mail и роль совпадают с подписанной cookie,
+ * а версия сессий не менялась после её выдачи.
  * Без этого удалённый или пониженный сотрудник сохранял бы права до истечения cookie (7 дней).
  */
-type StaffLookup = (id: string) => Promise<{ email: string; role: string; totpEnabled?: boolean } | null>;
+type StaffLookup = (id: string) => Promise<{ email: string; role: string; totpEnabled?: boolean; sessionVersion?: number } | null>;
 const findStaff: StaffLookup = (id) =>
-  prisma.user.findUnique({ where: { id }, select: { email: true, role: true, totpEnabled: true } });
+  prisma.user.findUnique({ where: { id }, select: { email: true, role: true, totpEnabled: true, sessionVersion: true } });
 
 export async function verifiedSession(req: Request, lookup: StaffLookup = findStaff): Promise<AdminSession | null> {
   const session = readSession(req);
   if (!session) return null;
   const user = await lookup(session.id);
   if (!user || user.role !== session.role || user.email.toLowerCase() !== session.email.toLowerCase()) return null;
+  // Cookie выдана до выхода, смены пароля или сброса 2FA — отозвана.
+  if ((user.sessionVersion ?? 0) !== cookieVersion(req)) return null;
   // У сотрудника включён 2FA, а cookie получена без кода (выдана до включения) — нужен новый вход.
   if (user.totpEnabled && !session.mfa) return null;
   return session;

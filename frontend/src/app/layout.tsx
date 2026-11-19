@@ -5,7 +5,6 @@ import { SiteChrome } from "@/components/SiteChrome";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Manrope, Montserrat, Unbounded } from "next/font/google";
-import Script from "next/script";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -90,10 +89,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
+      <head>
+        {/* Обычный inline-скрипт, а не next/script: beforeInteractive в App Router ставится в очередь и выполняется
+            только после загрузки JS — до этого на миг была видна заставка (тёмный фон) и тема по умолчанию. */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {themeScript}
-        </Script>
         <AppProviders>
           <MarketDataProvider value={market}>
             <SiteChrome>{children}</SiteChrome>

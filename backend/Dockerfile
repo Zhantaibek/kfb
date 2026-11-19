@@ -25,6 +25,10 @@ RUN npm ci --workspace=backend --omit=dev \
   && rm -rf /root/.npm /root/.cache
 COPY --from=build /app/backend/dist ./backend/dist
 COPY shared ./shared
+# Мост к торговой системе (Oracle 8i): старый JDBC-драйвер работает только под Java 8 (скрипт — на её движке Nashorn).
+# Включается ORACLE_SYNC=on; без него Java просто не вызывается.
+RUN apk add --no-cache openjdk8-jre
+COPY backend/src/integrations/oracle/bridge ./backend/oracle-bridge
 RUN mkdir -p /app/uploads && chown node:node /app/uploads
 USER node
 WORKDIR /app/backend

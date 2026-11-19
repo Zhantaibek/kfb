@@ -1,0 +1,220 @@
+/* Новости биржи в раскладке редакции: главная новость + колонка «Также» + карточки остальных. */
+.news {
+  display: grid;
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.top.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Мета: рубрика и дата одной строкой. */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.meta b {
+  color: var(--brand-strong, #2c7e87);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Главная новость: сплошной бирюзовый блок, крупный заголовок. */
+.lead {
+  position: relative;
+  display: flex;
+  min-height: 360px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #1f8f99;
+  color: #fff;
+  text-decoration: none;
+  isolation: isolate;
+}
+
+.lead::before {
+  /* Тонкая сетка-«миллиметровка» — фактура без градиентов. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.lead.withPhoto::before {
+  background: linear-gradient(180deg, rgba(13, 40, 44, 0.15) 0%, rgba(13, 40, 44, 0.82) 70%);
+}
+
+.leadPhoto {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.leadBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 14px;
+  width: 100%;
+  padding: 34px 36px;
+}
+
+.lead .meta,
+.lead .meta b {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.leadTitle {
+  max-width: 760px;
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+
+.leadText {
+  max-width: 620px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.leadMore {
+  width: fit-content;
+  margin-top: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: #fff;
+  color: #1d4f55;
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform 0.15s ease;
+}
+
+.lead:hover .leadMore {
+  transform: translateX(4px);
+}
+
+.lead:focus-visible,
+.sideItem:focus-visible,
+.card:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+/* Колонка «Также»: список с разделителями. */
+.side {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 26px;
+  border: 1px solid var(--card-border, var(--line));
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.sideLabel {
+  margin: 14px 0 4px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sideItem {
+  display: grid;
+  gap: 6px;
+  padding: 16px 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.sideItem + .sideItem {
+  border-top: 1px solid var(--line);
+}
+
+.sideTitle {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  transition: color 0.15s ease;
+}
+
+.sideItem:hover .sideTitle,
+.card:hover .sideTitle {
+  color: var(--brand-strong, #2c7e87);
+}
+
+.sideText {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Остальные новости — карточки. */
+.rest {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 20px 22px;
+  border: 1px solid var(--card-border, var(--line));
+  border-top: 3px solid var(--brand);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lead {
+    min-height: 300px;
+  }
+
+  .leadBody {
+    padding: 26px 22px;
+  }
+
+  .side {
+    padding: 4px 20px;
+  }
+}

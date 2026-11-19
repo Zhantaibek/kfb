@@ -27,9 +27,6 @@ function countScripts(text: string) {
   return { latin, cyr, kyExtra, letters: latin + cyr };
 }
 
-const kyHint = /[ңөүҢӨҮ]|жана|менен|үчүн|боюнча|кыргыз|катар|болот|кылуу|кылат|үстүнөн/;
-const ruStop = /\b(и|в|во|на|с|со|для|или|что|это|как|по|от|из|не|но|при|если|также|только|после|между|через|этот|эта|эти|быть|был|была)\b/iu;
-
 function sameText(a: string, b: string) {
   return a.toLowerCase().replace(/\s+/g, " ") === b.toLowerCase().replace(/\s+/g, " ");
 }
@@ -62,19 +59,7 @@ export function languageError(text: string, lang: CheckLang, ruText = ""): strin
     return null;
   }
 
-  if (stats.latin / stats.letters > 0.45 && stats.cyr / stats.letters < 0.5) {
-    return "Вкладка KY: текст должен быть на кыргызском — кириллицей, не латиницей.";
-  }
-  if (stats.cyr / stats.letters < 0.55) {
-    return "Вкладка KY: используйте кыргызскую кириллицу.";
-  }
-
-  const ruPlain = plainText(ruText);
-  if (ruPlain && sameText(plain, ruPlain) && (stats.letters >= 8 || plain.includes(" "))) {
-    return "Вкладка KY: это тот же русский текст. Нужен кыргызский перевод.";
-  }
-  if (stats.letters >= 12 && stats.kyExtra === 0 && ruStop.test(plain) && !kyHint.test(plain)) {
-    return "Вкладка KY: текст похож на русский. Напишите по-кыргызски (можно буквы ң, ө, ү).";
-  }
+  // Кыргызский текст не проверяем: его пишут и кириллицей, и латиницей, а названия, тикеры и имена
+  // часто совпадают с русскими. Достаточно, что вкладка KY заполнена (это проверяет вызывающий код).
   return null;
 }

@@ -1,0 +1,220 @@
+/* Архив новостей старого сайта: заголовок с поиском, строгий список-таблица (дата · рубрика · заголовок) и листание страниц. */
+.archive {
+  margin-top: 44px;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 14px;
+}
+
+.head h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.head p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.search {
+  width: min(360px, 100%);
+  height: 40px;
+  padding: 0 14px 0 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237a8b8d' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 3.5 3.5'/%3E%3C/svg%3E")
+    no-repeat 13px 50%;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.search:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.months {
+  display: grid;
+  gap: 26px;
+}
+
+/* Заголовок месяца — линейка с подписью, как раздел в подшивке. */
+.monthTitle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.monthTitle::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 22px;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 18px 12px 12px;
+  border: 1px solid var(--card-border, var(--line));
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.item:hover {
+  border-color: var(--brand);
+  transform: translateX(3px);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Листок календаря: число крупно, день недели мелко. */
+.day {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  height: 58px;
+  border-radius: 10px;
+  background: rgba(87, 182, 192, 0.12);
+  color: var(--brand-strong, #2c7e87);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.day b {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.day span {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tag {
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.42;
+}
+
+.item:hover .title {
+  color: var(--brand-strong, #2c7e87);
+}
+
+.external {
+  color: var(--ink-muted);
+  font-size: 15px;
+  text-align: right;
+}
+
+.item:hover .external {
+  color: var(--brand);
+}
+
+.note {
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 18px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager button {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pager button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pager button:not(:disabled):hover {
+  border-color: var(--brand);
+}
+
+/* Телефон: листок даты меньше, без стрелки. */
+@media (max-width: 720px) {
+  .item {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 12px;
+    padding: 10px 12px 10px 10px;
+  }
+
+  .day {
+    height: 50px;
+  }
+
+  .day b {
+    font-size: 19px;
+  }
+
+  .external {
+    display: none;
+  }
+}

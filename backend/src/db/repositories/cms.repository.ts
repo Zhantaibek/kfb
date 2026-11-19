@@ -47,7 +47,9 @@ import {
 export async function readFullStore(): Promise<CmsStore> {
   const [news, slides, media, pages, menu, hubs, management, partners, issuers, listing, settings, requests, users, visits, audit] =
     await Promise.all([
-    prisma.news.findMany({ orderBy: { updatedAt: "desc" } }),
+    // Архив старого сайта (source_url задан, ~8 тыс. заголовков) в админке не редактируется — он только читается
+    // постранично через /api/public/news/archive.
+    prisma.news.findMany({ where: { sourceUrl: null }, orderBy: { updatedAt: "desc" } }),
     prisma.slide.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.media.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.page.findMany({ orderBy: { updatedAt: "desc" } }),
@@ -91,7 +93,8 @@ export async function readFullStore(): Promise<CmsStore> {
  */
 export async function readPublicStore() {
   const [news, slides, media, pages, menu, hubs, management, partners, settings] = await Promise.all([
-    prisma.news.findMany({ where: { status: "published" }, orderBy: { updatedAt: "desc" } }),
+    // Без архива старого сайта: он отдаётся постранично отдельным запросом, а не в общем контенте каждой страницы.
+    prisma.news.findMany({ where: { status: "published", sourceUrl: null }, orderBy: { updatedAt: "desc" } }),
     prisma.slide.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.media.findMany({ orderBy: { createdAt: "desc" } }),
     prisma.page.findMany({ where: { status: "published" }, orderBy: { updatedAt: "desc" } }),

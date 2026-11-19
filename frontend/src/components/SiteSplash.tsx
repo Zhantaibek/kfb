@@ -17,6 +17,9 @@ const noop = () => () => {};
 
 export function SiteSplash() {
   const [phase, setPhase] = useState<"show" | "hide" | "gone">("show");
+  // Анимация стоит на паузе, пока страница не готова к показу: иначе буквы «доигрывали» ещё во время загрузки
+  // стилей и шрифтов, и посетитель видел уже готовую надпись без анимации.
+  const [playing, setPlaying] = useState(false);
   // Кто просил меньше анимаций — заставку не показываем вовсе.
   const reducedMotion = useSyncExternalStore(
     subscribeMotion,
@@ -37,9 +40,23 @@ export function SiteSplash() {
     } catch {
       // Хранилище недоступно (приватный режим) — заставка просто покажется снова.
     }
-    const hide = window.setTimeout(() => setPhase("hide"), 2900);
-    const gone = window.setTimeout(() => setPhase("gone"), 3700);
+    let hide = 0;
+    let gone = 0;
+    let frame = 0;
+    let cancelled = false;
+    // Запуск — когда загрузились шрифты (но не дольше 800 мс) и отрисован первый кадр; таймеры скрытия — от запуска.
+    const fontsReady = Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((resolve) => window.setTimeout(resolve, 800))]);
+    void fontsReady.then(() => {
+      if (cancelled) return;
+      frame = window.requestAnimationFrame(() => {
+        setPlaying(true);
+        hide = window.setTimeout(() => setPhase("hide"), 2900);
+        gone = window.setTimeout(() => setPhase("gone"), 3700);
+      });
+    });
     return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
       window.clearTimeout(hide);
       window.clearTimeout(gone);
     };
@@ -49,7 +66,7 @@ export function SiteSplash() {
 
   return (
     // data-site-splash читают другие блоки (баннер на главной), чтобы начать анимацию после заставки.
-    <div className={styles.splash} data-phase={phase} data-site-splash={phase} aria-hidden="true">
+    <div className={styles.splash} data-phase={phase} data-site-splash={phase} data-play={playing || undefined} aria-hidden="true">
       <span className={`${styles.orb} ${styles.orbA}`} />
       <span className={`${styles.orb} ${styles.orbB}`} />
       <div className={styles.inner}>

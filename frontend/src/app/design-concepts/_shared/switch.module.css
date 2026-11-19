@@ -1,0 +1,61 @@
+/* Служебная плашка переключения макетов — нейтральная, чтобы не смешиваться со стилем концепции. */
+.switch {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(17, 20, 20, 0.88);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  font:
+    600 13px/1 system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  letter-spacing: 0;
+}
+
+.switch a {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #e9eeee;
+  text-decoration: none;
+}
+
+.switch a:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.switch a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.switch a[aria-current="page"] {
+  background: #fff;
+  color: #111;
+}
+
+.all {
+  margin-right: 2px;
+}
+
+@media (max-width: 480px) {
+  .all {
+    display: none !important;
+  }
+}
+
+@media print {
+  .switch {
+    display: none;
+  }
+}

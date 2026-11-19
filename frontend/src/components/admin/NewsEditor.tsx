@@ -42,6 +42,45 @@ const POSITIONS: { id: Align; label: string }[] = [
 const clampWidth = (value: number) => Math.min(100, Math.max(15, Math.round(value)));
 const clampOffset = (value: number) => Math.min(800, Math.max(-800, Math.round(value) || 0));
 
+type OffsetBounds = { minX: number; maxX: number; minY: number; maxY: number };
+
+/**
+ * Сколько можно сдвинуть фото, чтобы оно не вышло за поле редактора. Считается от места фото без сдвига
+ * (на время замера transform снимается). null — фото ещё не на экране.
+ */
+function offsetBounds(figure: unknown, root: HTMLElement): OffsetBounds | null {
+  if (!(figure instanceof HTMLElement)) return null;
+  const prev = figure.style.transform;
+  figure.style.transform = "none";
+  const f = figure.getBoundingClientRect();
+  const s = root.getBoundingClientRect();
+  figure.style.transform = prev;
+  if (!f.width || !s.width) return null;
+  return {
+    minX: Math.min(0, Math.ceil(s.left - f.left)),
+    maxX: Math.max(0, Math.floor(s.right - f.right)),
+    minY: Math.min(0, Math.ceil(s.top - f.top)),
+    maxY: Math.max(0, Math.floor(s.bottom - f.bottom)),
+  };
+}
+
+function fitOffset(b: OffsetBounds | null, ox: number, oy: number) {
+  const x = clampOffset(ox);
+  const y = clampOffset(oy);
+  if (!b) return { ox: x, oy: y };
+  return { ox: Math.min(b.maxX, Math.max(b.minX, x)), oy: Math.min(b.maxY, Math.max(b.minY, y)) };
+}
+
+/** Вернуть выделенное фото внутрь поля редактора, если сдвиг выводит его за край. */
+function keepFigureInside(ed: Editor) {
+  const pos = ed.state.selection.from;
+  const node = ed.state.doc.nodeAt(pos);
+  if (!node || node.type.name !== "figure") return;
+  const { ox, oy } = node.attrs as FigureAttrs;
+  const next = fitOffset(offsetBounds(ed.view.nodeDOM(pos), ed.view.dom), ox, oy);
+  if (next.ox !== ox || next.oy !== oy) ed.commands.updateAttributes("figure", next);
+}
+
 type FigureAttrs = { src: string; alt: string; caption: string; align: string; width: number; ox: number; oy: number };
 
 /**
@@ -323,7 +362,11 @@ export function NewsEditor({ label, hint, value, onChange, onUpload, media, erro
   const picked = ui.figure;
   const run = (fn: (chain: ReturnType<Editor["chain"]>) => ReturnType<Editor["chain"]>) => fn(editor.chain().focus()).run();
   // Изменить выделенное фото, не уводя фокус с ползунка или поля.
-  const setFigure = (attrs: Partial<FigureAttrs>) => editor.commands.updateAttributes("figure", attrs);
+  const setFigure = (attrs: Partial<FigureAttrs>) => {
+    editor.commands.updateAttributes("figure", attrs);
+    // Ширина, расположение или сдвиг поменялись — после перерисовки возвращаем фото внутрь поля редактора.
+    requestAnimationFrame(() => keepFigureInside(editor));
+  };
 
   function setBlock(tag: string) {
     const chain = editor!.chain().focus();
@@ -382,6 +425,14 @@ export function NewsEditor({ label, hint, value, onChange, onUpload, media, erro
     event.preventDefault();
     ed.chain().focus().setNodeSelection(pos).run();
     const start = { x: event.clientX, y: event.clientY, ox: node.attrs.ox as number, oy: node.attrs.oy as number };
+    const bounds = offsetBounds(figureEl, ed.view.dom);
+    // Фото, сохранённое раньше со сдвигом за край, при клике сразу возвращается в поле.
+    const fitted = fitOffset(bounds, start.ox, start.oy);
+    if (fitted.ox !== start.ox || fitted.oy !== start.oy) {
+      ed.commands.updateAttributes("figure", fitted);
+      start.ox = fitted.ox;
+      start.oy = fitted.oy;
+    }
     let frame = 0;
     let moved = false;
     let firstStep = true;
@@ -395,7 +446,7 @@ export function NewsEditor({ label, hint, value, onChange, onUpload, media, erro
       frame = requestAnimationFrame(() => {
         const current = ed.state.doc.nodeAt(pos);
         if (!current || current.type.name !== "figure") return;
-        const attrs = { ...current.attrs, ox: clampOffset(start.ox + dx), oy: clampOffset(start.oy + dy) };
+        const attrs = { ...current.attrs, ...fitOffset(bounds, start.ox + dx, start.oy + dy) };
         const tr = ed.state.tr.setNodeMarkup(pos, undefined, attrs);
         // Всё перетаскивание — один шаг истории: Ctrl+Z возвращает фото на прежнее место, а не убирает его.
         ed.view.dispatch(firstStep ? closeHistory(tr) : tr);

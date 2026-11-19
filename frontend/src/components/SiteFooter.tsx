@@ -8,6 +8,8 @@ import { useSiteNav } from "@/lib/cms/use-site-nav";
 import ui from "@/app/ui.module.css";
 
 function sparkPath(values: number[], width: number, height: number) {
+  // Нет истории индекса — ровная линия по низу (без выдуманной кривой).
+  if (values.length < 2) return `M0 ${height - 2} L${width} ${height - 2}`;
   const min = Math.min(...values);
   const span = Math.max(...values) - min || 1;
   const points = values.map((value, i) => ({

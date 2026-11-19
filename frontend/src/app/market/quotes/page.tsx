@@ -1,25 +1,36 @@
+import Link from "next/link";
 import type { Metadata } from "next";
-import { LivePage } from "@/components/live/LiveParts";
-import { loadSnapshot, type Quotes } from "@/lib/kse-live";
+import { PageIntro } from "@/components/Forms";
+import { PublicMain } from "@/components/PublicMain";
+import { loadOracleQuotes } from "@/lib/kse-live";
 import { QuotesView, MarketLinks } from "@/components/live/LiveViews";
+import css from "@/components/live/live.module.css";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Котировки по ценным бумагам" };
 
-/** Живые данные с kse.kg/ru/Quotes (обновляются раз в 15 минут). */
+/** Котировки из торговой системы (Oracle): лучшие заявки на покупку и продажу, разделы по виду бумаги. */
 export default async function Page({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q = "" } = await searchParams;
-  const snapshot = await loadSnapshot<Quotes>("quotes");
+  const quotes = await loadOracleQuotes();
+  const updated = quotes ? new Date(quotes.fetchedAt).toLocaleString("ru-RU", { timeZone: "Asia/Bishkek", dateStyle: "short", timeStyle: "short" }) : "";
   return (
-    <LivePage
-      title="Котировки по ценным бумагам"
-      crumb="Статистика торгов"
-      lead="Лучшие заявки на покупку и продажу по каждой бумаге."
-      snapshot={snapshot}
-      sourceUrl="https://www.kse.kg/ru/Quotes"
-    >
-      {snapshot ? <QuotesView data={snapshot.data} initialQuery={q} /> : null}
+    <PublicMain>
+      <PageIntro
+        crumb={
+          <>
+            <Link href="/">Главная</Link> / Статистика торгов
+          </>
+        }
+        title="Котировки по ценным бумагам"
+        lead={`Лучшие заявки на покупку и продажу по каждой бумаге${updated ? ` · обновлено ${updated}` : ""}.`}
+      />
+      {quotes ? (
+        <QuotesView data={quotes.data} initialQuery={q} />
+      ) : (
+        <p className={css.empty}>Котировки из торговой системы ещё не загружены.</p>
+      )}
       <MarketLinks current="/market/quotes" />
-    </LivePage>
+    </PublicMain>
   );
 }

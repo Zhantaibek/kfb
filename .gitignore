@@ -50,3 +50,9 @@ next-env.d.ts
 
 # Резервные копии (сервис backup в docker-compose.yml)
 /backups/
+
+# Разведка схемы QUIK Reports (npm run quik:schema) — может содержать данные базы биржи
+quik-schema.json
+
+# Сломанная/служебная сборка Next.js
+/frontend/.next-broken/

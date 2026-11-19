@@ -68,7 +68,7 @@ export const siteNav: SiteNavGroup[] = [
     label: "Направления",
     href: "/listing",
     items: [
-      { href: "/commodity", label: "Товарно-сырьевой сектор" },
+      { href: "https://ts.kse.kg/", label: "Товарно-сырьевой сектор" },
       { href: "/listing", label: "Листинг" },
       { href: "/disclosure", label: "Центр раскрытия информации" },
       { href: "/tariffs", label: "Тарифы" },
@@ -76,8 +76,6 @@ export const siteNav: SiteNavGroup[] = [
       { href: "/finmarket", label: "Финансовый рынок KG" },
       { href: "/news", label: "Пресс-клуб" },
       { href: "/about/25-years", label: "25 лет ЗАО КФБ" },
-      { href: "/sustainable", label: "Сектор устойчивого развития" },
-      { href: "/gcb/invest", label: "Инвестиции в ГЦБ" },
     ],
   },
   {
@@ -263,7 +261,7 @@ export const sectionPages: Record<string, SectionContent> = {
       "К торгам товарно-сырьевого сектора допускаются организации, соответствующие требованиям биржи.",
     ],
     links: [
-      { href: "/commodity", label: "Товарно-сырьевой сектор" },
+      { href: "https://ts.kse.kg/", label: "Товарно-сырьевой сектор" },
       { href: "/members", label: "Участники торгов" },
     ],
   },
